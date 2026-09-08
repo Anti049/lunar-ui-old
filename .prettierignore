@@ -6,7 +6,11 @@ bun.lock
 bun.lockb
 
 # Miscellaneous
-apps/docs/static/
+packages/docs/static/
 
 # SvelteKit
 .svelte-kit/
+
+# Generated / built output
+packages/lunar-ui/generated/
+dist/

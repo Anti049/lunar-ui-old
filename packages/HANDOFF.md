@@ -14,10 +14,15 @@ seems reasonable. Read that section before changing the plugin.
 
 ```text
 lunar-ui/
-├─ packages/lunar-ui/css/     @anti049/lunar-ui         raw CSS, no build step, published
-├─ packages/svelte/   @anti049/lunar-ui-svelte  Svelte 5 components, published
-├─ packages/lunar-ui/   @anti049/lunar-ui  CSS→JS Tailwind plugin, PRIVATE
-└─ packages/docs/         @anti049/lunar-ui-docs    SvelteKit site, private
+├─ packages/lunar-ui/   @anti049/lunar-ui         CSS→JS Tailwind plugin, published
+│  ├─ functions/                                  hand-written runtime helpers
+│  └─ src/                                        the CSS the plugin is compiled from
+│     ├─ base/                                    tokens, palette, layers (no classes)
+│     ├─ components/                              one stylesheet per component
+│     ├─ themes/                                  shipped theme palettes
+│     └─ utilities/                               the `foundations` bundle
+├─ packages/svelte/     @anti049/lunar-ui-svelte  Svelte 5 components, published
+└─ packages/docs/       @anti049/lunar-ui-docs    SvelteKit site, private
 ```
 
 Bun workspaces, Changesets for releases, shared prettier/eslint at the root.
@@ -228,7 +233,7 @@ conflicts.**
 3. **1 Tailwind built-in deliberately unclaimed** (`.collapse:not(td,tr,colgroup)`).
    Consumers get it from `@import 'tailwindcss'`.
 
-Also worth knowing: `core/layers.css` declares sublayer order inside
+Also worth knowing: `src/base/layers.css` declares sublayer order inside
 `@layer components`, but the rules land under `@layer utilities` and at the top
 level — different layer trees, so that declaration appears to have no effect on
 either path.

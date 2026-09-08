@@ -1,6 +1,6 @@
 {
 	"name": "@anti049/lunar-ui",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Tailwind CSS v4 plugin for the lunar-ui design system: components, foundations, themes and design tokens.",
 	"repository": {
 		"type": "git",
@@ -12,7 +12,8 @@
 		"build": "bun build/build.ts && tsc -p tsconfig.build.json",
 		"typecheck": "tsc -p tsconfig.json",
 		"test": "bun test/e2e.test.ts",
-		"check": "bun run build && bun run typecheck && bun run test && publint"
+		"check": "bun run build && bun run typecheck && bun run test && publint",
+		"package": "bun run build && npm pack --pack-destination '../../build'"
 	},
 	"files": [
 		"dist",

@@ -21,7 +21,7 @@ import { extractCustomVariants } from '../build/extract-variants.js';
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pkgRoot = path.resolve(here, '..');
-const coreSrc = path.join(pkgRoot, 'css');
+const coreSrc = path.join(pkgRoot, 'src');
 const tmpDir = path.join(pkgRoot, 'dist', '.test');
 
 /* Mirrors build/build.ts: every component stylesheet that defines something.
@@ -167,7 +167,7 @@ const componentClasses = COMPONENTS.flatMap((c) =>
 );
 // Foundations (`surface`, `focusable`, `elevation-3`) are part of the public
 // surface too, and are not namespaced -- hence `namespace: null`.
-const foundationsDir = path.join(coreSrc, 'foundations');
+const foundationsDir = path.join(coreSrc, 'utilities');
 const foundationClasses = fs
 	.readdirSync(foundationsDir)
 	.filter((f) => f.endsWith('.css') && f !== '_index.css')

@@ -21,7 +21,7 @@ bun run dev                                  # docs site
 
 ## Things that will bite
 
-**The package ships a plugin, not CSS.** `packages/lunar-ui/css/` is the source
+**The package ships a plugin, not CSS.** `packages/lunar-ui/src/` is the source
 the plugin is *compiled from*; it is not published and has no export path.
 Consumers write `@plugin '@anti049/lunar-ui'`, never `@import`.
 
@@ -29,7 +29,7 @@ Consumers write `@plugin '@anti049/lunar-ui'`, never `@import`.
 by `bun build/build.ts`; `packages/lunar-ui/dist/**` is `tsc` output. Both are
 gitignored. Change the generator or the CSS source instead.
 
-**Run the package's check after touching `css/`.** The plugin is compiled from
+**Run the package's check after touching `src/`.** The plugin is compiled from
 those files, and `test/e2e.test.ts` compiles every component twice — once via
 `@import` of the raw CSS, once via `@plugin` — and compares. It is the guard
 against the compiled plugin drifting from its source, and it has caught real
@@ -51,6 +51,27 @@ is its own commit.
 silently eaten template literals and dropped `\\`, producing things like
 `collisions.push()` with no argument. Use Write/Edit for any file containing
 backticks, escapes or `${}`.
+
+## Source layout
+
+`packages/lunar-ui/src/` is split by what a file *emits*, not by topic:
+
+| directory | contains | emits |
+| --- | --- | --- |
+| `base/` | layers, colour scheme, palette, semantics, design tokens, motion, typography, fonts, keyframes, bundled plugins | tokens only, no classes |
+| `utilities/` | colour roles, elevation, accessibility, state layers, ripple | `@utility`, non-namespaced |
+| `components/` | one stylesheet per component | `@utility`, namespaced |
+| `themes/` | shipped theme palettes | `[data-theme]` blocks |
+
+The build depends on the split. `base/` + `utilities/` + `themes/` is the
+compile *context* (`build/context.css`); components are compiled against it and
+the difference is what gets partitioned into bundles. `utilities/` also ships as
+the single `foundations` bundle, so a new non-namespaced utility goes there —
+put it in `base/` and it becomes invisible context instead. Each directory has
+an `_index.css` barrel; a new file must be added to it.
+
+`functions/` is hand-written runtime that ships with the plugin (`addPrefix`,
+`nestCssLayers`, `generateTheme`), not part of the CSS compile.
 
 ## CSS authoring convention
 

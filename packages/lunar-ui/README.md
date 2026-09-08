@@ -10,7 +10,7 @@ Seventeen bundles ship, each excludable by name:
   `primary`, `inverse-error-container`), `elevation-0`…`elevation-5`,
   `focusable`, `interactive`, `scrim`, `touch-target`. Composite utilities keep
   both halves, so `surface` still sets `background-color` *and* `color`.
-- **16 components** — every stylesheet in `packages/lunar-ui/css/components` that
+- **16 components** — every stylesheet in `packages/lunar-ui/src/components` that
   defines something: appbar, badge, button, checkbox, code-block, collapsible,
   indicator, navigation, scaffold, scrollbar, section, select, sidebar, swap,
   table, tooltip. The other 68 files are still empty placeholders and are
@@ -213,7 +213,7 @@ and dashes, so `tonal spot` and `tonal-spot` both work.
 the default theme's `#0956AA` seed it produces `#005db9` against the committed
 `#0058ca`. **Near, not identical**: the originals came from a different
 generator, so a regenerated theme will not be byte-for-byte equal to the one
-in `packages/lunar-ui/css`.
+in `packages/lunar-ui/src/themes`.
 
 #### Status palettes are harmonized
 
@@ -278,7 +278,7 @@ Theme values are deliberately **not** prefixed. They occupy shared Tailwind
 namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
 set to; only lunar-ui's own component classes and locals get renamed.
 
-## Bugs this surfaced in packages/lunar-ui/css
+## Bugs this surfaced in packages/lunar-ui/src
 
 Widening the port from two components to sixteen turned the parity test into a
 linter for the CSS itself. It found two references to variables nothing
@@ -324,7 +324,7 @@ stops overriding `bg-*` utilities.
 Rules from `@utility` are unaffected: they were already inside
 `@layer utilities` and stay there.
 
-Worth noting the CSS-first build has an oddity here too. `core/layers.css`
+Worth noting the CSS-first build has an oddity here too. `src/base/layers.css`
 declares the sublayer order inside `@layer components`, but the rules land under
 `@layer utilities` and at the top level — different layer trees, so that
 ordering declaration appears to have no effect on either path.

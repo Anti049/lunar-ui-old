@@ -30,7 +30,7 @@ import type { Bundle, Registry, StyleObject } from '../types.js';
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pkgRoot = path.resolve(here, '..');
-const coreSrc = path.join(pkgRoot, 'css');
+const coreSrc = path.join(pkgRoot, 'src');
 const generatedDir = path.join(pkgRoot, 'generated');
 const distDir = path.join(pkgRoot, 'dist');
 const tmpDir = path.join(pkgRoot, '.tmp');
@@ -238,7 +238,7 @@ console.log(
 );
 
 // Foundations are not namespaced, so they are read with `namespace: null`.
-const foundationsDir = path.join(coreSrc, 'foundations');
+const foundationsDir = path.join(coreSrc, 'utilities');
 const foundationClasses = [
 	...new Set(
 		fs

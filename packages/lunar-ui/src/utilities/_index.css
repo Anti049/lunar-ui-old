@@ -1,0 +1,16 @@
+/*
+	Utilities
+
+	The non-namespaced utilities: colour roles (`surface`, `primary`,
+	`inverse-error-container`), elevation, accessibility helpers, state layers
+	and the ripple.
+
+	These ship as the `foundations` bundle -- one bundle rather than one per
+	file, because unlike components they share no naming prefix.
+*/
+
+@import './accessibility.css';
+@import './color-utilities.css';
+@import './elevation.css';
+@import './state-layers.css';
+@import './ripple.css';

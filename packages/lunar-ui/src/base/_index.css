@@ -1,0 +1,30 @@
+/*
+	Base
+
+	Everything that establishes the design system without declaring a single
+	class: colour schemes and palettes, semantic token mappings, design tokens,
+	cascade layer order, keyframes, fonts and the bundled Tailwind plugins.
+
+	Nothing here emits a selector, so none of it is attributed to a bundle by the
+	build -- it is the context every component and utility compiles against.
+*/
+
+/* Cascade layer order. Declared first so everything below lands correctly. */
+@import './layers.css';
+
+/* Colour: schemes, light/dark modes, palette and semantic mappings. */
+@import './color-scheme.css';
+@import './modes.css';
+@import './palette.css';
+@import './semantics.css';
+
+/* Design tokens. */
+@import './design-tokens.css';
+@import './motion.css';
+@import './typography.css';
+
+/* Fonts, keyframes, bundled plugins and the @reference target. */
+@import './fonts.css';
+@import './keyframes.css';
+@import './plugins.css';
+@import './reference.css';

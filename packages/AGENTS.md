@@ -6,9 +6,17 @@ either changes.
 
 ## Before you change anything
 
-- `packages/lunar-ui/css/` is the source of truth for the design system. The
+- `packages/lunar-ui/src/` is the source of truth for the design system. The
   published artifact is a **compiled Tailwind plugin**, not CSS. Editing the CSS
   is how you change the library; editing `generated/` or `dist/` is never right.
+- `src/` is split by what a file emits, not by topic: `base/` declares tokens
+  and no classes, `utilities/` holds the non-namespaced `@utility` rules that
+  ship as the `foundations` bundle, `components/` one namespaced stylesheet per
+  component, `themes/` the shipped palettes. The build treats
+  `base/ + utilities/ + themes/` as compile context and keeps only what the
+  components add on top, so a new non-namespaced utility belongs in
+  `utilities/` — in `base/` it becomes invisible context. Add every new file to
+  its directory's `_index.css`.
 - Read `packages/HANDOFF.md` before touching the plugin build. It records
   Tailwind v4 behaviour established by experiment, several bits of which are
   counter-intuitive and expensive to rediscover.
