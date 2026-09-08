@@ -9,11 +9,11 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "bun build/build.ts && tsc -p tsconfig.build.json",
+		"build": "bun functions/build.ts && tsc -p tsconfig.build.json",
 		"typecheck": "tsc -p tsconfig.json",
 		"test": "bun test/e2e.test.ts",
 		"check": "bun run build && bun run typecheck && bun run test && publint",
-		"package": "bun run build && npm pack --pack-destination '../../build'"
+		"package": "bun run build && node -e \"require('node:fs').mkdirSync('../../build',{recursive:true})\" && npm pack --pack-destination '../../build'"
 	},
 	"files": [
 		"dist",

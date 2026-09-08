@@ -26,7 +26,7 @@ the plugin is *compiled from*; it is not published and has no export path.
 Consumers write `@plugin '@anti049/lunar-ui'`, never `@import`.
 
 **Never hand-edit generated files.** `packages/lunar-ui/generated/**` is written
-by `bun build/build.ts`; `packages/lunar-ui/dist/**` is `tsc` output. Both are
+by `bun functions/build.ts`; `packages/lunar-ui/dist/**` is `tsc` output. Both are
 gitignored. Change the generator or the CSS source instead.
 
 **Run the package's check after touching `src/`.** The plugin is compiled from
@@ -64,14 +64,18 @@ backticks, escapes or `${}`.
 | `themes/` | shipped theme palettes | `[data-theme]` blocks |
 
 The build depends on the split. `base/` + `utilities/` + `themes/` is the
-compile *context* (`build/context.css`); components are compiled against it and
+compile *context* (`functions/context.css`); components are compiled against it and
 the difference is what gets partitioned into bundles. `utilities/` also ships as
 the single `foundations` bundle, so a new non-namespaced utility goes there —
 put it in `base/` and it becomes invisible context instead. Each directory has
 an `_index.css` barrel; a new file must be added to it.
 
-`functions/` is hand-written runtime that ships with the plugin (`addPrefix`,
-`nestCssLayers`, `generateTheme`), not part of the CSS compile.
+`functions/` holds every hand-written `.ts` in the package, of two kinds that
+`tsconfig.build.json` keeps apart. `addPrefix`, `nestCssLayers` and
+`generateTheme` are **runtime** and ship in `dist`; `build.ts` and its
+extractors are the **compiler** and do not. The build config lists only the
+entry points and lets `tsc` follow imports, so a new runtime helper ships as
+soon as something imports it and a new build script stays out on its own.
 
 ## CSS authoring convention
 

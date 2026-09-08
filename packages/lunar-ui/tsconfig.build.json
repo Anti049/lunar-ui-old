@@ -9,5 +9,12 @@
 		"checkJs": false,
 		"types": ["node"]
 	},
-	"include": ["index.ts", "theme.ts", "types.ts", "functions/**/*.ts", "generated/**/*.ts"]
+	/*
+		Entry points only. functions/ holds both shipped runtime (addPrefix,
+		nestCssLayers, generateTheme) and the build-time compiler (build.ts and its
+		extractors), so globbing it would emit the compiler into dist. tsc follows
+		imports from the entries instead, which ships exactly what the runtime
+		reaches -- no hand-maintained list to fall out of date.
+	*/
+	"include": ["index.ts", "theme.ts", "types.ts", "generated/**/*.ts"]
 }

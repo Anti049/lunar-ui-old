@@ -15,7 +15,7 @@ seems reasonable. Read that section before changing the plugin.
 ```text
 lunar-ui/
 ├─ packages/lunar-ui/   @anti049/lunar-ui         CSS→JS Tailwind plugin, published
-│  ├─ functions/                                  hand-written runtime helpers
+│  ├─ functions/                                  runtime helpers + the compiler
 │  └─ src/                                        the CSS the plugin is compiled from
 │     ├─ base/                                    tokens, palette, layers (no classes)
 │     ├─ components/                              one stylesheet per component
@@ -27,15 +27,17 @@ lunar-ui/
 
 Bun workspaces, Changesets for releases, shared prettier/eslint at the root.
 
-`packages/lunar-ui` is still `"private": true` and therefore unpublishable by
-design — see §8.
+`packages/lunar-ui` publishes `dist` only. The CSS in `src/` is what the plugin
+is compiled *from*; it is not shipped and has no export path, so consumers write
+`@plugin '@anti049/lunar-ui'` and never `@import`.
 
 ### Commands
 
 ```sh
-bun run check                                    # every workspace
-bun run --filter '@anti049/lunar-ui' check  # build + typecheck + e2e
-bun run dev                                      # docs site
+bun run check                                  # every workspace
+bun run --filter '@anti049/lunar-ui' check     # build + typecheck + e2e + publint
+bun run dev                                    # docs site
+bun run package                                # pack a tarball for external testing
 ```
 
 ---
@@ -81,7 +83,7 @@ All confirmed against **Tailwind 4.3.3** by experiment, not documentation.
   `moduleResolution: "bundler"` or `"node16"`; a project on `"node"` would fail.
 - `PluginWithOptions` is imported by Tailwind's own declarations but **never
   re-exported**, so the inferred type of a `withOptions` default export cannot
-  be named. It is restated locally in `src/index.ts` to keep the emitted `.d.ts`
+  be named. It is restated locally in `index.ts` to keep the emitted `.d.ts`
   portable.
 
 ### What the JS plugin API cannot do
@@ -124,7 +126,7 @@ All confirmed against **Tailwind 4.3.3** by experiment, not documentation.
 ### postcss-js
 
 - **Numeric CSS values become JS numbers** (`opacity: 0`), which Tailwind's own
-  `CssInJs` type does not model. One documented cast in `src/index.ts`.
+  `CssInJs` type does not model. One documented cast in `index.ts`.
 - **A repeated declaration becomes an array**, and Tailwind does *not*
   camelCase-convert array-valued keys — `transitionDuration` reached the output
   verbatim, invalid CSS that browsers drop. The build now emits kebab-case
@@ -152,19 +154,19 @@ All confirmed against **Tailwind 4.3.3** by experiment, not documentation.
 ## 4. Plugin architecture
 
 ```text
-build/*.ts        runs directly under bun, no compile step
+functions/*.ts    runs directly under bun, no compile step
    ↓ generates
-src/generated/*.ts   (gitignored)
+generated/*.ts   (gitignored)
    ↓ tsc
 dist/             JS + .d.ts — the only thing published
 ```
 
-**Generated data is emitted as `.ts`, not `.js`, on purpose.** `src/index.ts`
+**Generated data is emitted as `.ts`, not `.js`, on purpose.** `index.ts`
 imports `./generated/registry.js`, `theme.js`, `base.js` and the rest, so `tsc`
 checks the hand-written runtime against the real shape of what the build
 produced. Emitting `.js` would leave every one of those seams typed `any`.
 
-### Build pipeline (`build/build.ts`)
+### Build pipeline (`functions/build.ts`)
 
 1. **Enumerate** each bundle's classes — `@utility` names plus plain selectors
    in the bundle's own namespace, widened by its own `@utility` names
@@ -172,7 +174,7 @@ produced. Emitting `.js` would leave every one of those seams typed `any`.
 2. **Detect Tailwind built-ins** by compiling bare Tailwind with lunar-ui's class
    list safelisted and none of lunar-ui loaded. Whatever answers is Tailwind's
    and is left unclaimed — `collapse`, `table`, `select-text` all collide.
-3. **Compile once** with `src/context.css` plus every component, feeding the
+3. **Compile once** with `functions/context.css` plus every component, feeding the
    class list back as `@source inline(…)`.
 4. **Partition** by `@layer <name>.lN` and `<name>-*` keyframes, falling back to
    class-name attribution (layer names are not always file names), then to the
@@ -244,48 +246,52 @@ either path.
 
 | list | where | fails how |
 | --- | --- | --- |
-| `THEME_NAMESPACES` | `build/collect-tokens.ts` | a new namespace falls through to a plain custom property; components render, consumers get no utility |
-| `STATE_HOOKS` | `build/extract-classes.ts` | a consumer state hook gets renamed by a prefix |
-| `JS_COUPLED` | `build/extract-classes.ts` | a class written in JS gets renamed and the action breaks |
-| `CUSTOM_VARIANTS` | `build/build.ts` | **currently only 1 of 3** — see §8 |
+| `THEME_NAMESPACES` | `functions/collect-tokens.ts` | a new namespace falls through to a plain custom property; components render, consumers get no utility |
+| `STATE_HOOKS` | `functions/extract-classes.ts` | a consumer state hook gets renamed by a prefix |
+| `JS_COUPLED` | `functions/extract-classes.ts` | a class written in JS gets renamed and the action breaks |
+| `RUNTIME_CLASSES` | `functions/build.ts` | a class the ripple writes at runtime is converted to `@utility` and never emitted, since no candidate exists to gate on |
+| `SHAPE_TOKENS` | `functions/build.ts` | a new knob is settable nowhere, or is accepted and read by nothing |
+
+`CUSTOM_VARIANTS` used to be on this list and shipped 1 of 3. It is now derived
+by `functions/extract-variants.ts`, which is the pattern to follow for anything
+else here that can be read out of the CSS.
 
 ---
 
-## 8. Open work: proof-of-concept → shipping
-
-### Blocking — cannot publish today
-
-1. `"private": true` in `packages/lunar-ui/package.json`. Changesets skips private
-   packages. Also decide lockstep vs independent versioning with core.
-2. **`tailwindcss` is not a peer dependency.** `src/index.ts` and `src/theme.ts`
-   import `tailwindcss/plugin` at runtime but it is declared only as a devDep.
-3. Description is stale — still says "Badge and button only".
-4. `publint` is not in the plugin's `check` script (core runs it). It passes
-   today; wire it in so it stays passing.
+## 8. Open work
 
 ### Correctness gaps
 
-5. **`@custom-variant`: 1 of 3 registered.** Core defines `selected`,
-   `collapsed`, `nav-link-active`; only `selected` is carried. Should be derived
-   from source. *(Not runtime-reproduced — my probe harness failed to exercise
-   variants even in the CSS-first path — but the generated registry is
-   verifiably incomplete.)*
-6. **Three functional utilities dropped**: `tooltip-gap-*`,
+1. **Three functional utilities dropped**: `tooltip-gap-*`,
    `tooltip-tail-size-*`, `tooltip-tail-width-*`. `@utility name-*` cannot be
    safelisted by name; needs `matchUtilities`. The build warns, the consumer
    just finds them missing.
-7. **Usage gating changes semantics.** Plain-selector rules are unconditional in
-   the CSS-first build but usage-gated through `addUtilities`. Breaks
-   `class={\`badge-${variant}\`}`. Needs a documented safelist story.
+2. **Usage gating changes semantics.** Plain-selector rules are unconditional in
+   a CSS-first build but usage-gated through `addUtilities`. Breaks
+   `class={\`badge-${variant}\`}`. Needs a documented safelist story. The
+   `unconditional` bucket handles the runtime-written classes only.
 
 ### Decisions
 
-8. The cascade divergence (§6.1) — accept and document, or restructure core.
-9. **Two packages emit the same design system from one source.** They will drift
-   unless versioned in lockstep with the parity test in CI.
-10. **Nothing first-party exercises the plugin.** `packages/docs` uses the CSS
-    package directly; only a scratch app ever proved the published path.
-11. Pin or vendor `@material/material-color-utilities` given its broken ESM.
+3. The cascade divergence (§6.1) — accept and document, or restructure the CSS.
+4. Pin or vendor `@material/material-color-utilities` given its broken ESM.
+5. `@tailwindcss/forms` and `typography` are devDependencies, not composed into
+   the plugin: composing them throws on `Object.keys(modifiers)` because only
+   the handler half is reachable, not its `config`. Consumers add them
+   themselves.
+6. Changesets majors any package with a peerDependency on a bumped package,
+   regardless of range, so a patch to `@anti049/lunar-ui` proposes a major for
+   `@anti049/lunar-ui-svelte`. The escape hatch
+   (`onlyUpdatePeerDependentsWhenOutOfRange` plus a widened range) is verified
+   to work but is not enabled; the default is in force.
+
+### Resolved since this file was written
+
+`private: true`, the missing `tailwindcss` peer dependency, the stale
+description and the missing `publint` step are all fixed. The separate CSS
+package is gone — one package now emits the design system, so there is nothing
+left to drift. `packages/docs` consumes the plugin through
+`@plugin '@anti049/lunar-ui'`, so the published path is exercised first-party.
 
 ---
 
@@ -296,7 +302,7 @@ source — once through `@import` (today's path), once through `@plugin` — and
 compares. It also covers standalone resolution, prefixing, themes and shape
 tokens.
 
-It is **not** vacuous: mutate a value in `src/generated/components/*/object.ts`
+It is **not** vacuous: mutate a value in `generated/components/*/object.ts`
 and it fails, naming the selector and property.
 
 ```sh

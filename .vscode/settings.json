@@ -2,7 +2,6 @@
 	"files.associations": {
 		"*.css": "tailwindcss"
 	},
-	"deno.enable": true,
 	"json.schemas": [
 		{
 			"fileMatch": [

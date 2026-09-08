@@ -30,8 +30,5 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Deno Build
-/lunar-ui
-
 # Bun
 /.bun

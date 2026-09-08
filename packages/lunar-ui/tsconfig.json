@@ -12,7 +12,6 @@
 		"types.ts",
 		"functions/**/*.ts",
 		"generated/**/*.ts",
-		"build/**/*.ts",
 		"test/**/*.ts"
 	]
 }

@@ -15,8 +15,8 @@ import path from 'node:path';
 import postcss from 'postcss';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { extractClasses } from '../build/extract-classes.js';
-import { extractCustomVariants } from '../build/extract-variants.js';
+import { extractClasses } from '../functions/extract-classes.js';
+import { extractCustomVariants } from '../functions/extract-variants.js';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -175,7 +175,7 @@ const foundationClasses = fs
 
 const ownedClasses = new Set([...componentClasses, ...foundationClasses]);
 const safelist = [...ownedClasses].sort();
-const contextImport = "@import '" + rel(path.join(pkgRoot, 'build/context.css')) + "';";
+const contextImport = "@import '" + rel(path.join(pkgRoot, 'functions/context.css')) + "';";
 const pluginPath = rel(path.join(pkgRoot, 'dist/index.js'));
 const sourceLines = safelist.map((c) => '@source inline("' + c + '");');
 const prefixedSourceLines = safelist.map((c) => '@source inline("lunar-' + c + '");');

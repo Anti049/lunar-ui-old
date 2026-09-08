@@ -87,7 +87,7 @@ test classifies rather than hides them:
 The components reference `--color-primary`, which resolves to
 `--theme-color-primary`, which resolves to `--theme-color-primary-40`, which is
 finally a hex literal. Carrying that means a transitive closure, not a filter —
-`build/collect-tokens.ts` walks it from the compiled component output.
+`functions/collect-tokens.ts` walks it from the compiled component output.
 
 Tokens are read from **source**, not from a compile: `@theme` values are emitted
 on demand, so compiling the context in isolation would only reveal whichever
@@ -331,37 +331,37 @@ ordering declaration appears to have no effect on either path.
 
 ## How the build works
 
-Everything is TypeScript. `build/*.ts` runs directly under bun — no compile
-step — and writes `src/generated/*.ts`; `tsc` then compiles the hand-written
+Everything is TypeScript. `functions/*.ts` runs directly under bun — no compile
+step — and writes `generated/*.ts`; `tsc` then compiles the hand-written
 runtime and the generated data together into `dist/` as JS plus `.d.ts`.
 
 Generating `.ts` rather than `.js` is what makes the runtime type-safe: the
-hand-written `src/index.ts` imports `./generated/registry.js`, `theme.js` and
+hand-written `index.ts` imports `./generated/registry.js`, `theme.js` and
 the rest, so `tsc` checks it against the real shape of what the build produced
 rather than against `any`.
 
 ```sh
-bun build/build.ts              # CSS -> src/generated/*.ts
-tsc -p tsconfig.build.json      # src/**/*.ts -> dist (JS + .d.ts)
+bun functions/build.ts              # CSS -> generated/*.ts
+tsc -p tsconfig.build.json      # runtime + generated -> dist (JS + .d.ts)
 ```
 
-`build/build.ts`:
+`functions/build.ts`:
 
 1. **Enumerate** every class each bundle defines — `@utility` blocks plus plain
    selectors in the bundle's own namespace. Foundations are not namespaced, so
    they pass `namespace: null` and accept any non-state-hook class
-   (`build/extract-classes.ts`).
-2. **Compile once** with `src/context.css` (theme, tokens, foundations) plus the
+   (`functions/extract-classes.ts`).
+2. **Compile once** with `functions/context.css` (theme, tokens, foundations) plus the
    component files, feeding the class list back as `@source inline(…)`.
    `@utility` output is emitted on demand, so without that safelist the compile
    returns nothing.
 3. **Partition** the output by lunar-ui's naming discipline — `@layer <name>.l<n>`
    and `<name>-*` keyframes attribute to a component. Foundations carry no layer
    marker (`@utility surface` lands as a bare `.surface`), so they are attributed
-   by class name. Everything else is context and dropped (`build/partition.ts`).
+   by class name. Everything else is context and dropped (`functions/partition.ts`).
 4. **Serialize** to JS objects with postcss-js, into two buckets per component:
    `utilities` (from `@utility`) and `standalone` (from plain selectors).
-5. **Emit** `src/generated/components/<name>/{object,index}.ts`, plus a
+5. **Emit** `generated/components/<name>/{object,index}.ts`, plus a
    `registry.ts` of owned names, `theme.ts`, `base.ts` and a `properties.ts` of
    `@property` registrations.
 
@@ -381,7 +381,7 @@ construction rather than by remembering to exclude them.
 That inversion removes most of the prefixer's risk, but not all: generic state
 hooks (`.disabled`, `.selected`, `.active`, …) appear in lunar-ui's own
 selectors while belonging to consumer markup, so they still need an explicit
-denylist — see `STATE_HOOKS` in `build/extract-classes.ts`.
+denylist — see `STATE_HOOKS` in `functions/extract-classes.ts`.
 
 ## What a real port would still need
 
@@ -389,17 +389,17 @@ This POC covers the foundations layer and 2 of ~130 components. Beyond scaling
 that up:
 
 - **`@custom-variant` → `addVariant`.** Hand-ported here; `CUSTOM_VARIANTS` in
-  `build/build.ts` carries the one `button.css` defines. Automating it means
+  `functions/build.ts` carries the one `button.css` defines. Automating it means
   translating `@slot` nesting into a variant selector.
-- **Namespace table upkeep.** `THEME_NAMESPACES` in `build/collect-tokens.ts`
+- **Namespace table upkeep.** `THEME_NAMESPACES` in `functions/collect-tokens.ts`
   is hand-maintained. A namespace Tailwind adds, or one lunar-ui invents that
   isn't in the table, silently falls through to a plain custom property — the
   components still render, but consumers get no utility for it.
 - **The CssInJs boundary.** postcss-js emits numeric CSS values as JS numbers
   (`opacity: 0`), which Tailwind's own `CssInJs` type does not model. The
   conversion is safe -- Tailwind stringifies them -- and is confined to one cast
-  in `src/index.ts`. TypeScript found this; the JS version shipped it unnoticed.
-- **JS-coupled class names.** `JS_COUPLED` in `build/extract-classes.ts` lists
+  in `index.ts`. TypeScript found this; the JS version shipped it unnoticed.
+- **JS-coupled class names.** `JS_COUPLED` in `functions/extract-classes.ts` lists
   classes also written in JavaScript -- currently just `lunar-ripple`, created by
   the ripple action. Prefixing those would leave the action pointing at a class
   that no longer exists, so they ship unrenamed. The list is hand-maintained; a
