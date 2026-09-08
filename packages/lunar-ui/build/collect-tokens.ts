@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import postcss from 'postcss';
-import type { ThemeExtend } from '../src/types.js';
+import type { ThemeExtend } from '../types.js';
 
 /*
 	Gathers the design tokens a standalone plugin has to carry.

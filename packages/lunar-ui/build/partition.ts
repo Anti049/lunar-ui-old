@@ -1,6 +1,6 @@
 import postcss from 'postcss';
 import { objectify } from 'postcss-js';
-import type { Bundle, StyleObject } from '../src/types.js';
+import type { Bundle, StyleObject } from '../types.js';
 
 const LAYER_OWNER = /^([a-z][\w-]*)\.l\d+$/;
 

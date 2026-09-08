@@ -4,11 +4,11 @@ A monorepo containing lunar-ui's CSS layer, its Svelte bindings, and the docs si
 
 | Workspace                                          | Package                     | Published | What it is                                                        |
 | -------------------------------------------------- | --------------------------- | --------- | ----------------------------------------------------------------- |
-| [`packages/core`](packages/core)                    | `@anti049/lunar-ui`         | yes       | Framework-agnostic Tailwind v4 styles, design tokens, and themes.  |
+| [`packages/lunar-ui`](packages/lunar-ui)                    | `@anti049/lunar-ui`         | yes       | Framework-agnostic Tailwind v4 styles, design tokens, and themes.  |
 | [`packages/svelte`](packages/svelte)                | `@anti049/lunar-ui-svelte`  | yes       | Svelte 5 components built on top of the CSS layer.                 |
-| [`apps/docs`](apps/docs)                            | `@anti049/lunar-ui-docs`    | no        | SvelteKit documentation and demo site.                             |
+| [`packages/docs`](packages/docs)                            | `@anti049/lunar-ui-docs`    | no        | SvelteKit documentation and demo site.                             |
 
-`packages/core` has no build step — it ships raw CSS, because Tailwind v4 has to
+`packages/lunar-ui` has no build step — it ships raw CSS, because Tailwind v4 has to
 process `@plugin`, `@theme`, and `@layer` in the consumer's own build. Nothing
 in it depends on Svelte, so it can be used from any framework.
 
@@ -20,7 +20,7 @@ bun run dev      # docs site at http://localhost:5173
 ```
 
 The docs app aliases `@anti049/lunar-ui-svelte` to its source (see
-[apps/docs/vite.config.ts](apps/docs/vite.config.ts)), so component edits
+[packages/docs/vite.config.ts](packages/docs/vite.config.ts)), so component edits
 hot-reload without a package rebuild.
 
 ## Common tasks

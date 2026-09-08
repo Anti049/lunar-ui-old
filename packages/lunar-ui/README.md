@@ -1,4 +1,4 @@
-# @anti049/lunar-ui-plugin
+# @anti049/lunar-ui
 
 A proof of concept, not a shipping package. It compiles lunar-ui's CSS into a
 Tailwind JS plugin the way DaisyUI does, so the approach can be judged on
@@ -10,15 +10,15 @@ Seventeen bundles ship, each excludable by name:
   `primary`, `inverse-error-container`), `elevation-0`…`elevation-5`,
   `focusable`, `interactive`, `scrim`, `touch-target`. Composite utilities keep
   both halves, so `surface` still sets `background-color` *and* `color`.
-- **16 components** — every stylesheet in `packages/core/src/components` that
+- **16 components** — every stylesheet in `packages/lunar-ui/css/components` that
   defines something: appbar, badge, button, checkbox, code-block, collapsible,
   indicator, navigation, scaffold, scrollbar, section, select, sidebar, swap,
   table, tooltip. The other 68 files are still empty placeholders and are
   skipped.
 
 ```sh
-bun run --filter '@anti049/lunar-ui-plugin' build   # CSS -> generated TS -> dist
-bun run --filter '@anti049/lunar-ui-plugin' check   # build + typecheck + compare vs CSS-first
+bun run --filter '@anti049/lunar-ui' build   # CSS -> generated TS -> dist
+bun run --filter '@anti049/lunar-ui' check   # build + typecheck + compare vs CSS-first
 ```
 
 It is **standalone** — no lunar-ui CSS import, and `@anti049/lunar-ui` need not
@@ -26,7 +26,7 @@ even be installed. Consumers write:
 
 ```css
 @import 'tailwindcss';
-@plugin '@anti049/lunar-ui-plugin' {
+@plugin '@anti049/lunar-ui' {
 	prefix: lunar-;
 	exclude: badge;      /* or: foundations */
 	themes: dracula;     /* optional; omit for all */
@@ -147,7 +147,7 @@ and still resolves in a standalone build.
 Override globally on the plugin:
 
 ```css
-@plugin '@anti049/lunar-ui-plugin' {
+@plugin '@anti049/lunar-ui' {
 	--radius-box: 1.5rem;
 	--border-width: 2px;
 }
@@ -156,7 +156,7 @@ Override globally on the plugin:
 or per theme, where they sit alongside the colour roles:
 
 ```css
-@plugin '@anti049/lunar-ui-plugin/theme' {
+@plugin '@anti049/lunar-ui/theme' {
 	name: sharp;
 	seed: #0956AA;
 	--radius-selector: 0;
@@ -174,7 +174,7 @@ lists the valid names and points colour roles at the theme entry point.
 All four shipped palettes are included by default. `themes` narrows that:
 
 ```css
-@plugin '@anti049/lunar-ui-plugin' {
+@plugin '@anti049/lunar-ui' {
 	themes: dracula, gaziter;
 }
 ```
@@ -194,7 +194,7 @@ ways to supply colours, and they compose.
 and `gaziter` are built:
 
 ```css
-@plugin '@anti049/lunar-ui-plugin/theme' {
+@plugin '@anti049/lunar-ui/theme' {
 	name: brand;
 	seed: #b5179e;
 	variant: vibrant;    /* optional */
@@ -213,7 +213,7 @@ and dashes, so `tonal spot` and `tonal-spot` both work.
 the default theme's `#0956AA` seed it produces `#005db9` against the committed
 `#0058ca`. **Near, not identical**: the originals came from a different
 generator, so a regenerated theme will not be byte-for-byte equal to the one
-in `packages/core`.
+in `packages/lunar-ui/css`.
 
 #### Status palettes are harmonized
 
@@ -241,7 +241,7 @@ colour.
 authored:
 
 ```css
-@plugin '@anti049/lunar-ui-plugin/theme' {
+@plugin '@anti049/lunar-ui/theme' {
 	name: nightfall;
 	color-scheme: dark;
 	--theme-color-primary: #8be9fd;
@@ -278,7 +278,7 @@ Theme values are deliberately **not** prefixed. They occupy shared Tailwind
 namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
 set to; only lunar-ui's own component classes and locals get renamed.
 
-## Bugs this surfaced in packages/core
+## Bugs this surfaced in packages/lunar-ui/css
 
 Widening the port from two components to sixteen turned the parity test into a
 linter for the CSS itself. It found two references to variables nothing

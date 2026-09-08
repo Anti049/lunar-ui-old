@@ -10,7 +10,7 @@
 	@utility emission entirely, which is exactly what we need to capture.
 */
 @import 'tailwindcss';
-@import '../../core/src/colors/_index.css';
-@import '../../core/src/core/_index.css';
-@import '../../core/src/foundations/_index.css';
-@import '../../core/src/themes/_index.css';
+@import '../css/colors/_index.css';
+@import '../css/core/_index.css';
+@import '../css/foundations/_index.css';
+@import '../css/themes/_index.css';

@@ -21,7 +21,7 @@ import { extractCustomVariants } from '../build/extract-variants.js';
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pkgRoot = path.resolve(here, '..');
-const coreSrc = path.resolve(pkgRoot, '../core/src');
+const coreSrc = path.join(pkgRoot, 'css');
 const tmpDir = path.join(pkgRoot, 'dist', '.test');
 
 /* Mirrors build/build.ts: every component stylesheet that defines something.
@@ -141,7 +141,7 @@ const foundationClasses = fs
 
 const ownedClasses = new Set([...componentClasses, ...foundationClasses]);
 const safelist = [...ownedClasses].sort();
-const contextImport = "@import '" + rel(path.join(pkgRoot, 'src/context.css')) + "';";
+const contextImport = "@import '" + rel(path.join(pkgRoot, 'build/context.css')) + "';";
 const pluginPath = rel(path.join(pkgRoot, 'dist/index.js'));
 const sourceLines = safelist.map((c) => '@source inline("' + c + '");');
 const prefixedSourceLines = safelist.map((c) => '@source inline("lunar-' + c + '");');
@@ -434,11 +434,11 @@ const danglingHard = [...referencedVars]
    or the mode layer derives it from tone steps the theme sets (default,
    gaziter). The default theme sits at :where(:root), zero specificity, so it
    always underlies whatever a [data-theme] selector does not override. */
-const base_ = (await import('../src/generated/base.js')).default;
-const themeRules = (await import('../src/generated/themes.js')).default;
-const customVariants = (await import('../src/generated/variants.js')).default;
+const base_ = (await import('../generated/base.js')).default;
+const themeRules = (await import('../generated/themes.js')).default;
+const customVariants = (await import('../generated/variants.js')).default;
 const sourceVariantNames = Object.keys(extractCustomVariants(coreSrc));
-const themeExtendForTest = (await import('../src/generated/theme.js')).default;
+const themeExtendForTest = (await import('../generated/theme.js')).default;
 
 /*
 	Theme palettes live in generated/themes.ts, keyed by theme id; the mode layer
@@ -452,7 +452,7 @@ for (const perTheme of Object.values(themeRules)) {
 	}
 }
 const componentObjects = COMPONENTS.map((c) =>
-	fs.readFileSync(path.join(pkgRoot, 'src/generated/components', c, 'object.ts'), 'utf8')
+	fs.readFileSync(path.join(pkgRoot, 'generated/components', c, 'object.ts'), 'utf8')
 ).join('');
 const semanticTokens = new Set(
 	[...componentObjects.matchAll(/var\(\s*(--theme-color-[-\w]+)/g)].map((m) => m[1])

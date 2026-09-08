@@ -16,7 +16,7 @@ import type { BundleRegistrar, PluginOptions, StyleObject } from './types.js';
 	lunar-ui as a standalone Tailwind plugin.
 
 	  @import 'tailwindcss';
-	  @plugin '@anti049/lunar-ui-plugin' {
+	  @plugin '@anti049/lunar-ui' {
 	    prefix: lunar-;
 	    exclude: badge;
 	  }
@@ -72,7 +72,7 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 			throw new Error(
 				`lunar-ui: unknown theme${unknown.length > 1 ? 's' : ''} ${unknown.join(', ')}. ` +
 					`Shipped themes: ${Object.keys(themes).join(', ')}. ` +
-					`Define your own with @plugin '@anti049/lunar-ui-plugin/theme'.`
+					`Define your own with @plugin '@anti049/lunar-ui/theme'.`
 			);
 		}
 		const selectedThemes =
@@ -99,7 +99,7 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 			throw new Error(
 				`lunar-ui: unknown token${unknownTokens.length > 1 ? 's' : ''} ` +
 					`${unknownTokens.join(', ')}. Settable here: ${shapeTokens.join(', ')}. ` +
-					`Colour roles belong on a theme, via @plugin '@anti049/lunar-ui-plugin/theme'.`
+					`Colour roles belong on a theme, via @plugin '@anti049/lunar-ui/theme'.`
 			);
 		}
 

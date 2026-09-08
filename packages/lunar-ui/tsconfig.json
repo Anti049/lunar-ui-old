@@ -6,5 +6,13 @@
 		"checkJs": false,
 		"types": ["node"]
 	},
-	"include": ["src/**/*.ts", "build/**/*.ts", "test/**/*.ts"]
+	"include": [
+		"index.ts",
+		"theme.ts",
+		"types.ts",
+		"functions/**/*.ts",
+		"generated/**/*.ts",
+		"build/**/*.ts",
+		"test/**/*.ts"
+	]
 }

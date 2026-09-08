@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+
+/* Font faces. The plugin ships no CSS, so these come straight from fontsource. */
+@import '@fontsource-variable/plus-jakarta-sans/wght.css';
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/fira-code/wght.css';
+
+/* Components, foundations, themes and tokens all arrive through the plugin. */
+@plugin '@anti049/lunar-ui';
+
+/* Docs-only styling for the component preview widget. */
+@import './lib/styles/component-preview.css';
+
+/*
+	The Svelte components are aliased to source in vite.config.ts, so register
+	that directory here.
+*/
+@source '../../svelte/src/lib/**/*.svelte';

@@ -13,7 +13,7 @@ apps/*/build
 dist
 
 # Generated plugin data + scratch compiles
-packages/plugin/src/generated/
+packages/lunar-ui/generated/
 .tmp/
 
 # OS

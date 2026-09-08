@@ -42,7 +42,7 @@
 		"tailwind-merge": "^3.6.0"
 	},
 	"peerDependencies": {
-		"@anti049/lunar-ui": "^0.1.0",
+		"@anti049/lunar-ui": "^0.2.0",
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {

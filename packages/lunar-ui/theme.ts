@@ -7,7 +7,7 @@ import { generateThemePalette, VARIANT_NAMES, type StatusPalette } from './funct
 
 	Two ways to supply colours. Generate a full tonal palette from a seed:
 
-	  @plugin '@anti049/lunar-ui-plugin/theme' {
+	  @plugin '@anti049/lunar-ui/theme' {
 	    name: brand;
 	    seed: #0956AA;
 	    variant: vibrant;      -- optional, see VARIANT_NAMES
@@ -17,7 +17,7 @@ import { generateThemePalette, VARIANT_NAMES, type StatusPalette } from './funct
 	Or declare the semantic roles by hand, the way the shipped catppuccin and
 	dracula themes do:
 
-	  @plugin '@anti049/lunar-ui-plugin/theme' {
+	  @plugin '@anti049/lunar-ui/theme' {
 	    name: brand;
 	    --theme-color-primary: #8be9fd;
 	    --theme-color-on-primary: #282a36;

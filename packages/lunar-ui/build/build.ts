@@ -17,7 +17,7 @@ import {
 	buildThemeExtend,
 	inlineThemeFallbacks
 } from './collect-tokens.js';
-import type { Bundle, Registry, StyleObject } from '../src/types.js';
+import type { Bundle, Registry, StyleObject } from '../types.js';
 
 /*
 	Compiles lunar-ui's CSS into the data the plugin ships.
@@ -30,8 +30,8 @@ import type { Bundle, Registry, StyleObject } from '../src/types.js';
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pkgRoot = path.resolve(here, '..');
-const coreSrc = path.resolve(pkgRoot, '../core/src');
-const generatedDir = path.join(pkgRoot, 'src/generated');
+const coreSrc = path.join(pkgRoot, 'css');
+const generatedDir = path.join(pkgRoot, 'generated');
 const distDir = path.join(pkgRoot, 'dist');
 const tmpDir = path.join(pkgRoot, '.tmp');
 
@@ -294,7 +294,7 @@ console.log(
 
 process.stdout.write(`compiling ${BUNDLES.length} bundles together ... `);
 const input = [
-	`@import '${relFromTmp(path.join(pkgRoot, 'src/context.css'))}';`,
+	`@import '${relFromTmp(path.join(pkgRoot, 'build/context.css'))}';`,
 	...COMPONENTS.map((c) => `@import '${relFromTmp(path.join(componentsDir, `${c}.css`))}';`),
 	// @utility output is emitted on demand, so safelist every class the
 	// bundles define or the compile comes back empty.
@@ -499,4 +499,4 @@ if (unattributed.length) {
 	if (unattributed.length > 8) console.log(`  ... and ${unattributed.length - 8} more`);
 }
 if (!process.env.KEEP_TMP) fs.rmSync(tmpDir, { recursive: true, force: true });
-console.log(`\ngenerated ${BUNDLES.length} bundles -> src/generated/`);
+console.log(`\ngenerated ${BUNDLES.length} bundles -> generated/`);

@@ -14,22 +14,22 @@ seems reasonable. Read that section before changing the plugin.
 
 ```text
 lunar-ui/
-├─ packages/core/     @anti049/lunar-ui         raw CSS, no build step, published
+├─ packages/lunar-ui/css/     @anti049/lunar-ui         raw CSS, no build step, published
 ├─ packages/svelte/   @anti049/lunar-ui-svelte  Svelte 5 components, published
-├─ packages/plugin/   @anti049/lunar-ui-plugin  CSS→JS Tailwind plugin, PRIVATE
-└─ apps/docs/         @anti049/lunar-ui-docs    SvelteKit site, private
+├─ packages/lunar-ui/   @anti049/lunar-ui  CSS→JS Tailwind plugin, PRIVATE
+└─ packages/docs/         @anti049/lunar-ui-docs    SvelteKit site, private
 ```
 
 Bun workspaces, Changesets for releases, shared prettier/eslint at the root.
 
-`packages/plugin` is still `"private": true` and therefore unpublishable by
+`packages/lunar-ui` is still `"private": true` and therefore unpublishable by
 design — see §8.
 
 ### Commands
 
 ```sh
 bun run check                                    # every workspace
-bun run --filter '@anti049/lunar-ui-plugin' check  # build + typecheck + e2e
+bun run --filter '@anti049/lunar-ui' check  # build + typecheck + e2e
 bun run dev                                      # docs site
 ```
 
@@ -250,7 +250,7 @@ either path.
 
 ### Blocking — cannot publish today
 
-1. `"private": true` in `packages/plugin/package.json`. Changesets skips private
+1. `"private": true` in `packages/lunar-ui/package.json`. Changesets skips private
    packages. Also decide lockstep vs independent versioning with core.
 2. **`tailwindcss` is not a peer dependency.** `src/index.ts` and `src/theme.ts`
    import `tailwindcss/plugin` at runtime but it is declared only as a devDep.
@@ -278,7 +278,7 @@ either path.
 8. The cascade divergence (§6.1) — accept and document, or restructure core.
 9. **Two packages emit the same design system from one source.** They will drift
    unless versioned in lockstep with the parity test in CI.
-10. **Nothing first-party exercises the plugin.** `apps/docs` uses the CSS
+10. **Nothing first-party exercises the plugin.** `packages/docs` uses the CSS
     package directly; only a scratch app ever proved the published path.
 11. Pin or vendor `@material/material-color-utilities` given its broken ESM.
 
@@ -286,7 +286,7 @@ either path.
 
 ## 9. Testing
 
-`packages/plugin/test/e2e.test.ts` compiles every bundle twice from the same
+`packages/lunar-ui/test/e2e.test.ts` compiles every bundle twice from the same
 source — once through `@import` (today's path), once through `@plugin` — and
 compares. It also covers standalone resolution, prefixing, themes and shape
 tokens.
@@ -295,7 +295,7 @@ It is **not** vacuous: mutate a value in `src/generated/components/*/object.ts`
 and it fails, naming the selector and property.
 
 ```sh
-cd packages/plugin
+cd packages/lunar-ui
 bun test/e2e.test.ts
 KEEP_TMP=1 bun test/e2e.test.ts   # leaves compiled CSS in dist/.test/
 ```
@@ -306,9 +306,9 @@ Use **packed tarballs, not `bun link`** — a link resolves to the working tree
 and hides packaging bugs. That is how the empty-`dist` bug was caught.
 
 ```sh
-cd packages/plugin && bun run build && npm pack --pack-destination <dir>
+cd packages/lunar-ui && bun run build && npm pack --pack-destination <dir>
 bunx sv@latest create --template minimal --types ts --no-add-ons --no-install app
-cd app && bun add -d tailwindcss @tailwindcss/vite && bun add <dir>/anti049-lunar-ui-plugin-*.tgz
+cd app && bun add -d tailwindcss @tailwindcss/vite && bun add <dir>/anti049-lunar-ui-*.tgz
 ```
 
 Then add `tailwindcss()` to `vite.config.ts`, `import '../app.css'` in
@@ -316,7 +316,7 @@ Then add `tailwindcss()` to `vite.config.ts`, `import '../app.css'` in
 
 ```css
 @import 'tailwindcss';
-@plugin '@anti049/lunar-ui-plugin' { prefix: lunar-; }
+@plugin '@anti049/lunar-ui' { prefix: lunar-; }
 ```
 
 **Bump the version on every repack.** Bun caches by name+version, so re-packing

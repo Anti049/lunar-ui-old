@@ -6,9 +6,9 @@
 	"json.schemas": [
 		{
 			"fileMatch": [
-				"apps/docs/src/lib/docs/components/*.json"
+				"packages/docs/src/lib/docs/components/*.json"
 			],
-			"url": "./apps/docs/src/lib/docs/component-doc.schema.json"
+			"url": "./packages/docs/src/lib/docs/component-doc.schema.json"
 		}
 	]
 }

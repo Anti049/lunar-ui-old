@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 const svelteLibEntry = fileURLToPath(
-	new URL('../../packages/svelte/src/lib/index.ts', import.meta.url)
+	new URL('../svelte/src/lib/index.ts', import.meta.url)
 );
 
 export default defineConfig({
