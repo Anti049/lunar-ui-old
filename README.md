@@ -44,15 +44,18 @@ npm install @anti049/lunar-ui @anti049/lunar-ui-svelte
 ```css
 /* app.css */
 @import 'tailwindcss';
-@import '@anti049/lunar-ui';
 
-/* Optional: bundled font faces. Install the @fontsource-variable packages first. */
-@import '@anti049/lunar-ui/fonts.css';
+/* Components, foundations, themes and design tokens. */
+@plugin '@anti049/lunar-ui';
 
 /* Only if you use the Svelte components — keeps their utility classes from
    being tree-shaken out of your build. */
 @import '@anti049/lunar-ui-svelte/styles.css';
 ```
+
+lunar-ui ships as a Tailwind plugin, not as CSS: there is no `@import` entry.
+Fonts are not bundled — install the `@fontsource-variable` packages you want
+and import them yourself.
 
 ## Releasing
 

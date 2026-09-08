@@ -6,7 +6,7 @@
 	builds. The glob is relative to this file, which ships as `dist/styles.css`
 	alongside the compiled components.
 
-	Import this only if you use `@anti049/lunar-ui-svelte`; the CSS library
-	itself (`@anti049/lunar-ui`) does not depend on it.
+	Import this only if you use `@anti049/lunar-ui-svelte`; the lunar-ui
+	plugin itself (`@anti049/lunar-ui`) does not depend on it.
 */
 @source './**/*.{svelte,js}';

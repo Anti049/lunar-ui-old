@@ -9,14 +9,14 @@ npm install @anti049/lunar-ui @anti049/lunar-ui-svelte
 ```
 
 `svelte` ^5 and `@anti049/lunar-ui` are peer dependencies — the components render
-markup that the CSS package styles, so you need both.
+markup that the lunar-ui plugin styles, so you need both.
 
 ## Use
 
 ```css
 /* app.css */
 @import 'tailwindcss';
-@import '@anti049/lunar-ui';
+@plugin '@anti049/lunar-ui';
 @import '@anti049/lunar-ui-svelte/styles.css';
 ```
 
