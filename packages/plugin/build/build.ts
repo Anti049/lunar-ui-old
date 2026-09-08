@@ -10,6 +10,7 @@ import {
 	extractRootVariables
 } from './extract-classes.js';
 import { partition } from './partition.js';
+import { extractCustomVariants } from './extract-variants.js';
 import {
 	collectDeclarations,
 	resolveClosure,
@@ -51,8 +52,8 @@ const componentFiles = fs
    are not namespaced per component. */
 const FOUNDATIONS = 'foundations';
 
-/* Hand-ported: @custom-variant has no automated CSS -> JS path. */
-const CUSTOM_VARIANTS: Record<string, string> = { selected: '&:where(.selected)' };
+/* Derived from source. Hand-listing these silently shipped 1 of 3. */
+const CUSTOM_VARIANTS = extractCustomVariants(coreSrc);
 
 /*
 	Shape tokens: the knobs that decide how lunar-ui feels rather than what
@@ -466,7 +467,7 @@ console.log(
 );
 
 writeGenerated('registry.ts', registry, 'Registry', 'Registry');
-writeGenerated('variants.ts', CUSTOM_VARIANTS, 'Record<string, string>');
+writeGenerated('variants.ts', CUSTOM_VARIANTS, 'Record<string, string | string[]>');
 writeGenerated('properties.ts', properties satisfies StyleObject, 'StyleObject', 'StyleObject');
 writeGenerated('theme.ts', themeExtend, 'ThemeExtend', 'ThemeExtend');
 writeGenerated('base.ts', resolvedBaseRules, 'Record<string, Record<string, string>>');

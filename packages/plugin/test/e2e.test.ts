@@ -16,6 +16,7 @@ import postcss from 'postcss';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { extractClasses } from '../build/extract-classes.js';
+import { extractCustomVariants } from '../build/extract-variants.js';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -435,6 +436,8 @@ const danglingHard = [...referencedVars]
    always underlies whatever a [data-theme] selector does not override. */
 const base_ = (await import('../src/generated/base.js')).default;
 const themeRules = (await import('../src/generated/themes.js')).default;
+const customVariants = (await import('../src/generated/variants.js')).default;
+const sourceVariantNames = Object.keys(extractCustomVariants(coreSrc));
 const themeExtendForTest = (await import('../src/generated/theme.js')).default;
 
 /*
@@ -642,6 +645,19 @@ const themeChecks: [string, boolean][] = [
 		/--radius-box:\s*1\.5rem/.test(shaped) && /--border-width:\s*2px/.test(shaped)
 	],
 	['shape tokens are overridable per theme', /--radius-box:\s*0/.test(sharpRule)],
+	/*
+		Every @custom-variant lunar-ui defines must be registered. Hand-listing
+		these shipped 1 of 3 -- `collapsed` was missing while the docs layout used
+		it. Derived from source now, so the count is checked against the source.
+	*/
+	[
+		'every @custom-variant is registered (' + Object.keys(customVariants).length + ')',
+		Object.keys(customVariants).length === sourceVariantNames.length
+	],
+	[
+		'a multi-branch variant keeps every branch',
+		Array.isArray(customVariants.collapsed) && customVariants.collapsed.length === 2
+	],
 	[
 		'status palettes harmonize toward the seed',
 		statusOf(harmonizedBlue, 'success') !== statusOf(unharmonized, 'success')
