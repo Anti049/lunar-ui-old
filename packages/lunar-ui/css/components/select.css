@@ -26,12 +26,20 @@
 }
 
 /* State */
-.select-disabled,
-.select.disabled,
-.select[disabled],
-.select:disabled {
+@utility select-disabled {
 	@layer select.l1 {
 		@apply cursor-not-allowed border-on-surface/12 text-on-surface/38 elevation-0! before:bg-transparent;
+	}
+}
+
+/* Compound forms live in the utility so they are not plain selectors. */
+@utility select {
+	@layer select.l1 {
+		&.disabled,
+		&[disabled],
+		&:disabled {
+			@apply cursor-not-allowed border-on-surface/12 text-on-surface/38 elevation-0! before:bg-transparent;
+		}
 	}
 }
 

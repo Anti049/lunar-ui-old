@@ -91,10 +91,7 @@
  * DISABLED — covers all four ways to express it:
  *   .checkbox-disabled | .checkbox.disabled | [disabled] | :disabled
  */
-.checkbox-disabled,
-.checkbox.disabled,
-.checkbox[disabled],
-.checkbox:disabled {
+@utility checkbox-disabled {
 	@layer checkbox.l1 {
 		@apply cursor-not-allowed text-on-surface/38;
 
@@ -105,6 +102,23 @@
 
 		/* Kill elevation when disabled. */
 		box-shadow: none;
+	}
+}
+
+/* Compound forms live in the utility so they are not plain selectors. */
+@utility checkbox {
+	@layer checkbox.l1 {
+		&.disabled,
+		&[disabled],
+		&:disabled {
+			@apply cursor-not-allowed text-on-surface/38;
+
+			&:not(.checkbox-text):not(.checkbox-outlined) {
+				@apply bg-on-surface/10;
+			}
+
+			box-shadow: none;
+		}
 	}
 }
 

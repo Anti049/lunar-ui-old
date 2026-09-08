@@ -4,8 +4,10 @@
 	TODO: Add styles for the collapse component
 */
 
-.collapse:not(td, tr, colgroup) {
-	visibility: revert-layer;
+@utility collapse {
+	&:not(td, tr, colgroup) {
+		visibility: revert-layer;
+	}
 }
 
 @utility collapse {

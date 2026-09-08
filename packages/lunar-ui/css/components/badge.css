@@ -30,19 +30,32 @@
  * STATE (l1)
  * Highest per-component priority. Wins over variants, colors and foundation.
  * ========================================================================== */
-.badge-disabled,
-.badge.disabled,
-.badge[disabled] {
+@utility badge-disabled {
 	@layer badge.l1 {
 		@apply bg-on-surface/38 text-surface/76;
 	}
 }
 
-.badge:empty {
+/*
+ * The `.badge.disabled` / `.badge[disabled]` forms live inside `@utility badge`
+ * so they compile as utilities rather than as plain selectors. Plain rules land
+ * in a top-level cascade layer, which the JS plugin API cannot reach, so they
+ * were the one place the compiled plugin diverged from the CSS.
+ */
+@utility badge {
+	@layer badge.l1 {
+		&.disabled,
+		&[disabled] {
+			@apply bg-on-surface/38 text-surface/76;
+		}
+	}
+
 	@layer badge.l3 {
-		@apply rounded-full;
-		/* If being used as an indicator, update the offset to better attach the smaller badge */
-		--indicator-translate-amount: 33%;
+		&:empty {
+			@apply rounded-full;
+			/* If being used as an indicator, update the offset to better attach the smaller badge */
+			--indicator-translate-amount: 33%;
+		}
 	}
 }
 

@@ -38,6 +38,12 @@ export interface Bundle {
 	utilities: StyleObject;
 	/** From plain selectors; emitted in a top-level layer by the CSS-first build. */
 	standalone: StyleObject;
+	/**
+	 * Rules for classes created at runtime (the ripple action), which Tailwind
+	 * can never see as a candidate. They go through addBase so they are emitted
+	 * unconditionally rather than being usage-gated away.
+	 */
+	unconditional: StyleObject;
 }
 
 export interface PluginOptions {
@@ -64,5 +70,6 @@ export interface PluginOptions {
 /** Registers one bundle's rules. Generated per bundle. */
 export type BundleRegistrar = (context: {
 	addUtilities: (utilities: Record<string, StyleObject>) => void;
+	addBase: (base: StyleObject) => void;
 	prefix?: string;
 }) => void;

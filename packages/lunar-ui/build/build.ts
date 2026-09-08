@@ -52,6 +52,17 @@ const componentFiles = fs
    are not namespaced per component. */
 const FOUNDATIONS = 'foundations';
 
+/*
+	Classes that must stay plain selectors rather than `@utility`.
+
+	`@utility` output is usage-gated: Tailwind emits it only when it finds the
+	class in scanned source. These are written by the ripple action at runtime,
+	so there is no candidate to find and converting them would mean the rule is
+	never emitted. They stay unconditional, and are safelisted here so the
+	compile that feeds the plugin still produces them.
+*/
+const RUNTIME_CLASSES = ['lunar-ripple', 'interactive', 'dragged'];
+
 /* Derived from source. Hand-listing these silently shipped 1 of 3. */
 const CUSTOM_VARIANTS = extractCustomVariants(coreSrc);
 
@@ -171,24 +182,28 @@ function emitBundle(name: string, bundle: Bundle): void {
 		BANNER +
 			`import type { StyleObject } from '../../../types.js';\n\n` +
 			`export const utilities: StyleObject = ${JSON.stringify(bundle.utilities, null, '\t')};\n\n` +
-			`export const standalone: StyleObject = ${JSON.stringify(bundle.standalone, null, '\t')};\n`
+			`export const standalone: StyleObject = ${JSON.stringify(bundle.standalone, null, '\t')};\n\n` +
+			`export const unconditional: StyleObject = ${JSON.stringify(bundle.unconditional ?? {}, null, '\t')};\n`
 	);
 	fs.writeFileSync(
 		path.join(dir, 'index.ts'),
 		BANNER +
 			[
-				`import { utilities, standalone } from './object.js';`,
+				`import { utilities, standalone, unconditional } from './object.js';`,
 				`import registry from '../../registry.js';`,
 				`import { addPrefix } from '../../../functions/addPrefix.js';`,
 				`import { nestCssLayers } from '../../../functions/nestCssLayers.js';`,
 				`import type { BundleRegistrar } from '../../../types.js';`,
 				``,
-				`const register: BundleRegistrar = ({ addUtilities, prefix = '' }) => {`,
+				`const register: BundleRegistrar = ({ addUtilities, addBase, prefix = '' }) => {`,
 				`\taddUtilities(nestCssLayers(addPrefix(utilities, prefix, registry)));`,
 				`\t// Authored as plain selectors, which Tailwind emits in a top-level`,
 				`\t// layer. The plugin API has no channel for that, so they land in`,
 				`\t// @layer utilities instead -- see README, "Known divergences".`,
 				`\taddUtilities(nestCssLayers(addPrefix(standalone, prefix, registry)));`,
+				`\t// Classes written at run time: Tailwind never sees a candidate, so`,
+				`\t// these must not be usage-gated.`,
+				`\taddBase(nestCssLayers(addPrefix(unconditional, prefix, registry)));`,
 				`};`,
 				``,
 				`export default register;`,
@@ -261,7 +276,7 @@ if (collisions.length) {
 			collisions.slice(0, 5).join(', ')
 	);
 }
-const allClasses = [...new Set(Object.values(classesByBundle).flat())].sort();
+const allClasses = [...new Set([...Object.values(classesByBundle).flat(), ...RUNTIME_CLASSES])].sort();
 
 /*
 	Some lunar-ui class names collide with Tailwind built-ins: `collapse`,
@@ -325,6 +340,24 @@ const declaredVariables = (node: unknown, into: Set<string>): Set<string> => {
 	}
 	return into;
 };
+
+/*
+	Rules for runtime-created classes cannot be usage-gated. Tailwind never sees
+	a candidate for a class the ripple action writes at run time, so routing them
+	through addUtilities means they are never emitted at all. Split them out here
+	and register them with addBase instead.
+*/
+const runtimePattern = new RegExp(`\\.(${RUNTIME_CLASSES.join('|')})(?![\\w-])`);
+for (const name of BUNDLES) {
+	const bundle = buckets[name];
+	const unconditional: StyleObject = {};
+	for (const [selector, value] of Object.entries(bundle.standalone)) {
+		if (!runtimePattern.test(selector)) continue;
+		unconditional[selector] = value;
+		delete bundle.standalone[selector];
+	}
+	bundle.unconditional = unconditional;
+}
 
 const localVariables = new Set<string>();
 const referencedInBundles = new Set<string>();

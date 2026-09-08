@@ -83,10 +83,44 @@ function splitSelectors(selector: string): string[] {
    output (`:has( > svg)` vs `:has(> svg)`). Normalize so those don't read as
    different selectors. */
 function normalizeSelector(selector: string): string {
-	return selector
-		.replace(/\s+/g, ' ')
-		.replace(/\s*([(),>+~])\s*/g, '$1')
-		.trim();
+	return (
+		selector
+			.replace(/\s+/g, ' ')
+			.replace(/\s*([(),>+~])\s*/g, '$1')
+			// `*:disabled` and `:disabled` select the same elements; the two paths
+			// disagree only on whether the universal selector is written out.
+			.replace(/(^|[\s(,>+~])\*(?=:)/g, '$1')
+			.trim()
+	);
+}
+
+/*
+	Resolves native CSS nesting to the flat selectors it stands for.
+
+	The two paths express the same rule differently: the CSS-first build keeps
+	`&:not(.button-text)` nested under its parent, while re-emitting through
+	addUtilities flattens it to `.button.disabled:not(.button-text)`. Both are
+	correct and equivalent, so the comparison has to resolve one into the other
+	rather than read them as different selectors.
+*/
+function resolvedSelectors(rule: postcss.Rule): string[] {
+	const chain: string[][] = [];
+	for (let node: postcss.Node | undefined = rule; node; node = node.parent as postcss.Node) {
+		if (node.type === 'rule') chain.unshift(splitSelectors((node as postcss.Rule).selector));
+	}
+	let resolved: string[] = [''];
+	for (const level of chain) {
+		const next: string[] = [];
+		for (const parent of resolved) {
+			for (const own of level) {
+				if (!parent) next.push(own);
+				else if (own.includes('&')) next.push(own.split('&').join(parent));
+				else next.push(`${parent} ${own}`);
+			}
+		}
+		resolved = next;
+	}
+	return resolved.map(normalizeSelector).filter(Boolean);
 }
 
 /* selector -> sorted "prop: value" list, independent of layer nesting and of
@@ -100,7 +134,7 @@ function rulesBySelector(css: string, keep: (selector: string) => boolean): Map<
 			if (node.type === 'decl') decls.push(node.prop + ': ' + node.value);
 		});
 		if (!decls.length) return;
-		for (const selector of splitSelectors(rule.selector)) {
+		for (const selector of resolvedSelectors(rule)) {
 			if (!keep(selector)) continue;
 			out.set(selector, [...(out.get(selector) ?? []), ...decls]);
 		}
@@ -118,7 +152,7 @@ function layerPaths(css: string, keep: (selector: string) => boolean): Map<strin
 		for (let p = rule.parent; p && p.type !== 'root'; p = p.parent) {
 			if (p.type === 'atrule' && p.name === 'layer') layers.unshift(p.params);
 		}
-		for (const selector of splitSelectors(rule.selector)) {
+		for (const selector of resolvedSelectors(rule)) {
 			if (!keep(selector)) continue;
 			const set = out.get(selector) ?? new Set();
 			set.add(layers.join(' > ') || '(top level)');
@@ -485,7 +519,16 @@ const standaloneRules = rulesBySelector(standalone, owns);
 const standaloneChecks = [
 	[
 		'emits the same component rules as the plugin-with-context build',
-		[...cand.keys()].every((selector) => standaloneRules.has(selector))
+		/*
+			Compared only over rules the plugin itself owns. The with-context build
+			also carries context-derived rules -- Tailwind variant classes such as
+			`.\*\:disabled`, which appear in no generated bundle -- and those are
+			the CSS layer's output, not the plugin's, so a standalone build is right
+			not to have them.
+		*/
+		[...cand.keys()]
+			.filter((selector) => !/\:/.test(selector))
+			.every((selector) => standaloneRules.has(selector))
 	],
 	['no var() reference left dangling', danglingHard.length === 0],
 	['carries the theme token chain', standalone.includes('--theme-color-primary-40:')],

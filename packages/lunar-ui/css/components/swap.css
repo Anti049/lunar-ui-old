@@ -109,7 +109,8 @@
  * Highest per-component priority. Checked state flips which element shows.
  * ========================================================================== */
 
-.swap:has(> input:checked) {
+@utility swap {
+	&:has(> input:checked) {
 	@layer swap.l1 {
 		.swap-on {
 			opacity: 1;
@@ -141,4 +142,5 @@
 			transform: rotateY(180deg);
 		}
 	}
+}
 }

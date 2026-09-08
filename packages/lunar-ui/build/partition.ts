@@ -84,7 +84,7 @@ export function partition(
 		return null;
 	};
 
-	const take = (node: postcss.ChildNode, bucket: keyof Bundle): boolean => {
+	const take = (node: postcss.ChildNode, bucket: 'utilities' | 'standalone'): boolean => {
 		const owner = ownerOf(node);
 		if (owner) {
 			buckets[owner][bucket].append(node.clone());
@@ -123,7 +123,9 @@ export function partition(
 				name,
 				{
 					utilities: kebabCaseProperties(objectify(b.utilities)) as StyleObject,
-					standalone: kebabCaseProperties(objectify(b.standalone)) as StyleObject
+					standalone: kebabCaseProperties(objectify(b.standalone)) as StyleObject,
+					// Filled in by the build, which knows which classes are runtime-created.
+					unconditional: {}
 				}
 			])
 		),

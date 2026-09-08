@@ -67,20 +67,22 @@
 	@apply flex w-full flex-1 flex-col overflow-x-clip overflow-y-auto;
 }
 
-.nav-rail .nav-rail-scroll {
-	--nav-rail-reach: 20rem;
-	/* The widened strip overlaps the main content, so it stays click-through and
-	   the links take pointer events back. Wheeling over the gaps between links
-	   scrolls the page rather than the rail, which is the cost of that. */
-	@apply pointer-events-none;
-	width: calc(100% + var(--nav-rail-reach));
-	padding-inline-end: var(--nav-rail-reach);
-	margin-inline-end: calc(-1 * var(--nav-rail-reach));
-	/* A visible scrollbar would sit at the far edge of the reach, not the rail */
-	scrollbar-width: none;
+@utility nav-rail {
+	& .nav-rail-scroll {
+		--nav-rail-reach: 20rem;
+		/* The widened strip overlaps the main content, so it stays click-through
+		   and the links take pointer events back. Wheeling over the gaps between
+		   links scrolls the page rather than the rail, which is the cost of that. */
+		@apply pointer-events-none;
+		width: calc(100% + var(--nav-rail-reach));
+		padding-inline-end: var(--nav-rail-reach);
+		margin-inline-end: calc(-1 * var(--nav-rail-reach));
+		/* A visible scrollbar would sit at the far edge of the reach, not the rail */
+		scrollbar-width: none;
 
-	& > * {
-		@apply pointer-events-auto;
+		& > * {
+			@apply pointer-events-auto;
+		}
 	}
 }
 
@@ -123,12 +125,20 @@
 	}
 	@apply not-disabled:nav-link-primary;
 }
-.nav-link-disabled,
-.nav-link.disabled,
-.nav-link[disabled],
-.nav-link:disabled {
+@utility nav-link-disabled {
 	@layer nav-link.l1 {
 		@apply pointer-events-none cursor-not-allowed text-on-surface/38 before:bg-transparent;
+	}
+}
+
+/* Compound forms live in the utility so they are not plain selectors. */
+@utility nav-link {
+	@layer nav-link.l1 {
+		&.disabled,
+		&[disabled],
+		&:disabled {
+			@apply pointer-events-none cursor-not-allowed text-on-surface/38 before:bg-transparent;
+		}
 	}
 }
 

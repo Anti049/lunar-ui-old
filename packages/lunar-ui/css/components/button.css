@@ -78,10 +78,7 @@
  *   <button class="button" disabled>          (HTML boolean attribute)
  *   <button class="button">…</button>         when :disabled matches natively
  */
-.button-disabled,
-.button.disabled,
-.button[disabled],
-.button:disabled {
+@utility button-disabled {
 	@layer button.l1 {
 		@apply pointer-events-none border-on-surface/12 text-on-surface/38 elevation-0 before:bg-transparent;
 
@@ -94,6 +91,26 @@
 		&:not(.button-text),
 		&.button-text.selected {
 			@apply bg-on-surface/10 selected:bg-on-surface/20;
+		}
+	}
+}
+
+/*
+ * The compound disabled forms live inside `@utility button` so they compile as
+ * utilities rather than plain selectors, which land in a top-level cascade
+ * layer the JS plugin API cannot reach.
+ */
+@utility button {
+	@layer button.l1 {
+		&.disabled,
+		&[disabled],
+		&:disabled {
+			@apply pointer-events-none border-on-surface/12 text-on-surface/38 elevation-0 before:bg-transparent;
+
+			&:not(.button-text),
+			&.button-text.selected {
+				@apply bg-on-surface/10 selected:bg-on-surface/20;
+			}
 		}
 	}
 }
@@ -381,48 +398,50 @@
  * ⚠️  Padding values match half of the base horizontal padding for each size.
  *     Keep in sync with SIZES utilities if you tune the base padding.
  * ========================================================================== */
-.button:has(> svg:first-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
-		.button-circle
-	),
-.button:has(> .button-leading) {
+@utility button {
 	@layer button.l2 {
-		@apply pl-2;
-		&.button-xs {
-			@apply pl-1;
+		/* Leading icon: pad the start so the glyph is not flush to the edge. */
+		&:has(> svg:first-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
+				.button-circle
+			),
+		&:has(> .button-leading) {
+			@apply pl-2;
+			&.button-xs {
+				@apply pl-1;
+			}
+			&.button-sm {
+				@apply pl-1.5;
+			}
+			&.button-lg {
+				@apply pl-3;
+			}
+			&.button-xl {
+				@apply pl-3.5;
+			}
 		}
-		&.button-sm {
-			@apply pl-1.5;
+
+		/* Trailing icon: the same, mirrored. */
+		&:has(> svg:last-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
+				.button-circle
+			),
+		&:has(> .button-trailing) {
+			@apply pr-2;
+			&.button-xs {
+				@apply pr-1;
+			}
+			&.button-sm {
+				@apply pr-1.5;
+			}
+			&.button-lg {
+				@apply pr-3;
+			}
+			&.button-xl {
+				@apply pr-3.5;
+			}
 		}
-		&.button-lg {
-			@apply pl-3;
+
+		& svg {
+			@apply pointer-events-none;
 		}
-		&.button-xl {
-			@apply pl-3.5;
-		}
-	}
-}
-.button:has(> svg:last-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
-		.button-circle
-	),
-.button:has(> .button-trailing) {
-	@layer button.l2 {
-		@apply pr-2;
-		&.button-xs {
-			@apply pr-1;
-		}
-		&.button-sm {
-			@apply pr-1.5;
-		}
-		&.button-lg {
-			@apply pr-3;
-		}
-		&.button-xl {
-			@apply pr-3.5;
-		}
-	}
-}
-.button svg {
-	@layer button.l2 {
-		@apply pointer-events-none;
 	}
 }

@@ -131,20 +131,22 @@
  * STATES (l1)
  * Only reveal a tooltip that actually has something to say.
  * ========================================================================== */
-.tooltip:is([data-tooltip]:not([data-tooltip='']), :has(> .tooltip-content:not(:empty))):is(
-		.tooltip-open,
-		:hover,
-		:focus-visible,
-		:has(:focus-visible)
-	) {
+@utility tooltip {
 	@layer tooltip.l1 {
-		& > .tooltip-content,
-		&[data-tooltip]::before,
-		&::after {
-			opacity: var(--tooltip-enabled, 1);
-			--tooltip-enter-x: 0;
-			--tooltip-enter-y: 0;
-			transition-delay: var(--tooltip-delay-in);
+		&:is([data-tooltip]:not([data-tooltip='']), :has(> .tooltip-content:not(:empty))):is(
+				.tooltip-open,
+				:hover,
+				:focus-visible,
+				:has(:focus-visible)
+			) {
+			& > .tooltip-content,
+			&[data-tooltip]::before,
+			&::after {
+				opacity: var(--tooltip-enabled, 1);
+				--tooltip-enter-x: 0;
+				--tooltip-enter-y: 0;
+				transition-delay: var(--tooltip-delay-in);
+			}
 		}
 	}
 }

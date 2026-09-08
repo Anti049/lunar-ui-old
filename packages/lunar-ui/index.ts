@@ -123,9 +123,13 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 				api.addUtilities(utilities as unknown as Record<string, CssInJs>);
 			};
 
+			const addBundleBase = (styles: StyleObject): void => {
+				if (Object.keys(styles).length) api.addBase(asCssInJs(styles));
+			};
+
 			for (const [name, register] of Object.entries(bundles)) {
 				if (!included(name)) continue;
-				register({ addUtilities, prefix });
+				register({ addUtilities, addBase: addBundleBase, prefix });
 			}
 		};
 	},
