@@ -2,11 +2,11 @@
 
 A monorepo containing lunar-ui's CSS layer, its Svelte bindings, and the docs site.
 
-| Workspace                                          | Package                     | Published | What it is                                                        |
-| -------------------------------------------------- | --------------------------- | --------- | ----------------------------------------------------------------- |
-| [`packages/lunar-ui`](packages/lunar-ui)                    | `@anti049/lunar-ui`         | yes       | Framework-agnostic Tailwind v4 styles, design tokens, and themes.  |
-| [`packages/svelte`](packages/svelte)                | `@anti049/lunar-ui-svelte`  | yes       | Svelte 5 components built on top of the CSS layer.                 |
-| [`packages/docs`](packages/docs)                            | `@anti049/lunar-ui-docs`    | no        | SvelteKit documentation and demo site.                             |
+| Workspace                                | Package                    | Published | What it is                                                        |
+| ---------------------------------------- | -------------------------- | --------- | ----------------------------------------------------------------- |
+| [`packages/lunar-ui`](packages/lunar-ui) | `@anti049/lunar-ui`        | yes       | Framework-agnostic Tailwind v4 styles, design tokens, and themes. |
+| [`packages/svelte`](packages/svelte)     | `@anti049/lunar-ui-svelte` | yes       | Svelte 5 components built on top of the CSS layer.                |
+| [`packages/docs`](packages/docs)         | `@anti049/lunar-ui-docs`   | no        | SvelteKit documentation and demo site.                            |
 
 `packages/lunar-ui` has no build step — it ships raw CSS, because Tailwind v4 has to
 process `@plugin`, `@theme`, and `@layer` in the consumer's own build. Nothing

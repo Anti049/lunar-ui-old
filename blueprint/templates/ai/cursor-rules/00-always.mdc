@@ -1,0 +1,12 @@
+---
+description: Repository-wide rules
+alwaysApply: true
+---
+
+Read `AGENTS.md` for the full build rules, authoring convention and traps.
+
+- The published artifact is a compiled Tailwind plugin, not CSS.
+- `packages/core/generated/` and every `dist/` are build output. Never edit them.
+- Verify with `bun run check`, not with a build. Most failure modes here are
+  silent.
+- Never hand-maintain a list of things that exist in the CSS. Write an extractor.

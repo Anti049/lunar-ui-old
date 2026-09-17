@@ -1,0 +1,21 @@
+/*
+	Design system for prettier-plugin-tailwindcss.
+
+	The class sorter needs to resolve lunar-ui's own utilities, or it treats
+	`badge`, `surface` and `elevation-2` as unknown and hoists them to the front
+	of every class attribute instead of sorting them into place.
+
+	It loads the plugin from source rather than through the package specifier on
+	purpose. `@plugin '@anti049/lunar-ui'` resolves via the exports map to
+	`dist/index.js`, which made formatting depend on the package having been
+	compiled -- and the plugin throws once per file when it cannot resolve, so a
+	missing `dist` turned `prettier --check` into hundreds of stack traces.
+	Tailwind loads a plugin through jiti, which reads TypeScript directly, so
+	pointing at the entry needs only `generated/` to exist.
+
+	Keep this matching how the docs app configures the plugin. Options that
+	change class names -- `prefix` above all -- would make the sorter disagree
+	with the classes actually authored.
+*/
+@import 'tailwindcss';
+@plugin './packages/lunar-ui/index.ts';

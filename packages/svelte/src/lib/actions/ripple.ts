@@ -40,11 +40,18 @@ function isDisabled(node: HTMLElement): boolean {
 
 /** Respect the user's reduced-motion preference (WAAPI ignores the CSS media query). */
 function prefersReducedMotion(): boolean {
-	return typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+	return (
+		typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
+	);
 }
 
 /** Create, size, and position a ripple span on `host` at the given local point. */
-function makeSpan(host: HTMLElement, clientX: number, clientY: number, centered: boolean): HTMLElement {
+function makeSpan(
+	host: HTMLElement,
+	clientX: number,
+	clientY: number,
+	centered: boolean
+): HTMLElement {
 	const rect = host.getBoundingClientRect();
 	const x = centered ? rect.width / 2 : clientX - rect.left;
 	const y = centered ? rect.height / 2 : clientY - rect.top;

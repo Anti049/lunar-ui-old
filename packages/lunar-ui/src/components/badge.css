@@ -10,7 +10,7 @@
  * The base .badge utility. Every badge has this.
  * ========================================================================== */
 @utility badge {
-	@layer badge.l3 {
+	@layer badge.l1.l2.l3 {
 		@apply pointer-events-none flex h-fit min-h-4 w-fit min-w-4 items-center justify-center gap-2 rounded-sm px-1 py-0.5 align-middle;
 		/*
 		 * `relative` gives the badge-animate-alert halo a containing block.
@@ -50,7 +50,7 @@
 		}
 	}
 
-	@layer badge.l3 {
+	@layer badge.l1.l2.l3 {
 		&:empty {
 			@apply rounded-full;
 			/* If being used as an indicator, update the offset to better attach the smaller badge */
@@ -64,25 +64,25 @@
  * Fill treatments that read the color variables set by the color utilities.
  * ========================================================================== */
 @utility badge-filled {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		background-color: var(--badge-color, var(--color-primary));
 		color: var(--badge-on-color, var(--color-on-primary));
 	}
 }
 @utility badge-tonal {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		background-color: var(--badge-container, var(--color-primary-container));
 		color: var(--badge-on-container, var(--color-on-primary-container));
 	}
 }
 @utility badge-elevated {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		@apply bg-surface-container enabled:elevation-1;
 		color: var(--badge-color, var(--color-primary));
 	}
 }
 @utility badge-outlined {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		@apply bg-transparent;
 		color: var(--badge-color, var(--color-on-surface));
 		border: 1px solid
@@ -90,7 +90,7 @@
 	}
 }
 @utility badge-text {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		@apply bg-transparent;
 		color: var(--badge-color, var(--color-on-surface));
 	}
@@ -101,7 +101,7 @@
  * Each color utility sets the CSS variables that variants consume.
  * ========================================================================== */
 @utility badge-primary {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-primary);
 		--badge-on-color: var(--color-on-primary);
 		--badge-container: var(--color-primary-container);
@@ -111,7 +111,7 @@
 }
 
 @utility badge-secondary {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-secondary);
 		--badge-on-color: var(--color-on-secondary);
 		--badge-container: var(--color-secondary-container);
@@ -121,7 +121,7 @@
 }
 
 @utility badge-tertiary {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-tertiary);
 		--badge-on-color: var(--color-on-tertiary);
 		--badge-container: var(--color-tertiary-container);
@@ -131,7 +131,7 @@
 }
 
 @utility badge-error {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-error);
 		--badge-on-color: var(--color-on-error);
 		--badge-container: var(--color-error-container);
@@ -141,7 +141,7 @@
 }
 
 @utility badge-surface {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-inverse-surface);
 		--badge-on-color: var(--color-on-inverse-surface);
 		--badge-container: var(--color-surface-container);
@@ -151,7 +151,7 @@
 }
 
 @utility badge-success {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-success);
 		--badge-on-color: var(--color-on-success);
 		--badge-container: var(--color-success-container);
@@ -161,7 +161,7 @@
 }
 
 @utility badge-warning {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-warning);
 		--badge-on-color: var(--color-on-warning);
 		--badge-container: var(--color-warning-container);
@@ -171,7 +171,7 @@
 }
 
 @utility badge-info {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-info);
 		--badge-on-color: var(--color-on-info);
 		--badge-container: var(--color-info-container);
@@ -181,7 +181,7 @@
 }
 
 @utility badge-alert {
-	@layer badge.l2 {
+	@layer badge.l1.l2 {
 		--badge-color: var(--color-alert);
 		--badge-on-color: var(--color-on-alert);
 		--badge-container: var(--color-alert-container);

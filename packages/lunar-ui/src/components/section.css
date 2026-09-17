@@ -3,43 +3,43 @@
 */
 
 @utility section {
-	@layer section.l3 {
+	@layer section.l1.l2.l3 {
 		@apply flex h-fit w-full flex-col overflow-clip rounded-sm;
 	}
 }
 
 @utility section-header {
-	@layer section.l2 {
+	@layer section.l1.l2 {
 		@apply flex h-fit min-h-16 w-full flex-row items-center justify-between surface-container px-4 py-2;
 	}
 }
 
 @utility section-title-container {
-	@layer section.l2 {
+	@layer section.l1.l2 {
 		@apply flex flex-1 flex-col items-start justify-center overflow-clip text-ellipsis select-none;
 	}
 }
 
 @utility section-title {
-	@layer section.l2 {
+	@layer section.l1.l2 {
 		@apply text-title-medium-emphasized;
 	}
 }
 
 @utility section-subtitle {
-	@layer section.l2 {
+	@layer section.l1.l2 {
 		@apply text-label-small text-on-surface-variant;
 	}
 }
 
 @utility section-arrow {
-	@layer section.l2 {
+	@layer section.l1.l2 {
 		@apply swap flex aspect-square items-center justify-center;
 	}
 }
 
 @utility section-body {
-	@layer section.l2 {
+	@layer section.l1.l2 {
 		@apply flex h-fit max-h-512 w-full flex-col overflow-y-auto surface-container-low p-2 transition-[max-height] animated;
 	}
 }

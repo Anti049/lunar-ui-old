@@ -28,7 +28,7 @@ lunar-ui/
 Bun workspaces, Changesets for releases, shared prettier/eslint at the root.
 
 `packages/lunar-ui` publishes `dist` only. The CSS in `src/` is what the plugin
-is compiled *from*; it is not shipped and has no export path, so consumers write
+is compiled _from_; it is not shipped and has no export path, so consumers write
 `@plugin '@anti049/lunar-ui'` and never `@import`.
 
 ### Commands
@@ -44,22 +44,22 @@ bun run package                                # pack a tarball for external tes
 
 ## 2. Chronology
 
-| commit | what |
-| --- | --- |
-| `9a34dba` | monorepo split: core CSS / Svelte / docs |
+| commit    | what                                                              |
+| --------- | ----------------------------------------------------------------- |
+| `9a34dba` | monorepo split: core CSS / Svelte / docs                          |
 | `86c9b47` | packaging fixes found by installing tarballs into an external app |
-| `867915a` | plugin POC — badge + button only |
-| `64dd8d1` | standalone: plugin carries its own design tokens |
-| `ab3f8c3` | all theme namespaces registered; theme switching verified |
-| `221e377` | foundations ship as their own bundle |
-| `fa2394a` | core fix: badge alert halo had no containing block |
-| `9b55f01` | plugin converted to TypeScript |
-| `575676e` | theme selection + custom themes (roles or seed) |
-| `fd8dd83` | status palettes harmonized toward the seed |
-| `cd3a810` | all 16 components; default-theme + comment bugs fixed |
-| `8622073` | eight shape tokens as plugin/theme options |
-| `86244d5` | core fix: removed dead `--depth` box-shadow |
-| `a411600` | core fix: select tonal fallback → `--color-on-surface` |
+| `867915a` | plugin POC — badge + button only                                  |
+| `64dd8d1` | standalone: plugin carries its own design tokens                  |
+| `ab3f8c3` | all theme namespaces registered; theme switching verified         |
+| `221e377` | foundations ship as their own bundle                              |
+| `fa2394a` | core fix: badge alert halo had no containing block                |
+| `9b55f01` | plugin converted to TypeScript                                    |
+| `575676e` | theme selection + custom themes (roles or seed)                   |
+| `fd8dd83` | status palettes harmonized toward the seed                        |
+| `cd3a810` | all 16 components; default-theme + comment bugs fixed             |
+| `8622073` | eight shape tokens as plugin/theme options                        |
+| `86244d5` | core fix: removed dead `--depth` box-shadow                       |
+| `a411600` | core fix: select tonal fallback → `--color-on-surface`            |
 
 ---
 
@@ -92,7 +92,7 @@ All confirmed against **Tailwind 4.3.3** by experiment, not documentation.
   `@apply: font-bold;` declaration — invalid, silent.
 - **`addBase({'@theme': {...}})` emits a literal `@theme` block inside
   `@layer base`**, which browsers ignore entirely. It is not a route to
-  registering theme values. (It *looks* like it works if you only grep for the
+  registering theme values. (It _looks_ like it works if you only grep for the
   variable name.)
 - `addUtilities` **rejects an at-rule as a top-level key**. `@layer x` and
   `@media (...)` must be turned inside out so the selector is the key — see
@@ -127,7 +127,7 @@ All confirmed against **Tailwind 4.3.3** by experiment, not documentation.
 
 - **Numeric CSS values become JS numbers** (`opacity: 0`), which Tailwind's own
   `CssInJs` type does not model. One documented cast in `index.ts`.
-- **A repeated declaration becomes an array**, and Tailwind does *not*
+- **A repeated declaration becomes an array**, and Tailwind does _not_
   camelCase-convert array-valued keys — `transitionDuration` reached the output
   verbatim, invalid CSS that browsers drop. The build now emits kebab-case
   throughout.
@@ -147,7 +147,48 @@ All confirmed against **Tailwind 4.3.3** by experiment, not documentation.
   generator, so a regenerated theme will not equal the committed one.
 - `Blend.harmonize(designColor, sourceColor)` rotates hue by at most 15°, and is
   direction-aware: from a green seed, blue and magenta sources can produce the
-  *same* result because both lie the same way round the wheel. Not a bug.
+  _same_ result because both lie the same way round the wheel. Not a bug.
+
+### Functional utilities (`@utility name-*`)
+
+- **`addBase({'@utility x-*': …})` is inert**, the same way `@theme` is: the
+  at-rule is emitted verbatim into the consumer's CSS and never processed, so
+  the utility does not exist and the output carries a stray invalid block.
+  There is no plugin-API channel for a functional utility; `matchUtilities` is
+  the port.
+- **v4's `matchUtilities` has no bare-value support.** With `values: {}` only
+  the arbitrary form resolves; `x-2` needs `'2'` to be a key in `values`.
+  Adding `'number'` to `type` does not help -- it made even the arbitrary form
+  stop resolving. Registering `theme('spacing')`'s numeric keys mapped to
+  `calc(var(--spacing) * n)` reproduces the CSS-first output byte for byte and
+  keeps working if a consumer redefines `--spacing`.
+- **`--value([*])` vs `--value([length])`**: `[length]` rejects `calc()` and
+  `var()`, which are exactly the values you reach for when the number has to
+  come from somewhere else. `[*]` takes those plus percentages.
+- **The compile must be `source(none)`.** Tailwind otherwise scans the repo for
+  candidates, so a class name written _in a comment_ becomes a real utility
+  baked into the shipped bundle. This shipped 13 junk rules before it was
+  found; `functions/context.css` now pins it.
+
+### Getting a plugin rebuild into a running dev server
+
+- **`@tailwindcss/vite` ignores `.ts`/`.js` in `hotUpdate`.** It registers the
+  `@plugin` file as a build dependency and re-checks its mtime, but only from
+  inside its CSS `transform`, and nothing re-runs that transform when a JS file
+  changes. A plugin rebuild is therefore invisible until the stylesheet itself
+  is touched.
+- **Only a real mtime change on the entry stylesheet works.** Verified:
+  `moduleGraph.invalidateModule` still serves the cached `?direct` response,
+  and `watcher.emit('change', …)` runs HMR but not a fresh transform.
+  `fs.utimesSync` on app.css does both.
+- **`@plugin` accepts TypeScript.** Tailwind loads plugins through jiti, so
+  pointing at `index.ts` in dev skips `tsc` -- a ~1.4s loop instead of ~3.8s.
+  `clearRequireCache` handles the entry's transitive imports, so regenerated
+  `generated/*.ts` is picked up.
+- **`bun run --filter` serialises on workspace dependencies.** Docs depends on
+  the plugin, so a never-exiting watcher registered as the plugin's `dev` script
+  blocks the docs dev server from starting. The docs server spawns it as a child
+  instead.
 
 ---
 
@@ -176,13 +217,13 @@ produced. Emitting `.js` would leave every one of those seams typed `any`.
    and is left unclaimed — `collapse`, `table`, `select-text` all collide.
 3. **Compile once** with `functions/context.css` plus every component, feeding the
    class list back as `@source inline(…)`.
-4. **Partition** by `@layer <name>.lN` and `<name>-*` keyframes, falling back to
+4. **Partition** by `@layer <name>.l1[.l2[.l3]]` and `<name>-*` keyframes, falling back to
    class-name attribution (layer names are not always file names), then to the
    classes inside an unrecognised layer.
 5. **Serialize** with postcss-js into two buckets per bundle: `utilities` (from
    `@utility`, usage-gated) and `standalone` (from plain selectors).
 6. **Resolve tokens** — transitive closure from the compiled output, read from
-   *source* rather than a compile, with theme defaults inlined as `var()`
+   _source_ rather than a compile, with theme defaults inlined as `var()`
    fallbacks.
 
 ### Runtime
@@ -235,22 +276,24 @@ conflicts.**
 3. **1 Tailwind built-in deliberately unclaimed** (`.collapse:not(td,tr,colgroup)`).
    Consumers get it from `@import 'tailwindcss'`.
 
-Also worth knowing: `src/base/layers.css` declares sublayer order inside
-`@layer components`, but the rules land under `@layer utilities` and at the top
-level — different layer trees, so that declaration appears to have no effect on
-either path.
+Also worth knowing: `src/base/layers.css` used to declare sublayer order inside
+`@layer components`, while the rules land under `@layer utilities` and at the
+top level — different layer trees, so it never applied to either path. That list
+has been removed. Tier order is now structural: tiers nest (`badge.l1.l2.l3` for
+the foundation, `badge.l1` for state) and unlayered content of a layer outranks
+its sublayers regardless of declaration order or source file.
 
 ---
 
 ## 7. Hand-maintained lists (these degrade silently)
 
-| list | where | fails how |
-| --- | --- | --- |
-| `THEME_NAMESPACES` | `functions/collect-tokens.ts` | a new namespace falls through to a plain custom property; components render, consumers get no utility |
-| `STATE_HOOKS` | `functions/extract-classes.ts` | a consumer state hook gets renamed by a prefix |
-| `JS_COUPLED` | `functions/extract-classes.ts` | a class written in JS gets renamed and the action breaks |
-| `RUNTIME_CLASSES` | `functions/build.ts` | a class the ripple writes at runtime is converted to `@utility` and never emitted, since no candidate exists to gate on |
-| `SHAPE_TOKENS` | `functions/build.ts` | a new knob is settable nowhere, or is accepted and read by nothing |
+| list               | where                          | fails how                                                                                                               |
+| ------------------ | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `THEME_NAMESPACES` | `functions/collect-tokens.ts`  | a new namespace falls through to a plain custom property; components render, consumers get no utility                   |
+| `STATE_HOOKS`      | `functions/extract-classes.ts` | a consumer state hook gets renamed by a prefix                                                                          |
+| `JS_COUPLED`       | `functions/extract-classes.ts` | a class written in JS gets renamed and the action breaks                                                                |
+| `RUNTIME_CLASSES`  | `functions/build.ts`           | a class the ripple writes at runtime is converted to `@utility` and never emitted, since no candidate exists to gate on |
+| `SHAPE_TOKENS`     | `functions/build.ts`           | a new knob is settable nowhere, or is accepted and read by nothing                                                      |
 
 `CUSTOM_VARIANTS` used to be on this list and shipped 1 of 3. It is now derived
 by `functions/extract-variants.ts`, which is the pattern to follow for anything
@@ -262,19 +305,29 @@ else here that can be read out of the CSS.
 
 ### Correctness gaps
 
-1. **Three functional utilities dropped**: `tooltip-gap-*`,
-   `tooltip-tail-size-*`, `tooltip-tail-width-*`. `@utility name-*` cannot be
-   safelisted by name; needs `matchUtilities`. The build warns, the consumer
-   just finds them missing.
+1. **Functional utilities are bounded on the spacing scale.**
+   `tooltip-gap-*` and friends are ported through `matchUtilities`
+   (`functions/extract-functional.ts` reads them from source). Arbitrary values
+   are exact, but v4's compat layer has no bare-value support, so the numeric
+   form is registered from `theme('spacing')` -- 34 steps. `tooltip-gap-2`
+   matches, `tooltip-gap-7.25` does not, where the CSS-first build accepts any
+   number. Off-scale values need the arbitrary form, `tooltip-gap-[1.8125rem]`.
 2. **Usage gating changes semantics.** Plain-selector rules are unconditional in
    a CSS-first build but usage-gated through `addUtilities`. Breaks
    `class={\`badge-${variant}\`}`. Needs a documented safelist story. The
-   `unconditional` bucket handles the runtime-written classes only.
+`unconditional` bucket handles the runtime-written classes only.
 
 ### Decisions
 
 3. The cascade divergence (§6.1) — accept and document, or restructure the CSS.
-4. Pin or vendor `@material/material-color-utilities` given its broken ESM.
+4. **`@material/material-color-utilities` has extensionless internal imports**
+   (`../dynamiccolor/dynamic_scheme`, no `.js`). Bun and jiti fill the extension
+   in, so the plugin build and the unit tests never see it — but Node's ESM
+   resolver refuses, which is why the docs theme generator died with
+   `ERR_MODULE_NOT_FOUND` under Vite SSR until `ssr.noExternal` was set in
+   `packages/docs/vite.config.ts`. Anything that loads the package through plain
+   Node ESM needs the same treatment. Pinning or vendoring is still the durable
+   fix; the version is already pinned to `^0.4.0`.
 5. `@tailwindcss/forms` and `typography` are devDependencies, not composed into
    the plugin: composing them throws on `Object.keys(modifiers)` because only
    the handler half is reachable, not its `config`. Consumers add them
@@ -297,6 +350,15 @@ left to drift. `packages/docs` consumes the plugin through
 
 ## 9. Testing
 
+Two layers.
+
+`packages/lunar-ui/test/unit/*.test.ts` (bun's runner) covers the pure build
+functions. It exists because the e2e harness reports symptoms, not causes: when
+`LAYER_OWNER` was anchored to a single `.lN` tier, the e2e said "13 Tailwind
+built-ins, 1 conflict on `.table`" and reaching the regex took a diagnosis step.
+The unit case for it now fails by name. Each of the three seeded mutations
+(layer regex, vendor-prefix kebab rule, prefixer allowlist) is caught.
+
 `packages/lunar-ui/test/e2e.test.ts` compiles every bundle twice from the same
 source — once through `@import` (today's path), once through `@plugin` — and
 compares. It also covers standalone resolution, prefixing, themes and shape
@@ -307,7 +369,9 @@ and it fails, naming the selector and property.
 
 ```sh
 cd packages/lunar-ui
-bun test/e2e.test.ts
+bun run test          # both layers
+bun run test:unit     # pure functions only, ~100ms
+bun run test:e2e      # differential parity; needs a current dist/
 KEEP_TMP=1 bun test/e2e.test.ts   # leaves compiled CSS in dist/.test/
 ```
 
@@ -327,7 +391,9 @@ Then add `tailwindcss()` to `vite.config.ts`, `import '../app.css'` in
 
 ```css
 @import 'tailwindcss';
-@plugin '@anti049/lunar-ui' { prefix: lunar-; }
+@plugin '@anti049/lunar-ui' {
+	prefix: lunar-;
+}
 ```
 
 **Bump the version on every repack.** Bun caches by name+version, so re-packing

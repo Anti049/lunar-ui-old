@@ -120,7 +120,7 @@
 	}
 }
 @utility nav-link {
-	@layer nav-link.l3 {
+	@layer nav-link.l1.l2.l3 {
 		@apply flex h-12 w-full flex-row items-center gap-2 overflow-clip rounded-sm surface-container p-2 text-title-small transition-all select-none not-disabled:interactive in-collapsed:aspect-square;
 	}
 	@apply not-disabled:nav-link-primary;
@@ -143,65 +143,65 @@
 }
 
 @utility nav-link-primary {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:primary-container;
 	}
 }
 @utility nav-link-secondary {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:secondary-container;
 	}
 }
 @utility nav-link-tertiary {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:tertiary-container;
 	}
 }
 @utility nav-link-error {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:error-container;
 	}
 }
 @utility nav-link-surface {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:surface-container-highest;
 	}
 }
 @utility nav-link-success {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:success-container;
 	}
 }
 @utility nav-link-warning {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:warning-container;
 	}
 }
 @utility nav-link-info {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:info-container;
 	}
 }
 @utility nav-link-alert {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply nav-link-active:alert-container;
 	}
 }
 
 @utility nav-link-icon {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply aspect-square h-full bg-current object-contain transition-all;
 	}
 }
 
 @utility nav-link-label {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply flex grow whitespace-nowrap opacity-100 transition-all in-collapsed:opacity-0;
 	}
 }
 
 @utility nav-link-small {
-	@layer nav-link.l2 {
+	@layer nav-link.l1.l2 {
 		@apply h-10 in-collapsed:pl-3;
 	}
 }

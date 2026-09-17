@@ -9,8 +9,9 @@ import theme from './generated/theme.js';
 import base from './generated/base.js';
 import shapeTokens from './generated/shape.js';
 import themes from './generated/themes.js';
+import functional from './generated/functional.js';
 import { addPrefix } from './functions/addPrefix.js';
-import type { BundleRegistrar, PluginOptions, StyleObject } from './types.js';
+import type { PluginOptions, StyleObject } from './types.js';
 
 /*
 	lunar-ui as a standalone Tailwind plugin.
@@ -130,6 +131,49 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 			for (const [name, register] of Object.entries(bundles)) {
 				if (!included(name)) continue;
 				register({ addUtilities, addBase: addBundleBase, prefix });
+			}
+
+			/*
+				Functional utilities (`tooltip-gap-*`). Authored in CSS as
+				`@utility name-*`, which the plugin API cannot express -- injecting the
+				at-rule through addBase emits it verbatim and Tailwind never processes
+				it -- so they are re-registered here instead.
+
+				The spacing scale is read off the theme rather than hand-listed, and
+				mapped back to `calc(var(--spacing) * n)` rather than to the resolved
+				rem. That keeps the CSS byte-identical to the CSS-first build and keeps
+				working if a consumer redefines `--spacing`.
+			*/
+			for (const utility of functional) {
+				if (!included(utility.bundle)) continue;
+
+				// Run the names through the same allowlist prefixer everything else
+				// uses, so `lunar-tooltip-gap-2` sets `--lunar-tooltip-gap`.
+				const probe = addPrefix(
+					{ [`.${utility.name}`]: Object.fromEntries(utility.properties.map((p) => [p, ''])) },
+					prefix,
+					registry
+				);
+				const [selector, declarations] = Object.entries(probe)[0];
+				const properties = Object.keys(declarations as StyleObject);
+
+				const values: Record<string, string> = {};
+				if (utility.spacing) {
+					const spacing = api.theme('spacing') as Record<string, string> | undefined;
+					for (const step of Object.keys(spacing ?? {})) {
+						// `px` and friends are not numbers; --value(number) rejects them too.
+						if (!/^\d+(\.\d+)?$/.test(step)) continue;
+						values[step] = `calc(var(--spacing) * ${step})`;
+					}
+				}
+
+				api.matchUtilities(
+					{
+						[selector.slice(1)]: (value: string) =>
+							Object.fromEntries(properties.map((p) => [p, value]))
+					},
+					{ values, type: utility.arbitrary ? ['any'] : [] }
+				);
 			}
 		};
 	},

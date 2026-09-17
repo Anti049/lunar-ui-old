@@ -4,7 +4,7 @@
 	TODO: Add styles for the select component
 */
 @utility select {
-	@layer select.l3 {
+	@layer select.l1.l2.l3 {
 		/* Layout */
 		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit flex-row items-center justify-start rounded-sm border-0 border-transparent ring-0 outline-offset-2 select-none;
 
@@ -45,25 +45,25 @@
 
 /* Variants */
 @utility select-filled {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		background-color: var(--select-color, var(--color-surface));
 		color: var(--select-on-color, var(--color-on-surface));
 	}
 }
 @utility select-tonal {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		background-color: var(--select-container, var(--color-surface-container));
 		color: var(--select-on-container, var(--color-on-surface));
 	}
 }
 @utility select-elevated {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply bg-surface-container enabled:elevation-1;
 		color: var(--select-color, var(--color-surface));
 	}
 }
 @utility select-outlined {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply bg-transparent;
 		color: var(--select-color, var(--color-on-surface));
 		border: 1px solid
@@ -71,7 +71,7 @@
 	}
 }
 @utility select-text {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply bg-transparent;
 		color: var(--select-color, var(--color-on-surface));
 	}
@@ -79,7 +79,7 @@
 
 /* Colors */
 @utility select-surface {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-inverse-surface);
 		--select-on-color: var(--color-on-inverse-surface);
 		--select-container: var(--color-surface-container);
@@ -87,7 +87,7 @@
 	}
 }
 @utility select-primary {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-primary);
 		--select-on-color: var(--color-on-primary);
 		--select-container: var(--color-primary-container);
@@ -96,7 +96,7 @@
 	}
 }
 @utility select-secondary {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-secondary);
 		--select-on-color: var(--color-on-secondary);
 		--select-container: var(--color-secondary-container);
@@ -105,7 +105,7 @@
 	}
 }
 @utility select-tertiary {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-tertiary);
 		--select-on-color: var(--color-on-tertiary);
 		--select-container: var(--color-tertiary-container);
@@ -114,7 +114,7 @@
 	}
 }
 @utility select-error {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-error);
 		--select-on-color: var(--color-on-error);
 		--select-container: var(--color-error-container);
@@ -123,7 +123,7 @@
 	}
 }
 @utility select-success {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-success);
 		--select-on-color: var(--color-on-success);
 		--select-container: var(--color-success-container);
@@ -132,7 +132,7 @@
 	}
 }
 @utility select-warning {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-warning);
 		--select-on-color: var(--color-on-warning);
 		--select-container: var(--color-warning-container);
@@ -141,7 +141,7 @@
 	}
 }
 @utility select-info {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-info);
 		--select-on-color: var(--color-on-info);
 		--select-container: var(--color-info-container);
@@ -150,7 +150,7 @@
 	}
 }
 @utility select-alert {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		--select-color: var(--color-alert);
 		--select-on-color: var(--color-on-alert);
 		--select-container: var(--color-alert-container);
@@ -161,31 +161,31 @@
 
 /* Sizes */
 @utility select-xs {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply gap-1 px-2 py-1 text-caption-medium;
 	}
 }
 
 @utility select-sm {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply gap-1.5 px-2 py-1.5 text-label-small;
 	}
 }
 
 @utility select-md {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply gap-1.5 px-2.5 py-1.5 text-label-medium;
 	}
 }
 
 @utility select-lg {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply gap-2 px-3 py-3 text-label-large;
 	}
 }
 
 @utility select-xl {
-	@layer select.l2 {
+	@layer select.l1.l2 {
 		@apply gap-3 px-4 py-4 text-label-large;
 	}
 }

@@ -46,6 +46,26 @@ export interface Bundle {
 	unconditional: StyleObject;
 }
 
+/**
+ * A functional utility -- `@utility tooltip-gap-*`, registered at runtime with
+ * `matchUtilities` because its class names cannot be enumerated at build time.
+ */
+export interface FunctionalUtility {
+	/** Owning bundle, so include/exclude applies to these too. */
+	bundle: string;
+	/** Class stem without the trailing `-*`, e.g. `tooltip-gap`. */
+	name: string;
+	/** Properties the resolved value is written to. */
+	properties: string[];
+	/** Accepts a number off the spacing scale (`tooltip-gap-2`). */
+	spacing: boolean;
+	/** Accepts an arbitrary value (`tooltip-gap-[3px]`). */
+	arbitrary: boolean;
+}
+
+/** Re-exported so generated/swatches.ts can name its own shape. */
+export type { SwatchRole, ThemeSwatches } from './functions/extract-swatches.js';
+
 export interface PluginOptions {
 	/** Renames lunar-ui's own classes and locals, e.g. `lunar-`. */
 	prefix?: string;

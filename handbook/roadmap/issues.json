@@ -1,0 +1,164 @@
+{
+  "labels": [
+    { "name": "area:plugin", "color": "1d76db", "description": "Tailwind plugin package" },
+    { "name": "area:svelte", "color": "ff3e00", "description": "Svelte component library" },
+    { "name": "area:react", "color": "61dafb", "description": "React component library" },
+    { "name": "area:vue", "color": "42b883", "description": "Vue component library" },
+    { "name": "area:docs", "color": "0e8a16", "description": "Documentation site" },
+    { "name": "area:ci", "color": "5319e7", "description": "CI/CD and release automation" },
+    { "name": "area:build", "color": "5319e7", "description": "Build tooling and monorepo config" },
+    { "name": "area:a11y", "color": "b60205", "description": "Accessibility" },
+    { "name": "type:feat", "color": "0e8a16", "description": "New feature" },
+    { "name": "type:fix", "color": "d73a4a", "description": "Bug fix" },
+    { "name": "type:chore", "color": "cfd3d7", "description": "Maintenance" },
+    { "name": "type:docs", "color": "0075ca", "description": "Documentation change" },
+    { "name": "type:refactor", "color": "fbca04", "description": "Refactor" },
+    { "name": "type:test", "color": "bfdadc", "description": "Tests" },
+    { "name": "p0", "color": "b60205", "description": "Critical" },
+    { "name": "p1", "color": "d93f0b", "description": "High" },
+    { "name": "p2", "color": "fbca04", "description": "Normal" },
+    { "name": "good first issue", "color": "7057ff", "description": "Good for newcomers" },
+    { "name": "help wanted", "color": "008672", "description": "Extra attention welcome" },
+    { "name": "blocked", "color": "000000", "description": "Blocked by another item" }
+  ],
+  "issues": [
+    {
+      "title": "Initialize Bun workspace and shared tooling",
+      "milestone": "v0.1.0 — Foundation",
+      "labels": ["area:build", "type:chore", "p0"],
+      "body": "Create the root package.json with workspaces and orchestration scripts, tsconfig.base.json, ESLint flat config, Prettier, EditorConfig, and .vscode settings/extensions. See handbook/01-monorepo-setup.md.\n\nExit: `bun install && bun run lint` is clean."
+    },
+    {
+      "title": "Wire Husky + commitlint + lint-staged",
+      "milestone": "v0.1.0 — Foundation",
+      "labels": ["area:build", "type:chore", "p1"],
+      "body": "Add pre-commit (lint-staged) and commit-msg (commitlint, config-conventional) hooks so formatting and Conventional Commits are enforced locally. See handbook/01 and handbook/11."
+    },
+    {
+      "title": "Scaffold the Tailwind plugin package",
+      "milestone": "v0.1.0 — Foundation",
+      "labels": ["area:plugin", "type:feat", "p0"],
+      "body": "Create packages/project-name with package.json (peerDep tailwindcss, three export entries), tsconfig.json + tsconfig.build.json. See handbook/02-plugin-package.md."
+    },
+    {
+      "title": "Author design tokens and @property registrations",
+      "milestone": "v0.1.0 — Foundation",
+      "labels": ["area:plugin", "type:feat", "p0"],
+      "body": "Author src/base/tokens.css (@theme) and src/base/properties.css. Include the shape scale (--rounded-field, etc.). See handbook/02 sections 3.1-3.2."
+    },
+    {
+      "title": "Build the CSS->data compile pipeline",
+      "milestone": "v0.1.0 — Foundation",
+      "labels": ["area:plugin", "type:feat", "p0"],
+      "body": "Implement functions/build.ts and pure extraction helpers that compile src/** into generated/*.ts, plus unit tests per helper. See handbook/02 section 4."
+    },
+    {
+      "title": "Generate the default theme via Material Color Utilities",
+      "milestone": "v0.1.0 — Foundation",
+      "labels": ["area:plugin", "type:feat", "p1"],
+      "body": "Add functions/generate-theme.ts producing role colors from a seed. Emit the default theme at :where(:root). Always ship default. See handbook/02 section 5."
+    },
+    {
+      "title": "Author component CSS for the initial set",
+      "milestone": "v0.2.0 — Plugin components + Svelte",
+      "labels": ["area:plugin", "type:feat", "p0"],
+      "body": "Button, card, input, checkbox, badge in src/components/*.css inside @layer components. See handbook/02 section 3.3."
+    },
+    {
+      "title": "Implement layered border-radius for buttons",
+      "milestone": "v0.2.0 — Plugin components + Svelte",
+      "labels": ["area:plugin", "type:feat", "p1"],
+      "body": "border-radius: var(--rounded-button, var(--rounded-field)); inline utilities (rounded-full) override both. Add an E2E test asserting the fallback chain and that inline utilities win. See handbook/00 section 5 and handbook/02 section 3.3."
+    },
+    {
+      "title": "Plugin options: prefix, include, exclude, themes, shape overrides",
+      "milestone": "v0.2.0 — Plugin components + Svelte",
+      "labels": ["area:plugin", "type:feat", "p1"],
+      "body": "Honor options in index.ts with validation (unknown theme/token throws). Tests for each. See handbook/02 section 6."
+    },
+    {
+      "title": "Svelte library: cn, Button, ripple action, styles.css",
+      "milestone": "v0.2.0 — Plugin components + Svelte",
+      "labels": ["area:svelte", "type:feat", "p0"],
+      "body": "Scaffold packages/svelte, implement cn (clsx + tailwind-merge), Button.svelte mapping props to plugin classes, ripple action, safelist styles.css, curated barrel. See handbook/03."
+    },
+    {
+      "title": "Shared prop->class contract fixture + Svelte contract test",
+      "milestone": "v0.2.0 — Plugin components + Svelte",
+      "labels": ["area:svelte", "type:test", "p1"],
+      "body": "Author one JSON fixture (variant/role -> expected classes) at repo root and a Svelte test asserting parity. React/Vue reuse it. See handbook/04 section 8."
+    },
+    {
+      "title": "React library at parity",
+      "milestone": "v0.3.0 — React parity",
+      "labels": ["area:react", "type:feat", "p0"],
+      "body": "Scaffold packages/react (tsup, \"use client\"), cn, Button.tsx, useRipple, safelist styles.css, barrel. Contract test green. See handbook/04."
+    },
+    {
+      "title": "Vue library at parity",
+      "milestone": "v0.4.0 — Vue parity",
+      "labels": ["area:vue", "type:feat", "p0"],
+      "body": "Scaffold packages/vue (Vite lib mode, vue-tsc), cn, Button.vue, ripple directive, optional app.use(), safelist styles.css, barrel. Contract test green. See handbook/05."
+    },
+    {
+      "title": "Docs site scaffold with source aliasing and plugin live-reload",
+      "milestone": "v0.5.0 — Docs & theme generator",
+      "labels": ["area:docs", "type:feat", "p0"],
+      "body": "SvelteKit app depending on workspace packages, vite aliases to source, pluginLiveReload plugin. See handbook/06 sections 1-4."
+    },
+    {
+      "title": "Per-component reference pages with live demos",
+      "milestone": "v0.5.0 — Docs & theme generator",
+      "labels": ["area:docs", "type:docs", "p1"],
+      "body": "Installation, usage, and [component] routes; Shiki code blocks with copy; light/dark toggle. See handbook/06 section 5."
+    },
+    {
+      "title": "Live theme generator producing copyable CSS",
+      "milestone": "v0.5.0 — Docs & theme generator",
+      "labels": ["area:docs", "type:feat", "p0"],
+      "body": "Generator page that turns a seed color into copyable theme CSS with a live preview, reusing the plugin's palette function. See handbook/06 section 6."
+    },
+    {
+      "title": "CI matrix: lint, typecheck, unit, e2e, build, publint",
+      "milestone": "v0.9.0 — Automation",
+      "labels": ["area:ci", "type:chore", "p0"],
+      "body": "ci.yml running on every PR across the workspace. See handbook/08 section 2."
+    },
+    {
+      "title": "Changesets release workflow to npm with provenance",
+      "milestone": "v0.9.0 — Automation",
+      "labels": ["area:ci", "type:chore", "p0"],
+      "body": "release.yml using changesets/action; version PR then publish; NPM_CONFIG_PROVENANCE. Lockstep versioning. See handbook/08 section 3 and handbook/11."
+    },
+    {
+      "title": "Docs deploy: Cloudflare Workers and GitHub Pages",
+      "milestone": "v0.9.0 — Automation",
+      "labels": ["area:ci", "type:chore", "p1"],
+      "body": "docs-cloudflare.yml and docs-pages.yml. Adapter chosen via DOCS_TARGET. See handbook/08 sections 4-5."
+    },
+    {
+      "title": "Repository artifacts: templates, CODEOWNERS, Dependabot, SECURITY",
+      "milestone": "v0.9.0 — Automation",
+      "labels": ["area:build", "type:chore", "p2"],
+      "body": "Issue forms, PR template, CODEOWNERS, dependabot.yml, SECURITY.md, CONTRIBUTING.md, FUNDING. See handbook/09."
+    },
+    {
+      "title": "AI agent scaffolding for Claude, Copilot, and Cursor",
+      "milestone": "v0.9.0 — Automation",
+      "labels": ["area:build", "type:chore", "p2"],
+      "body": "AGENTS.md, .github/copilot-instructions.md, .cursor/rules, CLAUDE.md, and shared skills (add-component, verify-plugin). See handbook/10."
+    },
+    {
+      "title": "Accessibility audit for 1.0",
+      "milestone": "v1.0.0 — Stabilization",
+      "labels": ["area:a11y", "type:chore", "p0"],
+      "body": "Keyboard navigation, ARIA roles/states, focus visibility, and color contrast across all components. See handbook/07 M7."
+    },
+    {
+      "title": "API review and freeze; migration notes",
+      "milestone": "v1.0.0 — Stabilization",
+      "labels": ["area:build", "type:docs", "p1"],
+      "body": "Review the public API of all four packages, document it, and write migration notes for any pre-1.0 breaking changes."
+    }
+  ]
+}

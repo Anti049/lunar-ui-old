@@ -8,6 +8,13 @@
 /* Components, foundations, themes and tokens all arrive through the plugin. */
 @plugin '@anti049/lunar-ui';
 
+@plugin '@anti049/lunar-ui/theme' {
+	name: brand;
+	seed-primary: #52e2ac;
+	seed-success: #89b4fa;
+	seed-info: #f5e0dc;
+}
+
 /* Docs-only styling for the component preview widget. */
 @import './lib/styles/component-preview.css';
 

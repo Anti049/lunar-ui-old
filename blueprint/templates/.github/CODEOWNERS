@@ -1,0 +1,9 @@
+# Review routes by package. Replace with real handles or teams.
+*                        @acme/maintainers
+/packages/core/          @acme/design-system
+/packages/svelte/        @acme/svelte
+/packages/react/         @acme/react
+/packages/vue/           @acme/vue
+/packages/docs/          @acme/docs
+/.github/                @acme/maintainers
+/blueprint/              @acme/maintainers

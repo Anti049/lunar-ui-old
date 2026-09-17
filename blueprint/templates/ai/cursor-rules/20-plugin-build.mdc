@@ -1,0 +1,21 @@
+---
+description: The plugin build and its traps
+globs: ['packages/core/functions/**/*.ts']
+alwaysApply: false
+---
+
+These fail silently. Check against the real toolchain before assuming.
+
+- `@reference` suppresses `@utility` emission entirely.
+- The compile must use `source(none)`, or a class name in a comment becomes a
+  real utility in the shipped bundle.
+- `addBase({'@utility …'})` and `addBase({'@theme': …})` emit verbatim and are
+  never processed.
+- A class written by JavaScript at runtime is never emitted through
+  `addUtilities`. Route it through `addBase`.
+- `matchUtilities` has no bare-value support; supply `values` explicitly.
+- postcss-js camelCases properties and represents duplicates as arrays, which
+  skip Tailwind's conversion back. Emit kebab-case, and preserve vendor prefixes
+  (`-webkit-`, not `webkit-`).
+
+Each build script cleans only what it produces. `dist/` belongs to `tsc`.

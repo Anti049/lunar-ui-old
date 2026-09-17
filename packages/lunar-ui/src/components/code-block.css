@@ -1,7 +1,7 @@
 /* Code Block component styles */
 
 @utility code-block {
-	@layer code-block.l3 {
+	@layer code-block.l1.l2.l3 {
 		@apply flex h-fit min-h-fit w-full min-w-0 items-start justify-start rounded-sm surface-container-lowest text-left;
 
 		& pre,

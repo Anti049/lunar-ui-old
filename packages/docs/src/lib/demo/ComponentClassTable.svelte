@@ -14,6 +14,7 @@
 	} from '@lucide/svelte';
 	import { capitalCase } from 'change-case';
 	import { getComponentDoc, type ComponentClass, type ComponentClassType } from '$lib/docs';
+	import prefix from '$lib/stores/prefix.svelte';
 
 	// Types
 	interface ComponentDocProps {
@@ -72,7 +73,7 @@
 
 	// Variables
 	let doc = $derived(getComponentDoc(name));
-	let prefix = $state('');
+	let prefixValue = $state(prefix.value);
 	let sortedClasses = $derived(sortClasses(doc?.classes ?? []));
 
 	// Functions
@@ -94,6 +95,9 @@
 			return 0;
 		});
 	}
+	$effect(() => {
+		prefix.value = prefixValue;
+	});
 </script>
 
 {#if doc}
@@ -109,12 +113,12 @@
 						<!-- TODO: Replace with proper input later -->
 						<div
 							class={cn(
-								'tooltip tooltip-bottom w-fit! tooltip-start tooltip-info',
-								prefix.length > 0 && 'tooltip-open'
+								'tooltip tooltip-bottom w-fit! tooltip-start tooltip-info tooltip-tail-size-4',
+								prefixValue.length > 0 && 'tooltip-open'
 							)}
 						>
-							{#if prefix.length > 0}
-								<div class="w-fit max-w-1000 tooltip-content">
+							{#if prefixValue.length > 0}
+								<div class="tooltip-content w-fit max-w-1000">
 									<div class="flex flex-row items-center gap-2">
 										<Info class="h-4 w-4 text-on-info" />
 										<span class="pointer-events-auto text-caption-large text-nowrap"
@@ -130,7 +134,7 @@
 								type="text"
 								placeholder="prefix-"
 								class="w-32 rounded-sm surface px-2 py-1 text-caption-large"
-								bind:value={prefix}
+								bind:value={prefixValue}
 							/>
 						</div>
 						Class
@@ -140,11 +144,17 @@
 				</tr>
 			</thead>
 			<tbody>
+				{#if prefixValue.length > 0}
+					<!-- Empty row so that prefix tooltip doesn't overlap top row of class table -->
+					<tr class="h-12">
+						<td colspan="3"></td>
+					</tr>
+				{/if}
 				{#each sortedClasses as { className, type, description } (className)}
 					{@const Icon = typeDescriptors[type].icon}
 					<tr>
 						<td>
-							<code>{prefix}{className}</code>
+							<code>{prefix.value}{className}</code>
 						</td>
 						<td>
 							<div

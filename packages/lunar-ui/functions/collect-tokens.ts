@@ -62,7 +62,11 @@ export function collectDeclarations(coreSrc: string): CollectedDeclaration[] {
 
 			root.walkRules((rule) => {
 				// @theme blocks are handled above; skip their inner decls.
-				for (let p: postcss.Container | undefined = rule.parent as postcss.Container | undefined; p && p.type !== 'root'; p = p.parent as postcss.Container | undefined) {
+				for (
+					let p: postcss.Container | undefined = rule.parent as postcss.Container | undefined;
+					p && p.type !== 'root';
+					p = p.parent as postcss.Container | undefined
+				) {
 					if (p.type === 'atrule' && (p as postcss.AtRule).name === 'theme') return;
 				}
 				rule.each((node) => {
@@ -134,7 +138,8 @@ const MODIFIERS: Record<string, string> = {
 	'--font-weight': 'fontWeight'
 };
 
-const namespaceOf = (prop: string): string | null => PREFIXES.find((p) => prop.startsWith(p)) ?? null;
+const namespaceOf = (prop: string): string | null =>
+	PREFIXES.find((p) => prop.startsWith(p)) ?? null;
 
 /**
  * Turns `@theme` declarations into a plugin `theme.extend` object.

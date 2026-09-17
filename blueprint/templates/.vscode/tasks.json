@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "check",
+			"type": "shell",
+			"command": "bun run check",
+			"problemMatcher": ["$tsc"],
+			"group": { "kind": "test", "isDefault": true },
+			"presentation": { "reveal": "always", "panel": "dedicated" }
+		},
+		{
+			"label": "build plugin",
+			"type": "shell",
+			"command": "bun run --filter '@scope/project-name' build",
+			"problemMatcher": ["$tsc"],
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "bun run lint",
+			"problemMatcher": ["$eslint-stylish"]
+		},
+		{
+			"label": "dev",
+			"type": "shell",
+			"command": "bun run dev",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": { "reveal": "always", "panel": "dedicated" }
+		},
+		{
+			"label": "changeset",
+			"type": "shell",
+			"command": "bun changeset",
+			"problemMatcher": [],
+			"presentation": { "reveal": "always", "panel": "dedicated" }
+		}
+	]
+}

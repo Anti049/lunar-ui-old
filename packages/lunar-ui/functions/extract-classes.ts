@@ -42,10 +42,10 @@ export function extractClasses(css: string, namespace: string | null): string[] 
 
 	root.walkAtRules('utility', (rule) => {
 		const name = rule.params.trim();
-		if (name.includes('*')) {
-			console.warn(`  ! skipping functional utility: @utility ${name}`);
-			return;
-		}
+		// Functional utilities have no finite set of names to safelist, so they
+		// are not candidates. extract-functional.ts reads them separately and the
+		// plugin re-registers them through matchUtilities.
+		if (name.includes('*')) return;
 		classes.add(name);
 	});
 

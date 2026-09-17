@@ -29,6 +29,11 @@ Run the package's own check, not just a build:
 bun run --filter '@anti049/lunar-ui' check
 ```
 
+There are two layers. `test/unit/*.test.ts` covers the pure build functions —
+`partition`, `addPrefix`, `nestCssLayers`, the extractors — so a broken one is
+named directly rather than surfacing as a downstream symptom. Add a case there
+whenever you change how a rule is attributed, prefixed or nested.
+
 `test/e2e.test.ts` compiles every component twice — once from the raw CSS, once
 through the compiled plugin — and compares selector by selector. A green run
 means the plugin still faithfully represents the CSS. It reports benign
@@ -59,7 +64,8 @@ caches by name and version and will otherwise reinstall stale content.
 
 ## Known-broken, leave alone
 
-`bun run lint` fails on essentially every file: the repo is CRLF and Prettier
-defaults to `endOfLine: "lf"`. It is pre-existing and unrelated to whatever you
-are working on. Do not "fix" it as a side effect — reformatting the repo buries
-the real diff. If it should be fixed, that is a commit of its own.
+`bun run lint` passes on formatting. `prettier-plugin-tailwindcss` loads
+`prettier-tailwind.css` at the repo root to resolve lunar-ui's classes; keep it
+in step with any plugin option that changes class names. ESLint runs after
+Prettier and reports real findings — treat a lint failure as an ESLint result,
+not a formatting one, and do not reformat the repo to "fix" it.

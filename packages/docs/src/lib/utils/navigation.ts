@@ -94,18 +94,37 @@ type NavigationRoute = {
 
 const plannedHref = (path: string): ResolvedPathname => path as ResolvedPathname;
 
-const componentStyles = import.meta.glob<string>('/src/lib/styles/components/*.css', {
+/*
+	The component stylesheets, read from the plugin's source rather than from the
+	docs app. `packages/lunar-ui/src/components/` is where they live now; the
+	docs package no longer carries a copy.
+
+	Most of that directory is still empty placeholders for planned components --
+	a file with nothing but a header comment. `functions/build.ts` skips those
+	when it decides which bundles to ship, so stripping comments and asking
+	whether anything is left is the same question the build asks, and gives the
+	same 16 components.
+*/
+const componentStyles = import.meta.glob<string>('../../../../lunar-ui/src/components/*.css', {
 	eager: true,
 	query: '?raw',
 	import: 'default'
 });
 
+/* Keyed by component slug, so the lookup does not depend on how Vite spells
+   the glob's keys (relative here, root-absolute before). */
+const implemented = new Set(
+	Object.entries(componentStyles)
+		.filter(([, css]) => css.replace(/\/\*[\s\S]*?\*\//g, '').trim().length > 0)
+		.map(([file]) => file.replace(/^.*\/(.+)\.css$/, '$1'))
+);
+
 function isDisabled(route: NavigationRoute): boolean {
-	// Check if a CSS file exists for the component, if not, mark it as disabled
-	const cssFilePath = `/src/lib/styles/components/${route.href.replace('/components/', '')}.css`;
-	const cssContent = componentStyles[cssFilePath];
-	const meaningfulCss = cssContent?.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-	return !meaningfulCss || route.disabled === true;
+	if (route.disabled === true) return true;
+	// Last segment, not a replace() of '/components/', so a non-empty `base`
+	// path would not silently mangle the slug.
+	const slug = route.href.split('/').pop() ?? '';
+	return !implemented.has(slug);
 }
 
 const componentLinks: NavigationRoute[] = [

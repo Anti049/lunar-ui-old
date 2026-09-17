@@ -4,7 +4,7 @@
 	let collapsed = $state(false);
 </script>
 
-<div class="flex flex-col w-full h-full gap-8">
+<div class="flex h-full w-full flex-col gap-8">
 	<div id="section" class="component-preview">
 		<div class="component-preview-header">
 			<a href="#section" class="component-preview-anchor">
@@ -62,14 +62,14 @@
 			<p>Collapsible Section</p>
 		</div>
 		<div class="component-preview-body">
-			<div class="section section-collapsible">
+			<div class="section-collapsible section">
 				<div class="section-header">
 					<div class="section-title-container">
 						<p class="section-title">Section Title</p>
 						<p class="section-subtitle">Section Subtitle</p>
 					</div>
 					<button
-						class="button button-text button-square button-md swap"
+						class="button swap button-square button-md button-text"
 						onclick={() => (collapsed = !collapsed)}
 					>
 						<input type="checkbox" bind:checked={collapsed} />

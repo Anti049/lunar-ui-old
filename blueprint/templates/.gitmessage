@@ -1,0 +1,25 @@
+# <type>(<scope>): <subject>
+#   ≤72 chars · imperative mood · no trailing period
+#
+# <body>
+#   What changed and why. Not how — the diff shows how.
+#
+# BREAKING CHANGE: <what changed, and what to change it to>
+# Refs: #<issue>
+#
+# ── types ────────────────────────────────────────────────────────────────
+#   feat      new capability                            minor
+#   fix       bug fix                                   patch
+#   perf      faster, same behaviour                    patch
+#   refactor  no behaviour change                       —
+#   docs      documentation only                        —
+#   test      tests only                                —
+#   build     build system, dependencies                —
+#   ci        workflows                                 —
+#   chore     everything else                           —
+#   revert    reverts a previous commit                 matches
+#
+# ── scopes ───────────────────────────────────────────────────────────────
+#   core svelte react vue docs repo deps
+#
+# Add `!` before the colon for a breaking change: feat(core)!: …

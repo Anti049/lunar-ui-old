@@ -21,20 +21,10 @@
  *   Custom variant `selected` targets `.selected` on the button:
  *     <button class="button button-filled selected:bg-primary-container">
  *
- * Layer priority (declared in core/layers.css, LOW → HIGH):
- *   l3 — foundation (base .button, always-on)
- *   l2 — axes (variants, colors, sizes, shapes, icon slots)
- *   l1 — state (disabled, selected — override everything else)
- *
- * ⚠️  Colors are read from Tailwind's --color-* semantic tokens (--color-primary,
- *     --color-on-primary, etc.), NOT --theme-color-* internal tokens. This means
- *     the button correctly picks up scoped [data-theme] values IF AND ONLY IF
- *     semantics.css's `:root, [data-theme]` propagation block is present. Those
- *     --color-* tokens come from @theme inline (which inlines them into
- *     utilities but emits the vars only at :root, computed once), so without the
- *     propagation block re-declaring them per scope, buttons inside a scoped
- *     <ThemeScope> render the root theme's colors.
- * ========================================================================== */
+ * Layer priority (deeper nests weaker, LOW → HIGH):
+ *   l1.l2.l3 foundation (base .button, always-on)
+ *   l1.l2    axes (variants, colors, sizes, shapes, icon slots)
+ *   l1       state (disabled, selected — override everything else)
 
 /* =============================================================================
  * CUSTOM VARIANTS
@@ -55,8 +45,28 @@
  * ========================================================================== */
 
 @utility button {
-	@layer button.l3 {
-		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit origin-center items-center justify-center gap-2 rounded-sm text-center align-middle focusable outline-(--button-outline-color)! transition-[background-color,color,border-color,box-shadow,scale] select-none;
+	@layer button.l1.l2.l3 {
+		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit origin-center items-center justify-center gap-2 text-center align-middle focusable outline-(--button-outline-color)! transition-[background-color,color,border-color,box-shadow,scale] select-none;
+
+		/*
+			Corner radius, lowest priority first:
+
+			  --radius-field    the shared default for field-shaped controls
+			  --radius-button   a theme's button-specific override, if it sets one
+			  rounded-*         a utility on the element itself
+
+			The fallback is written here rather than given to `--radius-button` as
+			a `:root` default on purpose. A custom property's `var()` resolves
+			where the property is declared, so `--radius-button: var(--radius-field)`
+			at `:root` would freeze the root's `--radius-field` and a theme's
+			override would never reach a button. Resolved here, it reads whichever
+			`--radius-field` is in scope.
+
+			A utility still wins: `.rounded-full` lands unlayered inside
+			`@layer utilities`, and unlayered content outranks that layer's
+			sublayers, which is where this rule sits.
+		*/
+		border-radius: var(--radius-button, var(--radius-field));
 		/* Default size is medium */
 		@apply button-md;
 		/* Default variant is filled */
@@ -134,7 +144,7 @@
  * Adds elevation-1 when enabled, drops to elevation-0 when selected.
  */
 @utility button-elevated {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply bg-surface-container enabled:elevation-1;
 		color: var(--button-color, var(--color-primary));
 
@@ -151,7 +161,7 @@
  * The Material 3 default; what most people mean by "a button."
  */
 @utility button-filled {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		background-color: var(--button-color, var(--color-primary));
 		color: var(--button-on-color, var(--color-on-primary));
 
@@ -176,7 +186,7 @@
  * Lower visual weight than filled, higher than text/outlined.
  */
 @utility button-tonal {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		background-color: var(--button-container, var(--color-primary-container));
 		color: var(--button-on-container, var(--color-on-primary-container));
 
@@ -192,7 +202,7 @@
  * Border uses a color-mix to soften; on selected, fills with the color.
  */
 @utility button-outlined {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply bg-transparent;
 		color: var(--button-color, var(--color-on-surface));
 		border: 2px solid
@@ -211,7 +221,7 @@
  * Lowest visual weight; use for tertiary actions inline with text.
  */
 @utility button-text {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply bg-transparent;
 		color: var(--button-color, var(--color-on-surface));
 
@@ -239,7 +249,7 @@
  * ========================================================================== */
 
 @utility button-surface {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-inverse-surface);
 		--button-on-color: var(--color-on-inverse-surface);
 		--button-container: var(--color-surface-container);
@@ -248,7 +258,7 @@
 	}
 }
 @utility button-primary {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-primary);
 		--button-on-color: var(--color-on-primary);
 		--button-container: var(--color-primary-container);
@@ -257,7 +267,7 @@
 	}
 }
 @utility button-secondary {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-secondary);
 		--button-on-color: var(--color-on-secondary);
 		--button-container: var(--color-secondary-container);
@@ -266,7 +276,7 @@
 	}
 }
 @utility button-tertiary {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-tertiary);
 		--button-on-color: var(--color-on-tertiary);
 		--button-container: var(--color-tertiary-container);
@@ -275,7 +285,7 @@
 	}
 }
 @utility button-error {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-error);
 		--button-on-color: var(--color-on-error);
 		--button-container: var(--color-error-container);
@@ -284,7 +294,7 @@
 	}
 }
 @utility button-success {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-success);
 		--button-on-color: var(--color-on-success);
 		--button-container: var(--color-success-container);
@@ -293,7 +303,7 @@
 	}
 }
 @utility button-warning {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-warning);
 		--button-on-color: var(--color-on-warning);
 		--button-container: var(--color-warning-container);
@@ -302,7 +312,7 @@
 	}
 }
 @utility button-info {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-info);
 		--button-on-color: var(--color-on-info);
 		--button-container: var(--color-info-container);
@@ -311,7 +321,7 @@
 	}
 }
 @utility button-alert {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		--button-color: var(--color-alert);
 		--button-on-color: var(--color-on-alert);
 		--button-container: var(--color-alert-container);
@@ -326,7 +336,7 @@
  * ========================================================================== */
 
 @utility button-xs {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply gap-1 px-2 py-1 text-caption-medium;
 		& svg {
 			@apply size-4;
@@ -334,7 +344,7 @@
 	}
 }
 @utility button-sm {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply gap-1.5 px-2.5 py-1.5 text-label-small;
 		& svg {
 			@apply size-5;
@@ -342,7 +352,7 @@
 	}
 }
 @utility button-md {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply gap-1.5 px-3 py-1.5 text-label-medium;
 		& svg {
 			@apply size-6;
@@ -350,7 +360,7 @@
 	}
 }
 @utility button-lg {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply gap-2 px-5 py-3 text-label-large;
 		& svg {
 			@apply size-8;
@@ -358,7 +368,7 @@
 	}
 }
 @utility button-xl {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply gap-3 px-6 py-4 text-label-large;
 		& svg {
 			@apply size-8;
@@ -372,12 +382,12 @@
  * ========================================================================== */
 
 @utility button-square {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply aspect-square;
 	}
 }
 @utility button-circle {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		@apply aspect-square rounded-full;
 	}
 }
@@ -399,7 +409,7 @@
  *     Keep in sync with SIZES utilities if you tune the base padding.
  * ========================================================================== */
 @utility button {
-	@layer button.l2 {
+	@layer button.l1.l2 {
 		/* Leading icon: pad the start so the glyph is not flush to the edge. */
 		&:has(> svg:first-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
 				.button-circle

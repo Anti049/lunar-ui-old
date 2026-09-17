@@ -1,0 +1,57 @@
+[
+	{
+		"title": "v0.1.0 — Repository foundation",
+		"description": "Monorepo skeleton, shared tooling, CI that can fail. Nothing is published yet.",
+		"state": "open"
+	},
+	{
+		"title": "v0.2.0 — Plugin core",
+		"description": "CSS compiles to a working Tailwind plugin with prefix, include/exclude and the differential test harness proving the two paths agree.",
+		"state": "open"
+	},
+	{
+		"title": "v0.3.0 — First component set",
+		"description": "Button, badge, input, checkbox, select, tooltip. Enough surface to prove the authoring conventions hold.",
+		"state": "open"
+	},
+	{
+		"title": "v0.4.0 — Svelte bindings",
+		"description": "First framework package, published alongside the plugin. Establishes the binding contract the other two follow.",
+		"state": "open"
+	},
+	{
+		"title": "v0.5.0 — React bindings",
+		"description": "React package with ESM and CJS output, matching Svelte's component inventory exactly.",
+		"state": "open"
+	},
+	{
+		"title": "v0.6.0 — Vue bindings",
+		"description": "Vue package completing the three-framework set, with an export-parity test across all three.",
+		"state": "open"
+	},
+	{
+		"title": "v0.7.0 — Documentation site",
+		"description": "Public site with per-component pages, live previews for all three frameworks, and install instructions.",
+		"state": "open"
+	},
+	{
+		"title": "v0.8.0 — Theming",
+		"description": "Custom themes from a seed colour, per-role seeds, shape tokens, and a theme generator in the docs.",
+		"state": "open"
+	},
+	{
+		"title": "v0.9.0 — Accessibility and hardening",
+		"description": "Keyboard and screen-reader audit, contrast enforcement, visual regression coverage, migration guides.",
+		"state": "open"
+	},
+	{
+		"title": "v1.0.0 — Stable API",
+		"description": "Plugin option surface and class names frozen. Semantic versioning applies in earnest from here.",
+		"state": "open"
+	},
+	{
+		"title": "Backlog",
+		"description": "Accepted but unscheduled. Pull into a version milestone when it becomes next.",
+		"state": "open"
+	}
+]

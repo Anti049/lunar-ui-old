@@ -1,0 +1,95 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			// SERVER: launches Vite under the Node debugger. Breakpoints bind in
+			// +page.server.ts, hooks.server.ts, vite.config.ts, and in a component's
+			// <script> during the SSR pass.
+			"type": "node",
+			"request": "launch",
+			"name": "Debug: docs (server)",
+			"cwd": "${workspaceFolder}/packages/docs",
+			"runtimeExecutable": "bun",
+			"runtimeArgs": ["--bun", "run", "dev", "--", "--port", "5173"],
+			"console": "integratedTerminal",
+			"skipFiles": ["<node_internals>/**", "**/node_modules/vite/**"],
+			// Opens Chrome once Vite prints its URL, so the compound does not race
+			// the server's startup.
+			"serverReadyAction": {
+				"pattern": "Local:\\s+(https?://\\S+)",
+				"uriFormat": "%s",
+				"action": "debugWithChrome"
+			}
+		},
+		{
+			// CLIENT: everything after hydration — onMount, event handlers, $effect.
+			"type": "chrome",
+			"request": "launch",
+			"name": "Debug: docs (client)",
+			"url": "http://localhost:5173",
+			"webRoot": "${workspaceFolder}/packages/docs",
+			"sourceMapPathOverrides": {
+				// Vite serves files outside the project root through /@fs/, which a
+				// monorepo does constantly. Without this, breakpoints in workspace
+				// packages never bind.
+				"/@fs/*": "/*",
+				"webpack://_N_E/*": "${webRoot}/*"
+			},
+			"skipFiles": ["**/node_modules/**", "**/.svelte-kit/**"]
+		},
+		{
+			// The plugin build. Where most of the interesting bugs are — put a
+			// breakpoint in partition.ts and inspect what a rule's @layer marker
+			// actually says.
+			"type": "node",
+			"request": "launch",
+			"name": "Debug: plugin build",
+			"cwd": "${workspaceFolder}/packages/core",
+			"runtimeExecutable": "bun",
+			"runtimeArgs": ["functions/build.ts"],
+			"console": "integratedTerminal",
+			"env": {
+				// Keeps the intermediate compiles in .tmp/ so you can read exactly
+				// what Tailwind produced.
+				"KEEP_TMP": "1"
+			}
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug: unit tests",
+			"cwd": "${workspaceFolder}/packages/core",
+			"runtimeExecutable": "bun",
+			"runtimeArgs": ["test", "test/unit"],
+			"console": "integratedTerminal"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug: current test file",
+			"cwd": "${workspaceFolder}/packages/core",
+			"runtimeExecutable": "bun",
+			"runtimeArgs": ["test", "${relativeFile}"],
+			"console": "integratedTerminal"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug: differential harness",
+			"cwd": "${workspaceFolder}/packages/core",
+			"runtimeExecutable": "bun",
+			"runtimeArgs": ["test/e2e.test.ts"],
+			"console": "integratedTerminal",
+			"env": { "KEEP_TMP": "1" }
+		}
+	],
+	"compounds": [
+		{
+			"name": "Debug: docs (full stack)",
+			"configurations": ["Debug: docs (server)", "Debug: docs (client)"],
+			// Without this you leave orphaned Vite processes holding the port, and
+			// the next launch fails with EADDRINUSE.
+			"stopAll": true
+		}
+	]
+}

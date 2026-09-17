@@ -1,0 +1,44 @@
+{
+  "milestones": [
+    {
+      "title": "v0.1.0 — Foundation",
+      "state": "open",
+      "description": "Monorepo foundation and the plugin's core token layer. Bun workspace, shared TS/ESLint/Prettier, Husky + commitlint, plugin skeleton, design tokens, @property registrations, the default theme, and the CSS->data test harness."
+    },
+    {
+      "title": "v0.2.0 — Plugin components + Svelte",
+      "state": "open",
+      "description": "Component CSS for the initial set with the layered border-radius model (E2E tested). Svelte library: cn, Button, ripple action, styles.css, barrel export. Shared prop->class contract fixture."
+    },
+    {
+      "title": "v0.3.0 — React parity",
+      "state": "open",
+      "description": "React 19 library mirroring the Svelte API 1:1. tsup build, \"use client\", useRipple hook. Contract test green for React."
+    },
+    {
+      "title": "v0.4.0 — Vue parity",
+      "state": "open",
+      "description": "Vue 3 library via Vite library mode + vue-tsc. Ripple directive, optional app.use() install. Contract test green for Vue."
+    },
+    {
+      "title": "v0.5.0 — Docs & theme generator",
+      "state": "open",
+      "description": "Full docs IA (installation, usage, per-component reference with live demos), Shiki code blocks with copy, light/dark toggle, live theme generator producing copyable CSS, and plugin live-reload in dev."
+    },
+    {
+      "title": "v0.9.0 — Automation",
+      "state": "open",
+      "description": "CI matrix on every PR, Changesets release to npm with provenance, docs deploy to Cloudflare Workers and/or GitHub Pages, Dependabot, issue/PR templates, CODEOWNERS, SECURITY, CONTRIBUTING."
+    },
+    {
+      "title": "v1.0.0 — Stabilization",
+      "state": "open",
+      "description": "Accessibility audit, API review and freeze, migration notes, docs polish, and getting-started tutorial. First stable release."
+    },
+    {
+      "title": "v1.1.0+ — Post-1.0 expansion",
+      "state": "open",
+      "description": "Additional components (menu, dialog, tabs, tooltip, data table), additional themes, and optional framework targets (Solid, Angular) using the same contract."
+    }
+  ]
+}

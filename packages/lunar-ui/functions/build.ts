@@ -11,13 +11,15 @@ import {
 } from './extract-classes.js';
 import { partition } from './partition.js';
 import { extractCustomVariants } from './extract-variants.js';
+import { extractFunctional } from './extract-functional.js';
+import { buildSwatches, modeMapping } from './extract-swatches.js';
 import {
 	collectDeclarations,
 	resolveClosure,
 	buildThemeExtend,
 	inlineThemeFallbacks
 } from './collect-tokens.js';
-import type { Bundle, Registry, StyleObject } from '../types.js';
+import type { Bundle, FunctionalUtility, Registry, StyleObject } from '../types.js';
 
 /*
 	Compiles lunar-ui's CSS into the data the plugin ships.
@@ -32,7 +34,6 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const pkgRoot = path.resolve(here, '..');
 const coreSrc = path.join(pkgRoot, 'src');
 const generatedDir = path.join(pkgRoot, 'generated');
-const distDir = path.join(pkgRoot, 'dist');
 const tmpDir = path.join(pkgRoot, '.tmp');
 
 /*
@@ -92,6 +93,29 @@ const SHAPE_TOKENS: Record<string, string> = {
 	'--animation-easing': 'var(--ease-standard)'
 };
 
+/*
+	Shape tokens that are settable but deliberately get no `:root` default.
+
+	`--radius-button` means "the radius buttons use", and falls back to
+	`--radius-field` when nothing sets it. That fallback is written at the point of
+	use in button.css rather than declared here, because a custom property's
+	`var()` is substituted where the property is *declared*. Emitting
+	`--radius-button: var(--radius-field)` at `:root` would bake in the root's
+	`--radius-field`, and a theme overriding `--radius-field` would never reach
+	buttons. Left undeclared, `var(--radius-button, var(--radius-field))` resolves
+	at the button instead, so a theme's value does reach it.
+
+	They still belong in the settable list, so `@plugin { --radius-button: ... }`
+	validates rather than being rejected as a typo.
+*/
+const DERIVED_SHAPE_TOKENS: Record<string, string> = {
+	// token -> the token it falls back to, for documentation
+	'--radius-button': '--radius-field'
+};
+
+/** Every shape token a consumer may set, declared or not. */
+const SETTABLE_SHAPE_TOKENS = [...Object.keys(SHAPE_TOKENS), ...Object.keys(DERIVED_SHAPE_TOKENS)];
+
 const cliEntry = path.join(
 	path.dirname(require.resolve('@tailwindcss/cli/package.json')),
 	'dist/index.mjs'
@@ -107,9 +131,10 @@ function runTailwind(input: string, label: string): string {
 		execFileSync(process.execPath, [cliEntry, '-i', inFile, '-o', outFile], { stdio: 'pipe' });
 	} catch (error) {
 		const detail = ((error as { stderr?: Buffer }).stderr?.toString() ?? '')
+			// eslint-disable-next-line no-control-regex
 			.replace(/\x1b\[[0-9;]*m/g, '')
 			.trim();
-		throw new Error(`tailwind failed on ${label}:\n${detail}`);
+		throw new Error(`tailwind failed on ${label}:\n${detail}`, { cause: error });
 	}
 	return fs.readFileSync(outFile, 'utf8');
 }
@@ -145,7 +170,9 @@ function themeVariables(): Set<string> {
 	// Component files may still define @theme values; those are context too.
 	for (const entry of fs.readdirSync(componentsDir)) {
 		if (!entry.endsWith('.css')) continue;
-		for (const n of extractThemeVariables(fs.readFileSync(path.join(componentsDir, entry), 'utf8'))) {
+		for (const n of extractThemeVariables(
+			fs.readFileSync(path.join(componentsDir, entry), 'utf8')
+		)) {
 			owned.add(n);
 		}
 	}
@@ -212,8 +239,16 @@ function emitBundle(name: string, bundle: Bundle): void {
 	);
 }
 
+/*
+	Only `generated/` is ours to clear. `dist/` is tsc's output, and deleting it
+	here meant any run of this script without the tsc half behind it -- a bare
+	`bun functions/build.ts`, or `bun run dev` by way of watch.ts -- left the
+	package with no resolvable entry point. That broke the e2e compile and, less
+	obviously, Prettier: prettier-plugin-tailwindcss loads a stylesheet that
+	`@plugin`s this package. The `build` script clears dist immediately before
+	tsc instead.
+*/
 fs.rmSync(generatedDir, { recursive: true, force: true });
-fs.rmSync(distDir, { recursive: true, force: true });
 fs.mkdirSync(generatedDir, { recursive: true });
 fs.mkdirSync(tmpDir, { recursive: true });
 
@@ -249,6 +284,30 @@ const foundationClasses = [
 ].sort();
 classesByBundle[FOUNDATIONS] = foundationClasses;
 
+/*
+	Functional utilities (`@utility tooltip-gap-*`). They cannot be safelisted --
+	there is no finite set of names -- so they never survive the compile the way
+	everything else does. They are read from source instead and re-registered at
+	runtime through matchUtilities. See extract-functional.ts.
+*/
+const FUNCTIONAL: FunctionalUtility[] = [
+	...componentFiles.flatMap((file) =>
+		extractFunctional(
+			fs.readFileSync(path.join(componentsDir, file), 'utf8'),
+			file.replace(/\.css$/, '')
+		)
+	),
+	...fs
+		.readdirSync(foundationsDir)
+		.filter((f) => f.endsWith('.css') && f !== '_index.css')
+		.flatMap((f) =>
+			extractFunctional(fs.readFileSync(path.join(foundationsDir, f), 'utf8'), FOUNDATIONS)
+		)
+];
+console.log(
+	`  ${FUNCTIONAL.length} functional utilities: ${FUNCTIONAL.map((u) => u.name + '-*').join(', ') || '(none)'}`
+);
+
 const BUNDLES = [FOUNDATIONS, ...COMPONENTS];
 /*
 	Class-name attribution, used when a rule carries no usable @layer marker.
@@ -276,7 +335,9 @@ if (collisions.length) {
 			collisions.slice(0, 5).join(', ')
 	);
 }
-const allClasses = [...new Set([...Object.values(classesByBundle).flat(), ...RUNTIME_CLASSES])].sort();
+const allClasses = [
+	...new Set([...Object.values(classesByBundle).flat(), ...RUNTIME_CLASSES])
+].sort();
 
 /*
 	Some lunar-ui class names collide with Tailwind built-ins: `collapse`,
@@ -319,7 +380,11 @@ const compiled = runTailwind(input, 'library');
 if (compiled.includes('@apply')) throw new Error('output still contains @apply');
 console.log(`${compiled.split('\n').length} lines`);
 
-const { components: buckets, properties, unattributed } = partition(compiled, COMPONENTS, classOwners);
+const {
+	components: buckets,
+	properties,
+	unattributed
+} = partition(compiled, COMPONENTS, classOwners);
 
 /*
 	A component-local variable is one the component *declares*, not merely one it
@@ -380,7 +445,12 @@ if (undeclared.length) {
 
 const registry: Registry = {
 	// JS-coupled names keep their identity so the ripple action keeps working.
-	classes: allClasses.filter((c) => !JS_COUPLED.has(c)),
+	// Functional stems are added here but deliberately not to allClasses: they
+	// are not candidates to safelist, they are names a prefix has to rename.
+	classes: [
+		...allClasses.filter((c) => !JS_COUPLED.has(c)),
+		...FUNCTIONAL.map((u) => u.name)
+	].sort(),
 	variables: [...localVariables].sort()
 };
 
@@ -496,7 +566,7 @@ console.log(
 	`${needed.size} in closure -> ${themeEntryCount} theme entries across ` +
 		`${Object.keys(themeExtend).length} namespaces (${Object.keys(themeExtend).join(', ')}), ` +
 		`${baseDeclCount} base declarations across ${Object.keys(baseRules).length} selectors, ` +
-		`${Object.keys(themeRules).length} themes (${Object.keys(themeRules).join(", ")})`
+		`${Object.keys(themeRules).length} themes (${Object.keys(themeRules).join(', ')})`
 );
 
 writeGenerated('registry.ts', registry, 'Registry', 'Registry');
@@ -504,8 +574,26 @@ writeGenerated('variants.ts', CUSTOM_VARIANTS, 'Record<string, string | string[]
 writeGenerated('properties.ts', properties satisfies StyleObject, 'StyleObject', 'StyleObject');
 writeGenerated('theme.ts', themeExtend, 'ThemeExtend', 'ThemeExtend');
 writeGenerated('base.ts', resolvedBaseRules, 'Record<string, Record<string, string>>');
-writeGenerated('shape.ts', Object.keys(SHAPE_TOKENS), 'string[]');
+writeGenerated('shape.ts', SETTABLE_SHAPE_TOKENS, 'string[]');
+writeGenerated('functional.ts', FUNCTIONAL, 'FunctionalUtility[]', 'FunctionalUtility');
 writeGenerated('themes.ts', resolvedThemeRules, 'ThemeRules', 'ThemeRules');
+
+/*
+	The catalogue the package ships for JavaScript: every `data-theme` value and
+	a few representative colours per theme, both modes. Derived from the themes
+	just emitted and from modes.css's light-dark() pairings, so a new theme or a
+	re-pointed role shows up here without anyone maintaining a list.
+*/
+const swatchModeMap = modeMapping(fs.readFileSync(path.join(coreSrc, 'base/modes.css'), 'utf8'));
+const swatches = buildSwatches(resolvedThemeRules, swatchModeMap);
+writeGenerated('swatches.ts', swatches, 'Record<string, ThemeSwatches>', 'ThemeSwatches');
+/* Shipped too, so a consumer's own generated theme can be resolved the same way
+   at runtime rather than only the ones baked in here. */
+writeGenerated('mode-map.ts', swatchModeMap, 'Record<SwatchRole, [string, string]>', 'SwatchRole');
+console.log(
+	`
+theme catalogue: ${Object.keys(swatches).length} names -> ${Object.keys(swatches).join(', ')}`
+);
 /*
 	A keyed record rather than named re-exports: bundle names are file names, and
 	`code-block` is not a valid JS identifier. The keys keep the real names, which

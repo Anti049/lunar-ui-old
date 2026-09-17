@@ -9,9 +9,12 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "bun functions/build.ts && tsc -p tsconfig.build.json",
+		"dev": "bun functions/watch.ts",
+		"build": "bun functions/build.ts && node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
 		"typecheck": "tsc -p tsconfig.json",
-		"test": "bun test/e2e.test.ts",
+		"test:unit": "bun test test/unit",
+		"test:e2e": "bun test/e2e.test.ts",
+		"test": "bun run test:unit && bun run test:e2e",
 		"check": "bun run build && bun run typecheck && bun run test && publint",
 		"package": "bun run build && node -e \"require('node:fs').mkdirSync('../../build',{recursive:true})\" && npm pack --pack-destination '../../build'"
 	},
@@ -29,6 +32,10 @@
 			"types": "./dist/theme.d.ts",
 			"default": "./dist/theme.js"
 		},
+		"./themes": {
+			"types": "./dist/themes.d.ts",
+			"default": "./dist/themes.js"
+		},
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
@@ -43,15 +50,16 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/cli": "^4.3.3",
-		"postcss": "^8.5.6",
-		"postcss-js": "^4.0.1",
-		"tailwindcss": "^4.3.0",
-		"typescript": "^6.0.3",
+		"@tailwindcss/forms": "^0.5.11",
+		"@tailwindcss/typography": "^0.5.19",
+		"@types/bun": "^1.4.2",
 		"@types/node": "^24",
 		"@types/postcss-js": "^4.0.4",
+		"postcss": "^8.5.6",
+		"postcss-js": "^4.0.1",
 		"publint": "^0.3.21",
-		"@tailwindcss/forms": "^0.5.11",
-		"@tailwindcss/typography": "^0.5.19"
+		"tailwindcss": "^4.3.0",
+		"typescript": "^6.0.3"
 	},
 	"keywords": [
 		"tailwindcss",

@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { extractClasses } from '../functions/extract-classes.js';
 import { extractCustomVariants } from '../functions/extract-variants.js';
+import shapeTokenNames from '../generated/shape.js';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -34,8 +35,8 @@ const COMPONENTS = fs
 	.map((f) => f.replace(/\.css$/, ''))
 	.filter(
 		(name) =>
-			extractClasses(fs.readFileSync(path.join(componentsDir, `${name}.css`), 'utf8'), name).length >
-			0
+			extractClasses(fs.readFileSync(path.join(componentsDir, `${name}.css`), 'utf8'), name)
+				.length > 0
 	)
 	.sort();
 const cliEntry = path.join(
@@ -52,8 +53,11 @@ function compile(input: string, label: string): string {
 	try {
 		execFileSync(process.execPath, [cliEntry, '-i', inFile, '-o', outFile], { stdio: 'pipe' });
 	} catch (error) {
-		const detail = ((error as { stderr?: Buffer }).stderr?.toString() || '').replace(/\x1b\[[0-9;]*m/g, '').trim();
-		throw new Error('tailwind failed on ' + label + ':\n' + detail);
+		const detail = ((error as { stderr?: Buffer }).stderr?.toString() || '')
+			// eslint-disable-next-line no-control-regex
+			.replace(/\x1b\[[0-9;]*m/g, '')
+			.trim();
+		throw new Error('tailwind failed on ' + label + ':\n' + detail, { cause: error });
 	}
 	return fs.readFileSync(outFile, 'utf8');
 }
@@ -251,7 +255,8 @@ const collapseRedundant = (selector: string): string => {
 	} while (out !== previous);
 	return out;
 };
-const withoutWhere = (selector: string): string => collapseRedundant(selector.replace(/:where\([^()]*\)/g, ''));
+const withoutWhere = (selector: string): string =>
+	collapseRedundant(selector.replace(/:where\([^()]*\)/g, ''));
 
 /*
 	A few lunar-ui names collide with Tailwind built-ins -- `collapse`, `table`,
@@ -423,10 +428,23 @@ console.log('selectors compared: ' + base.size + ' (CSS-first) vs ' + cand.size 
 
 console.log('parity');
 console.log('  present in both:        ' + [...base.keys()].filter((k) => cand.has(k)).length);
-console.log('  missing from plugin:    ' + missing.length +
-  (missingBuiltins.length ? '  (+' + missingBuiltins.length + ' Tailwind built-ins, deliberately unclaimed)' : ''));
-console.log('  extra in plugin:        ' + extraWithNewDeclarations.length + ' with new declarations');
-console.log('    also ' + extraDuplicates + ' narrower duplicates (no new declarations) and ' + extraRedundant + ' redundant wrappers');
+console.log(
+	'  missing from plugin:    ' +
+		missing.length +
+		(missingBuiltins.length
+			? '  (+' + missingBuiltins.length + ' Tailwind built-ins, deliberately unclaimed)'
+			: '')
+);
+console.log(
+	'  extra in plugin:        ' + extraWithNewDeclarations.length + ' with new declarations'
+);
+console.log(
+	'    also ' +
+		extraDuplicates +
+		' narrower duplicates (no new declarations) and ' +
+		extraRedundant +
+		' redundant wrappers'
+);
 console.log('  benign (inlined var fallback):  ' + fallbackCount);
 console.log('  benign (var fallback folding): ' + foldedCount);
 console.log('  benign (regrouped superset):   ' + supersetCount);
@@ -496,7 +514,9 @@ const modeSelector = Object.keys(allThemeSelectors).find(
 );
 const modeLayer = modeSelector ? (allThemeSelectors[modeSelector] ?? {}) : {};
 const defaultSelector = Object.keys(allThemeSelectors).find((s) => s.includes(':where(:root)'));
-const defaultTokens = new Set(Object.keys(defaultSelector ? (allThemeSelectors[defaultSelector] ?? {}) : {}));
+const defaultTokens = new Set(
+	Object.keys(defaultSelector ? (allThemeSelectors[defaultSelector] ?? {}) : {})
+);
 
 const unresolvableThemes: string[] = [];
 for (const [selector, decls] of Object.entries(allThemeSelectors)) {
@@ -510,10 +530,13 @@ for (const [selector, decls] of Object.entries(allThemeSelectors)) {
 			.map((m) => m[1])
 			.every((tone) => defines.has(tone));
 	});
-	if (unresolved.length) unresolvableThemes.push(selector.split(',')[0] + ' (' + unresolved.length + ')');
+	if (unresolved.length)
+		unresolvableThemes.push(selector.split(',')[0] + ' (' + unresolved.length + ')');
 }
 
-const themeSelectorCount = Object.keys(allThemeSelectors).filter((s) => s.includes('data-theme')).length;
+const themeSelectorCount = Object.keys(allThemeSelectors).filter((s) =>
+	s.includes('data-theme')
+).length;
 
 const standaloneRules = rulesBySelector(standalone, owns);
 const standaloneChecks = [
@@ -527,7 +550,7 @@ const standaloneChecks = [
 			not to have them.
 		*/
 		[...cand.keys()]
-			.filter((selector) => !/\:/.test(selector))
+			.filter((selector) => !/:/.test(selector))
 			.every((selector) => standaloneRules.has(selector))
 	],
 	['no var() reference left dangling', danglingHard.length === 0],
@@ -562,15 +585,15 @@ const standaloneChecks = [
 ];
 
 console.log('\nstandalone (@plugin only, no @import of lunar-ui)');
-console.log(
-	'  selectors: ' + standaloneRules.size + ' | variables declared: ' + declaredVars.size
-);
+console.log('  selectors: ' + standaloneRules.size + ' | variables declared: ' + declaredVars.size);
 for (const [label, ok] of standaloneChecks) {
 	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + label);
 	if (!ok) failures.push('standalone: ' + label);
 }
-if (danglingHard.length) for (const v of danglingHard.slice(0, 10)) console.log('    dangling: ' + v);
-if (unresolvableThemes.length) for (const t of unresolvableThemes) console.log('    unresolved: ' + t);
+if (danglingHard.length)
+	for (const v of danglingHard.slice(0, 10)) console.log('    dangling: ' + v);
+if (unresolvableThemes.length)
+	for (const t of unresolvableThemes) console.log('    unresolved: ' + t);
 
 console.log('\nprefix');
 for (const [label, ok] of prefixChecks) {
@@ -589,12 +612,16 @@ function compileExpectingError(input: string, label: string): string | null {
 		compile(input, label);
 		return null;
 	} catch (error) {
-		return /lunar-ui: [^\n│]*/.exec(String((error as Error).message))?.[0]?.trim() ?? 'unknown error';
+		return (
+			/lunar-ui: [^\n│]*/.exec(String((error as Error).message))?.[0]?.trim() ?? 'unknown error'
+		);
 	}
 }
 
 const selected = compile(
-	["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}' { themes: dracula; }`].join('\n'),
+	["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}' { themes: dracula; }`].join(
+		'\n'
+	),
 	'themes-selected'
 );
 const selectedThemes = themesOf(selected);
@@ -608,7 +635,7 @@ const generated = compile(
 		'\tseed: #0956AA;',
 		'\tvariant: monochrome;',
 		'\tdefault: true;',
-		"\t--theme-color-primary-40: #ff00ff;",
+		'\t--theme-color-primary-40: #ff00ff;',
 		'}',
 		`@plugin '${themePluginPath}' {`,
 		'\tname: nightfall;',
@@ -675,8 +702,15 @@ const shapeDefaults = compile(
 const themeChecks: [string, boolean][] = [
 	[
 		'shape tokens have defaults at :root',
-		['--radius-selector', '--radius-field', '--radius-box', '--size-selector', '--size-field',
-			'--border-width', '--animation-duration', '--animation-easing'
+		[
+			'--radius-selector',
+			'--radius-field',
+			'--radius-box',
+			'--size-selector',
+			'--size-field',
+			'--border-width',
+			'--animation-duration',
+			'--animation-easing'
 		].every((token) => shapeDefaults.includes(token + ':'))
 	],
 	[
@@ -688,6 +722,21 @@ const themeChecks: [string, boolean][] = [
 		/--radius-box:\s*1\.5rem/.test(shaped) && /--border-width:\s*2px/.test(shaped)
 	],
 	['shape tokens are overridable per theme', /--radius-box:\s*0/.test(sharpRule)],
+	/*
+		`--radius-button` is settable but deliberately has no `:root` default, so
+		`var(--radius-button, var(--radius-field))` on `.button` resolves the
+		fallback at the element. Giving it a default here would substitute the
+		root's `--radius-field` once and stop a theme's override reaching buttons.
+	*/
+	['--radius-button is settable', shapeTokenNames.includes('--radius-button')],
+	[
+		'--radius-button has no :root default, so the fallback can fire',
+		!/--radius-button:/.test(shapeDefaults)
+	],
+	[
+		'.button resolves its radius through that chain',
+		/border-radius:\s*var\(--radius-button,\s*var\(--radius-field\)\)/.test(baseline)
+	],
 	/*
 		Every @custom-variant lunar-ui defines must be registered. Hand-listing
 		these shipped 1 of 3 -- `collapsed` was missing while the docs layout used
@@ -718,11 +767,23 @@ const themeChecks: [string, boolean][] = [
 		/^#0/.test(statusOf(harmonizedBlue, 'success') ?? '')
 	],
 	['`themes` keeps the requested theme', selectedThemes.has('dracula')],
-	['`themes` drops the rest', !selectedThemes.has('catppuccin-mocha') && !selectedThemes.has('gaziter')],
+	[
+		'`themes` drops the rest',
+		!selectedThemes.has('catppuccin-mocha') && !selectedThemes.has('gaziter')
+	],
 	['`default` is always kept, since others inherit from it', selectedThemes.has('default')],
-	['seed generates a full tone scale', (brandRule.match(/--theme-color-primary-\d+:/g) ?? []).length === 30],
-	['variant changes the generated palette', /--theme-color-secondary-40:\s*#5e5e5e/.test(brandRule)],
-	['hand-declared roles beat the generated ones', /--theme-color-primary-40:\s*#ff00ff/.test(brandRule)],
+	[
+		'seed generates a full tone scale',
+		(brandRule.match(/--theme-color-primary-\d+:/g) ?? []).length === 30
+	],
+	[
+		'variant changes the generated palette',
+		/--theme-color-secondary-40:\s*#5e5e5e/.test(brandRule)
+	],
+	[
+		'hand-declared roles beat the generated ones',
+		/--theme-color-primary-40:\s*#ff00ff/.test(brandRule)
+	],
 	['role-only themes need no seed', themesOf(generated).has('nightfall')],
 	[
 		'`default: true` applies where no theme is set',
@@ -745,7 +806,9 @@ const themeErrors: [string, string | null][] = [
 	[
 		'unknown theme',
 		compileExpectingError(
-			["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}' { themes: nope; }`].join('\n'),
+			["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}' { themes: nope; }`].join(
+				'\n'
+			),
 			'themes-err-unknown'
 		)
 	],
@@ -782,9 +845,10 @@ const themeErrors: [string, string | null][] = [
 	[
 		'theme with no name',
 		compileExpectingError(
-			["@import 'tailwindcss' source(none);", `@plugin '${themePluginPath}' { seed: #0956AA; }`].join(
-				'\n'
-			),
+			[
+				"@import 'tailwindcss' source(none);",
+				`@plugin '${themePluginPath}' { seed: #0956AA; }`
+			].join('\n'),
 			'themes-err-name'
 		)
 	]
@@ -799,6 +863,107 @@ for (const [label, message] of themeErrors) {
 	const ok = message !== null;
 	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' rejects ' + label);
 	if (!ok) failures.push('themes: ' + label + ' was not rejected');
+}
+
+/* ---- Functional utilities ---------------------------------------------- *
+   `@utility tooltip-gap-*` and friends. These never survive the compile the
+   way named utilities do -- there is no finite set of names to safelist -- so
+   the plugin re-registers them through matchUtilities. Both paths are compiled
+   with the same candidates and their declarations compared directly.          */
+
+const functionalCandidates = [
+	'tooltip-gap-2',
+	'tooltip-gap-1.5',
+	'tooltip-gap-[3px]',
+	'tooltip-gap-[var(--x)]',
+	'tooltip-tail-size-3',
+	'tooltip-tail-width-4'
+];
+const functionalSource = functionalCandidates.map((c) => '@source inline("' + c + '");');
+
+const functionalBaseline = compile(
+	[
+		contextImport,
+		...COMPONENTS.map((c) => "@import '" + rel(path.join(componentsDir, c + '.css')) + "';"),
+		...functionalSource
+	].join('\n'),
+	'functional-baseline'
+);
+const functionalPlugin = compile(
+	[contextImport, "@plugin '" + pluginPath + "';", ...functionalSource].join('\n'),
+	'functional-plugin'
+);
+const functionalPrefixed = compile(
+	[
+		contextImport,
+		"@plugin '" + pluginPath + "' {",
+		'\tprefix: lunar-;',
+		'}',
+		...functionalCandidates.map((c) => '@source inline("lunar-' + c + '");')
+	].join('\n'),
+	'functional-prefixed'
+);
+
+/** The declarations a candidate's own rule emits, or null when it is missing. */
+function functionalRule(css: string, candidate: string): string[] | null {
+	const rules = rulesBySelector(css, () => true);
+	for (const [selector, declarations] of rules) {
+		// Selectors arrive escaped (`.tooltip-gap-\[3px\]`); compare on the
+		// unescaped text so the candidate can be written the way an author would.
+		if (selector.replace(/\\/g, '') === '.' + candidate) return declarations;
+	}
+	return null;
+}
+
+const functionalChecks: [string, boolean][] = [
+	[
+		'every candidate resolves in the CSS-first build',
+		functionalCandidates.every((c) => functionalRule(functionalBaseline, c) !== null)
+	],
+	[
+		'every candidate resolves through the plugin',
+		functionalCandidates.every((c) => functionalRule(functionalPlugin, c) !== null)
+	],
+	[
+		'declarations are identical in both paths',
+		functionalCandidates.every((c) => {
+			const a = functionalRule(functionalBaseline, c);
+			const b = functionalRule(functionalPlugin, c);
+			return a !== null && b !== null && a.join(';') === b.join(';');
+		})
+	],
+	[
+		'a spacing step keeps the var(--spacing) link',
+		(functionalRule(functionalPlugin, 'tooltip-gap-2') ?? []).some((d) =>
+			d.includes('calc(var(--spacing) * 2)')
+		)
+	],
+	[
+		'an arbitrary value passes through verbatim',
+		(functionalRule(functionalPlugin, 'tooltip-gap-[3px]') ?? []).some((d) => d.includes('3px'))
+	],
+	[
+		'an arbitrary var() is accepted, which [length] would reject',
+		(functionalRule(functionalPlugin, 'tooltip-gap-[var(--x)]') ?? []).some((d) =>
+			d.includes('var(--x)')
+		)
+	],
+	[
+		'a prefix renames both the class and the property it sets',
+		(functionalRule(functionalPrefixed, 'lunar-tooltip-gap-2') ?? []).some((d) =>
+			d.startsWith('--lunar-tooltip-gap:')
+		)
+	],
+	[
+		'an unprefixed candidate is dead under a prefix',
+		functionalRule(functionalPrefixed, 'tooltip-gap-2') === null
+	]
+];
+
+console.log('\nfunctional utilities');
+for (const [label, ok] of functionalChecks) {
+	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + label);
+	if (!ok) failures.push('functional: ' + label);
 }
 
 if (!process.env.KEEP_TMP) fs.rmSync(tmpDir, { recursive: true, force: true });

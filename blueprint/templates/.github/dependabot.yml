@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'build(deps)'
+      prefix-development: 'build(deps-dev)'
+    # Grouped, or it is thirty PRs a week and everyone ignores them.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      tailwind:
+        patterns: ['tailwindcss', '@tailwindcss/*']
+      frameworks:
+        patterns: ['svelte', '@sveltejs/*', 'react', 'react-dom', 'vue', '@vitejs/*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'ci(deps)'

@@ -1,0 +1,16 @@
+{
+	"recommendations": [
+		"vivaxy.vscode-conventional-commits",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint",
+		"bradlc.vscode-tailwindcss",
+		"svelte.svelte-vscode",
+		"Vue.volar",
+		"dsznajder.es7-react-js-snippets",
+		"ms-playwright.playwright",
+		"github.vscode-github-actions",
+		"eamodio.gitlens",
+		"streetsidesoftware.code-spell-checker"
+	],
+	"unwantedRecommendations": ["octref.vetur", "hookyqr.beautify"]
+}

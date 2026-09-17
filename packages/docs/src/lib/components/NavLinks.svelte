@@ -25,6 +25,17 @@
 		<span class="nav-link-label">Home</span>
 	</a>
 </div>
+<div class="tooltip tooltip-right tooltip-center tooltip-disabled" data-tooltip="Themes">
+	<a
+		href={resolve('/themes')}
+		class="nav-link"
+		data-active={page.url.pathname === '/themes' ? '' : undefined}
+		onclick={(e) => onnavigate?.(e, resolve('/themes'))}
+	>
+		<MaskedImage src="/icons/navigation/palette.svg" alt="Themes" class="nav-link-icon" />
+		<span class="nav-link-label">Themes</span>
+	</a>
+</div>
 <div class="h-0.5 w-full rounded-full surface-container"></div>
 <div class="nav-rail-scroll scrollbar-hidden gap-2">
 	{#each componentLinks as link (link.href)}
@@ -32,7 +43,7 @@
 			class="tooltip tooltip-right tooltip-center tooltip-surface tooltip-disabled"
 			data-tooltip={link.label}
 		>
-			<div class="flex flex-row items-center gap-2 tooltip-content">
+			<div class="tooltip-content flex flex-row items-center gap-2">
 				{link.label}
 				<span
 					class={cn(

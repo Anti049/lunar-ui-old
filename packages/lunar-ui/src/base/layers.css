@@ -1,50 +1,24 @@
-/* 
+/*
 	Layers
 
-	Defines cascade layers for component creation.
-	Layers are used to control the cascade order of component styles, 
-	allowing for more predictable styling and easier overrides.
-*/
-@layer components {
-	/* 
-		Component styles go here.
-		- l3: Foundational styles (lowest priority)
-		- l2: Size/Variant/Color adjustments (medium priority)
-		- l1: State overrides (highest priority - disabled, hover, focus, active, etc.)
+	Component tiers used to be declared here, in order, to fix their relative
+	weight:
 
-		Add a new line for each new component
-	*/
-	@layer appbar.l3, 
-			appbar.l2, 
-			appbar.l1;
-	@layer badge.l3, 
-			badge.l2, 
-			badge.l1;
-	@layer button.l3, 
-			button.l2, 
-			button.l1;
-	@layer checkbox.l3, 
-			checkbox.l2, 
-			checkbox.l1;
-	@layer indicator.l3, 
-			indicator.l2, 
-			indicator.l1;
-	@layer nav-link.l3, 
-			nav-link.l2, 
-			nav-link.l1;
-	@layer scaffold.l3, 
-			scaffold.l2, 
-			scaffold.l1;
-	@layer select.l3, 
-			select.l2, 
-			select.l1;
-	@layer swap.l3, 
-			swap.l2, 
-			swap.l1;
-	@layer table.l3, 
-			table.l2, 
-			table.l1;
-	@layer tooltip.l3, 
-			tooltip.l2, 
-			tooltip.l1;
-}
+	    @layer badge.l3, badge.l2, badge.l1;
+
+	That list is gone, for three reasons. It never worked -- it declared the
+	order inside `@layer components`, while the rules land under
+	`@layer utilities` and at the top level, so it applied to a different layer
+	tree. It was hand-maintained, and had already drifted to 11 of 16
+	components. And it is now unnecessary: tiers nest rather than sit side by
+	side, so their weight is structural.
+
+	    @layer badge.l1.l2.l3 { }   foundation   weakest
+	    @layer badge.l1.l2    { }   variant
+	    @layer badge.l1       { }   state        strongest
+
+	Unlayered content of a layer outranks that layer's own sublayers, so `l1`
+	beats `l1.l2` beats `l1.l2.l3` no matter what order the blocks appear in or
+	which file they come from. Nothing has to be declared up front, and adding a
+	component requires no edit here.
+*/

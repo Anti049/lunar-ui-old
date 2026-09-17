@@ -16,6 +16,7 @@
 		"build:packages": "bun run --filter '@anti049/lunar-ui' --filter '@anti049/lunar-ui-svelte' build",
 		"package": "bun run --filter '@anti049/lunar-ui' package",
 		"check": "bun run --filter '*' check",
+		"prettier": "prettier --check .",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"changeset": "changeset",

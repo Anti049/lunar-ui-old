@@ -22,7 +22,7 @@
  * The base .tooltip utility. Every tooltip has this.
  * ========================================================================== */
 @utility tooltip {
-	@layer tooltip.l3 {
+	@layer tooltip.l1.l2.l3 {
 		@apply relative inline-block;
 
 		/* Color */
@@ -108,7 +108,7 @@
 }
 
 @utility tooltip-content {
-	@layer tooltip.l3 {
+	@layer tooltip.l1.l2.l3 {
 		@apply text-label-large;
 	}
 }
@@ -122,7 +122,7 @@
  * layer can switch them back on without fighting the state rules' specificity.
  * ========================================================================== */
 @utility tooltip-disabled {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-enabled: 0;
 	}
 }
@@ -156,7 +156,7 @@
  * Offsets, tail geometry, and the direction the tooltip enters from.
  * ========================================================================== */
 @utility tooltip-top {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-enter-x: 0;
 		--tooltip-enter-y: var(--tooltip-travel);
 
@@ -181,7 +181,7 @@
 }
 
 @utility tooltip-bottom {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-enter-x: 0;
 		--tooltip-enter-y: calc(-1 * var(--tooltip-travel));
 
@@ -206,7 +206,7 @@
 }
 
 @utility tooltip-left {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-enter-x: var(--tooltip-travel);
 		--tooltip-enter-y: 0;
 
@@ -231,7 +231,7 @@
 }
 
 @utility tooltip-right {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-enter-x: calc(-1 * var(--tooltip-travel));
 		--tooltip-enter-y: 0;
 
@@ -261,7 +261,7 @@
  * block axis, which keeps alignment and placement order-independent.
  * ========================================================================== */
 @utility tooltip-start {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-align-bubble-inset: 0 auto;
 		--tooltip-align-bubble-translate: 0;
 		--tooltip-align-tail-inset: var(--tooltip-tail-offset) auto;
@@ -270,7 +270,7 @@
 }
 
 @utility tooltip-center {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-align-bubble-inset: 50% auto;
 		--tooltip-align-bubble-translate: -50%;
 		--tooltip-align-tail-inset: 50% auto;
@@ -279,7 +279,7 @@
 }
 
 @utility tooltip-end {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-align-bubble-inset: auto 0;
 		--tooltip-align-bubble-translate: 0;
 		--tooltip-align-tail-inset: auto var(--tooltip-tail-offset);
@@ -292,55 +292,55 @@
  * One background drives both the bubble and the tail.
  * ========================================================================== */
 @utility tooltip-surface {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-surface-container);
 		--tooltip-fg: var(--color-on-surface);
 	}
 }
 @utility tooltip-primary {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-primary);
 		--tooltip-fg: var(--color-on-primary);
 	}
 }
 @utility tooltip-secondary {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-secondary);
 		--tooltip-fg: var(--color-on-secondary);
 	}
 }
 @utility tooltip-tertiary {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-tertiary);
 		--tooltip-fg: var(--color-on-tertiary);
 	}
 }
 @utility tooltip-error {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-error);
 		--tooltip-fg: var(--color-on-error);
 	}
 }
 @utility tooltip-success {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-success);
 		--tooltip-fg: var(--color-on-success);
 	}
 }
 @utility tooltip-warning {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-warning);
 		--tooltip-fg: var(--color-on-warning);
 	}
 }
 @utility tooltip-info {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-info);
 		--tooltip-fg: var(--color-on-info);
 	}
 }
 @utility tooltip-alert {
-	@layer tooltip.l2 {
+	@layer tooltip.l1.l2 {
 		--tooltip-bg: var(--color-alert);
 		--tooltip-fg: var(--color-on-alert);
 	}
@@ -349,19 +349,32 @@
 /* =============================================================================
  * VARIABLES (l1)
  * Override spacing/size variables for tooltips.
+ *
+ * Each takes either a number off the spacing scale (`tooltip-gap-2` ->
+ * `calc(var(--spacing) * 2)`) or an arbitrary value (`tooltip-gap-[3px]`).
+ * The arbitrary branch is `[*]` rather than `[length]` on purpose: `[length]`
+ * rejects `calc()` and `var()`, which is exactly what you reach for when the
+ * value has to come from somewhere else at runtime.
+ *
+ * Tailwind drops whichever `--value()` branch does not match the candidate, so
+ * the two declarations never both apply.
  * ========================================================================== */
 @utility tooltip-gap-* {
 	@layer tooltip.l1 {
 		--tooltip-gap: --spacing(--value(number));
+		/* prettier-ignore */
+		--tooltip-gap: --value([*]);
 	}
 }
 @utility tooltip-tail-size-* {
 	@layer tooltip.l1 {
 		--tooltip-tail-size: --spacing(--value(number));
+		--tooltip-tail-size: --value([ *]);
 	}
 }
 @utility tooltip-tail-width-* {
 	@layer tooltip.l1 {
 		--tooltip-tail-width: --spacing(--value(number));
+		--tooltip-tail-width: --value([ *]);
 	}
 }

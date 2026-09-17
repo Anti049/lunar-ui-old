@@ -1,0 +1,65 @@
+{
+	// ---- Commit conventions ------------------------------------------------
+	// VS Code cannot validate a commit message itself; these get you most of the
+	// way. commitlint in CI is the actual gate.
+	"conventionalCommits.scopes": ["core", "svelte", "react", "vue", "docs", "repo", "deps"],
+	"conventionalCommits.autoCommit": false,
+	"conventionalCommits.showEditor": true,
+	"conventionalCommits.gitmoji": false,
+
+	// Native git input validation — the ruler turns red past 72 characters.
+	"git.inputValidation": true,
+	"git.inputValidationLength": 72,
+	"git.inputValidationSubjectLength": 72,
+
+	// ---- Formatting and linting --------------------------------------------
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
+	"[svelte]": { "editor.defaultFormatter": "svelte.svelte-vscode" },
+	"[vue]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+	// ---- Tailwind ----------------------------------------------------------
+	// The design system is authored in CSS; without this the editor flags
+	// @utility, @apply and @theme as unknown at-rules.
+	"files.associations": { "*.css": "tailwindcss" },
+	"css.lint.unknownAtRules": "ignore",
+
+	// IntelliSense inside class-merge helpers. Note the doubled backslashes:
+	// these are JSON strings containing a regex, so `\\(` is the regex `\(`.
+	"tailwindCSS.experimental.classRegex": [
+		["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"],
+		["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"],
+		["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
+	],
+	"tailwindCSS.classAttributes": ["class", "className", "ngClass", "class:list"],
+
+	// ---- TypeScript --------------------------------------------------------
+	// Use the repo's TypeScript, not the editor's bundled one.
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"typescript.preferences.importModuleSpecifierEnding": "js",
+
+	// ---- Noise reduction ---------------------------------------------------
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/dist": true,
+		"**/.svelte-kit": true,
+		"**/packages/core/generated": true,
+		"**/bun.lock": true
+	},
+	"files.watcherExclude": {
+		"**/node_modules/**": true,
+		"**/dist/**": true,
+		"**/.svelte-kit/**": true,
+		"**/packages/core/generated/**": true
+	},
+
+	// Generated output is read-only in spirit; make that visible.
+	"files.readonlyInclude": {
+		"**/packages/core/generated/**": true,
+		"**/dist/**": true
+	}
+}

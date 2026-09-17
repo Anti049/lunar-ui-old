@@ -1,2 +1,2 @@
-<h1 class="text-3xl font-bold mb-4">Countdown</h1>
+<h1 class="mb-4 text-3xl font-bold">Countdown</h1>
 <p>Documentation and examples for the Countdown component.</p>

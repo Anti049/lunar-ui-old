@@ -12,7 +12,7 @@
  * The base .table utility. Every table has this.
  * ========================================================================== */
 @utility table {
-	@layer table.l3 {
+	@layer table.l1.l2.l3 {
 		@apply relative w-full border-separate border-spacing-0 rounded-sm surface text-left text-body-small rtl:text-right;
 
 		/* Cells */
@@ -54,14 +54,14 @@
  * Zebra striping and sticky rows/columns.
  * ========================================================================== */
 @utility table-zebra {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		tbody tr {
 			@apply odd:surface-container-low even:surface-container-lowest;
 		}
 	}
 }
 @utility table-pin-rows {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		:where(thead, tfoot) tr {
 			@apply sticky z-1 surface-container;
 		}
@@ -74,7 +74,7 @@
 	}
 }
 @utility table-pin-cols {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		tr th {
 			@apply sticky right-0 left-0 z-1 surface-container;
 		}
@@ -86,7 +86,7 @@
  * Scale cell padding and body text.
  * ========================================================================== */
 @utility table-xs {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		:not(thead, tfoot) tr {
 			font-size: 0.6875rem;
 		}
@@ -98,7 +98,7 @@
 }
 
 @utility table-sm {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		:not(thead, tfoot) tr {
 			font-size: 0.75rem;
 		}
@@ -110,7 +110,7 @@
 }
 
 @utility table-md {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		:not(thead, tfoot) tr {
 			font-size: 0.875rem;
 		}
@@ -122,7 +122,7 @@
 }
 
 @utility table-lg {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		:not(thead, tfoot) tr {
 			font-size: 1.125rem;
 		}
@@ -134,7 +134,7 @@
 }
 
 @utility table-xl {
-	@layer table.l2 {
+	@layer table.l1.l2 {
 		:not(thead, tfoot) tr {
 			font-size: 1.375rem;
 		}

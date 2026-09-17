@@ -1,0 +1,49 @@
+name: Accessibility issue
+description: A component is not usable with assistive technology
+labels: ['type:a11y', 'priority:high', 'needs-triage']
+body:
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      placeholder: select
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tech
+    attributes:
+      label: How did you find it?
+      options:
+        - Keyboard only
+        - Screen reader — NVDA
+        - Screen reader — JAWS
+        - Screen reader — VoiceOver
+        - Automated tooling (axe, Lighthouse)
+        - Colour contrast
+        - Reduced motion
+        - Zoom or reflow
+    validations:
+      required: true
+
+  - type: input
+    id: criterion
+    attributes:
+      label: WCAG criterion
+      description: If you know it.
+      placeholder: '2.4.7 Focus Visible (AA)'
+
+  - type: textarea
+    id: detail
+    attributes:
+      label: What happens
+      description: What you did, what assistive technology reported, what should have happened.
+    validations:
+      required: true
+
+  - type: input
+    id: theme
+    attributes:
+      label: Theme and mode
+      description: Contrast issues are usually theme-specific.
+      placeholder: 'brand, dark'

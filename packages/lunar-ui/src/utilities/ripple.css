@@ -7,15 +7,15 @@
 
 /* Standard Ripple */
 .lunar-ripple {
-	position: 			absolute;
-	border-radius: 		9999px;
-	background-color: 	currentColor;
-	pointer-events: 	none;
-	transform: 			scale(0);
-	will-change: 		transform, opacity;
+	position: absolute;
+	border-radius: 9999px;
+	background-color: currentColor;
+	pointer-events: none;
+	transform: scale(0);
+	will-change: transform, opacity;
 }
 
 /* Press-and-Hold Ripple */
 .interactive[data-ripple-held]::before {
-	opacity: 			0 !important;
+	opacity: 0 !important;
 }

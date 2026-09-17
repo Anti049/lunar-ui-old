@@ -9,7 +9,7 @@ Seventeen bundles ship, each excludable by name:
 - **`foundations`** — the 59 non-namespaced utilities: colour roles (`surface`,
   `primary`, `inverse-error-container`), `elevation-0`…`elevation-5`,
   `focusable`, `interactive`, `scrim`, `touch-target`. Composite utilities keep
-  both halves, so `surface` still sets `background-color` *and* `color`.
+  both halves, so `surface` still sets `background-color` _and_ `color`.
 - **16 components** — every stylesheet in `packages/lunar-ui/src/components` that
   defines something: appbar, badge, button, checkbox, code-block, collapsible,
   indicator, navigation, scaffold, scrollbar, section, select, sidebar, swap,
@@ -28,8 +28,8 @@ even be installed. Consumers write:
 @import 'tailwindcss';
 @plugin '@anti049/lunar-ui' {
 	prefix: lunar-;
-	exclude: badge;      /* or: foundations */
-	themes: dracula;     /* optional; omit for all */
+	exclude: badge; /* or: foundations */
+	themes: dracula; /* optional; omit for all */
 }
 ```
 
@@ -97,12 +97,12 @@ Every `@theme` value lunar-ui defines is registered through `theme.extend` —
 not merely the ones badge and button reach — across all the namespaces it uses,
 mapped onto the JS theme keys a plugin config accepts:
 
-| CSS namespace | JS theme key | | CSS namespace | JS theme key |
-| --- | --- | --- | --- | --- |
-| `--color-*` | `colors` | | `--ease-*` | `transitionTimingFunction` |
-| `--text-*` | `fontSize` | | `--duration-*` | `transitionDuration` |
-| `--font-*` | `fontFamily` | | `--opacity-*` | `opacity` |
-| `--breakpoint-*` | `screens` | | `--animation-*` | `animation` |
+| CSS namespace    | JS theme key |     | CSS namespace   | JS theme key               |
+| ---------------- | ------------ | --- | --------------- | -------------------------- |
+| `--color-*`      | `colors`     |     | `--ease-*`      | `transitionTimingFunction` |
+| `--text-*`       | `fontSize`   |     | `--duration-*`  | `transitionDuration`       |
+| `--font-*`       | `fontFamily` |     | `--opacity-*`   | `opacity`                  |
+| `--breakpoint-*` | `screens`    |     | `--animation-*` | `animation`                |
 
 So consumers get real utilities — `text-display-small`, `duration-medium-2`,
 `bg-primary` — not just bare custom properties. `--text-x--line-height` and its
@@ -125,19 +125,19 @@ across 12 selectors.
 
 ### Shape tokens
 
-The knobs that decide how lunar-ui *feels* rather than what colour it is. All
+The knobs that decide how lunar-ui _feels_ rather than what colour it is. All
 eight are emitted at `:root` with defaults, so they always resolve:
 
-| token | default | |
-| --- | --- | --- |
-| `--radius-selector` | `var(--radius-sm)` | corner radii, smallest to largest |
-| `--radius-field` | `var(--radius-sm)` | |
-| `--radius-box` | `var(--radius-lg)` | |
-| `--size-selector` | `var(--spacing)` | base sizing units components multiply |
-| `--size-field` | `var(--spacing)` | |
-| `--border-width` | `1px` | border thickness for outlined variants |
+| token                  | default                   |                                        |
+| ---------------------- | ------------------------- | -------------------------------------- |
+| `--radius-selector`    | `var(--radius-sm)`        | corner radii, smallest to largest      |
+| `--radius-field`       | `var(--radius-sm)`        |                                        |
+| `--radius-box`         | `var(--radius-lg)`        |                                        |
+| `--size-selector`      | `var(--spacing)`          | base sizing units components multiply  |
+| `--size-field`         | `var(--spacing)`          |                                        |
+| `--border-width`       | `1px`                     | border thickness for outlined variants |
 | `--animation-duration` | `var(--duration-short-4)` | matches lunar-ui's standard transition |
-| `--animation-easing` | `var(--ease-standard)` | |
+| `--animation-easing`   | `var(--ease-standard)`    |                                        |
 
 Defaults point at lunar-ui's existing scales rather than inventing numbers, and
 go through the same `var()` fallback inlining as everything else — so
@@ -158,7 +158,7 @@ or per theme, where they sit alongside the colour roles:
 ```css
 @plugin '@anti049/lunar-ui/theme' {
 	name: sharp;
-	seed: #0956AA;
+	seed: #0956aa;
 	--radius-selector: 0;
 	--radius-field: 0;
 	--radius-box: 0;
@@ -197,11 +197,11 @@ and `gaziter` are built:
 @plugin '@anti049/lunar-ui/theme' {
 	name: brand;
 	seed: #b5179e;
-	variant: vibrant;    /* optional */
-	contrast: 0.3;       /* optional, -1 to 1 */
-	default: true;       /* optional, also apply at :root */
-	success: #2e7d32;    /* optional status-palette hues */
-	harmonize: false;    /* optional, defaults to true */
+	variant: vibrant; /* optional */
+	contrast: 0.3; /* optional, -1 to 1 */
+	default: true; /* optional, also apply at :root */
+	success: #2e7d32; /* optional status-palette hues */
+	harmonize: false; /* optional, defaults to true */
 }
 ```
 
@@ -223,10 +223,10 @@ hues — the shipped default theme's tone-40 values — and are then **harmonize
 toward the seed** with Material's `Blend.harmonize`, so they read as part of one
 palette rather than four unrelated colours bolted on:
 
-| seed | success | warning | info | alert |
-| --- | --- | --- | --- | --- |
-| `#0956AA` (blue) | `#006b5b` | `#8b4e3a` | `#356383` | `#8938b0` |
-| `#006c4e` (green) | `#006c4b` | `#825520` | `#1f6774` | `#8938b0` |
+| seed                      | success   | warning   | info      | alert     |
+| ------------------------- | --------- | --------- | --------- | --------- |
+| `#0956AA` (blue)          | `#006b5b` | `#8b4e3a` | `#356383` | `#8938b0` |
+| `#006c4e` (green)         | `#006c4b` | `#825520` | `#1f6774` | `#8938b0` |
 | none (`harmonize: false`) | `#006c49` | `#88512c` | `#29657d` | `#993297` |
 
 Harmonize rotates hue by at most 15°, so meaning survives — success stays green,
@@ -285,10 +285,10 @@ linter for the CSS itself. It found two references to variables nothing
 declared -- both silent failures in the CSS-first build as much as through the
 plugin, and both now fixed at source:
 
-| where | was | outcome |
-| --- | --- | --- |
-| `checkbox.css` | `calc(var(--depth) * 0.1)` inside a `box-shadow` | an undefined variable in `calc()` invalidates the whole declaration, so the inset highlight never rendered. Removed. |
-| `select.css` | `var(--select-on-container, var(--color-on-surface-container))` | the fallback named a token that does not exist, so the colour no-opped. Corrected to `--color-on-surface`, matching button and badge. |
+| where          | was                                                             | outcome                                                                                                                               |
+| -------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `checkbox.css` | `calc(var(--depth) * 0.1)` inside a `box-shadow`                | an undefined variable in `calc()` invalidates the whole declaration, so the inset highlight never rendered. Removed.                  |
+| `select.css`   | `var(--select-on-container, var(--color-on-surface-container))` | the fallback named a token that does not exist, so the colour no-opped. Corrected to `--color-on-surface`, matching button and badge. |
 
 Nothing is exempt now, so any new dangling reference fails the suite.
 
@@ -299,7 +299,7 @@ lunar-ui ones. The build detects this by compiling bare Tailwind with lunar-ui's
 class list safelisted and nothing of lunar-ui loaded: whatever answers is
 Tailwind's. Those bare rules are left unclaimed, so `visibility: collapse` does
 not get swept into the collapsible bundle. lunar-ui's own rules for the same
-names still arrive, via their `@layer <name>.lN` wrapper.
+names still arrive, via their `@layer <name>.l1[.l2[.l3]]` wrapper.
 
 ## Known divergence: cascade position
 
@@ -313,7 +313,7 @@ names still arrive, via their `@layer <name>.lN` wrapper.
 
 Rules authored as plain selectors (`.badge-disabled { @layer badge.l1 { … } }`)
 are emitted by Tailwind into a **top-level** layer. Top-level layers that aren't
-in the `@layer theme, base, components, utilities` list sort *after* all of
+in the `@layer theme, base, components, utilities` list sort _after_ all of
 them, so those rules currently outrank every utility.
 
 The plugin API has no channel that lands there — `addBase` means `@layer base`,
@@ -324,10 +324,12 @@ stops overriding `bg-*` utilities.
 Rules from `@utility` are unaffected: they were already inside
 `@layer utilities` and stay there.
 
-Worth noting the CSS-first build has an oddity here too. `src/base/layers.css`
-declares the sublayer order inside `@layer components`, but the rules land under
-`@layer utilities` and at the top level — different layer trees, so that
-ordering declaration appears to have no effect on either path.
+`src/base/layers.css` used to declare the sublayer order inside
+`@layer components`, while the rules land under `@layer utilities` and at the
+top level — different layer trees, so it never applied. That list is gone.
+Component tiers nest rather than sit side by side, so their relative weight is
+structural rather than order-dependent, and nothing has to be declared up
+front.
 
 ## How the build works
 
@@ -355,7 +357,7 @@ tsc -p tsconfig.build.json      # runtime + generated -> dist (JS + .d.ts)
    component files, feeding the class list back as `@source inline(…)`.
    `@utility` output is emitted on demand, so without that safelist the compile
    returns nothing.
-3. **Partition** the output by lunar-ui's naming discipline — `@layer <name>.l<n>`
+3. **Partition** the output by lunar-ui's naming discipline — `@layer <name>.l1[.l2[.l3]]`
    and `<name>-*` keyframes attribute to a component. Foundations carry no layer
    marker (`@utility surface` lands as a bare `.surface`), so they are attributed
    by class name. Everything else is context and dropped (`functions/partition.ts`).

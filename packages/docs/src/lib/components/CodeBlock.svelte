@@ -1578,7 +1578,11 @@
 <div class="code-block">
 	{#if editable}
 		<div bind:this={editorElement} class="code-block-editor" aria-label="Editable code"></div>
-	{:else}
+	{:else if highlighted}
 		{@html highlighted}
+	{:else}
+		<!-- Shiki highlights on the client, so without this the block is an empty
+			 box on the server render and for the moment before hydration. -->
+		<pre><code>{code.trim()}</code></pre>
 	{/if}
 </div>

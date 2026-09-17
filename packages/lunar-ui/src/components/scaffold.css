@@ -12,7 +12,7 @@
  * The base .scaffold utility. Every scaffold has this.
  * ========================================================================== */
 @utility scaffold {
-	@layer scaffold.l3 {
+	@layer scaffold.l1.l2.l3 {
 		@apply grid h-dvh w-full overflow-hidden surface;
 
 		grid-template-columns: auto 1fr;
@@ -28,19 +28,19 @@
  * Define the layout slots for the scaffold component.
  * ========================================================================== */
 @utility scaffold-header {
-	@layer scaffold.l2 {
+	@layer scaffold.l1.l2 {
 		@apply w-full surface-container;
 		grid-area: header;
 	}
 }
 @utility scaffold-sidebar {
-	@layer scaffold.l2 {
+	@layer scaffold.l1.l2 {
 		@apply h-full;
 		grid-area: sidebar;
 	}
 }
 @utility scaffold-main {
-	@layer scaffold.l2 {
+	@layer scaffold.l1.l2 {
 		@apply relative h-full w-full min-w-0 overflow-x-hidden overflow-y-auto surface;
 		grid-area: main;
 		scroll-behavior: smooth;
@@ -48,7 +48,7 @@
 	}
 }
 @utility scaffold-content {
-	@layer scaffold.l2 {
+	@layer scaffold.l1.l2 {
 		@apply flex min-h-full w-full flex-col p-4;
 	}
 }

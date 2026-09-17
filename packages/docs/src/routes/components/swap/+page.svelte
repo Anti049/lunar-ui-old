@@ -11,8 +11,8 @@
 	<ComponentPreview id="swap" title="Swap" description="Click to toggle between two elements.">
 		<label class="swap text-title-large-emphasized">
 			<input type="checkbox" />
-			<span class="text-primary swap-on">ON</span>
-			<span class="text-on-surface-variant swap-off">OFF</span>
+			<span class="swap-on text-primary">ON</span>
+			<span class="swap-off text-on-surface-variant">OFF</span>
 		</label>
 	</ComponentPreview>
 	<!-- Rotate -->

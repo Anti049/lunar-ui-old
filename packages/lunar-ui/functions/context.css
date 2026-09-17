@@ -9,7 +9,14 @@
 	Note this is imported normally, not via @reference: @reference suppresses
 	@utility emission entirely, which is exactly what we need to capture.
 */
-@import 'tailwindcss';
+/*
+	`source(none)` matters. Without it Tailwind scans the repo for candidates, so
+	any class-like string anywhere -- including one written in a comment -- became
+	a real utility baked into the shipped bundle. Every compile that uses this
+	file supplies its candidates explicitly with `@source inline()`, which makes
+	the output a function of the CSS alone.
+*/
+@import 'tailwindcss' source(none);
 @import '../src/base/_index.css';
 @import '../src/utilities/_index.css';
 @import '../src/themes/_index.css';

@@ -4,9 +4,7 @@
 	},
 	"json.schemas": [
 		{
-			"fileMatch": [
-				"packages/docs/src/lib/docs/components/*.json"
-			],
+			"fileMatch": ["packages/docs/src/lib/docs/components/*.json"],
 			"url": "./packages/docs/src/lib/docs/component-doc.schema.json"
 		}
 	]

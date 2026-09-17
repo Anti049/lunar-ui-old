@@ -2,7 +2,15 @@ import postcss from 'postcss';
 import { objectify } from 'postcss-js';
 import type { Bundle, StyleObject } from '../types.js';
 
-const LAYER_OWNER = /^([a-z][\w-]*)\.l\d+$/;
+/*
+	The bundle that owns a `@layer` block, read from its first segment.
+
+	Tiers nest rather than sit side by side -- `badge.l1.l2.l3` for the
+	foundation, `badge.l1.l2` for variants, `badge.l1` for state -- because
+	unlayered content of a layer beats that layer's sublayers whatever the
+	declaration order. One or more `.lN` segments therefore follow the name.
+*/
+const LAYER_OWNER = /^([a-z][\w-]*)(?:\.l\d+)+$/;
 
 export interface Partitioned {
 	components: Record<string, Bundle>;
@@ -14,7 +22,8 @@ export interface Partitioned {
  * Splits a whole-library compile into per-bundle buckets.
  *
  * Attribution runs off lunar-ui's own naming discipline: component rules live
- * in `@layer <component>.l<n>`, and keyframes are named `<component>-*`.
+ * in `@layer <component>.l1[.l2[.l3]]`, and keyframes are named
+ * `<component>-*`.
  * Foundations carry no layer marker of their own, so they are attributed by
  * class name via `classOwners`. Anything unattributed is context (theme,
  * preflight) and is dropped.

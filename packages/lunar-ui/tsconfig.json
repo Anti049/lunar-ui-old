@@ -4,11 +4,12 @@
 		"noEmit": true,
 		"allowJs": false,
 		"checkJs": false,
-		"types": ["node"]
+		"types": ["node", "bun"]
 	},
 	"include": [
 		"index.ts",
 		"theme.ts",
+		"themes.ts",
 		"types.ts",
 		"functions/**/*.ts",
 		"generated/**/*.ts",

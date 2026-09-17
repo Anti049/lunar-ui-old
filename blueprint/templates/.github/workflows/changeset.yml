@@ -1,0 +1,21 @@
+name: Changeset
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: PR carries a changeset
+    runs-on: ubuntu-latest
+    # Escape hatch for docs-only and CI-only PRs.
+    if: "!contains(github.event.pull_request.labels.*.name, 'skip-changeset')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Fail if no changeset
+        run: bunx changeset status --since=origin/${{ github.base_ref }}

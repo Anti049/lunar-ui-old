@@ -1,0 +1,64 @@
+name: Component proposal
+description: Propose a new component for the design system
+labels: ['type:feat', 'component', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A component lands in the plugin **and** all three bindings, or it does not
+        land. Divergence is how a design system becomes three products.
+
+  - type: input
+    id: name
+    attributes:
+      label: Component name
+      placeholder: accordion
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve?
+      description: What people are doing today instead, and why that is worse.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Proposed classes
+      description: |
+        The class surface, in the layer scheme. Foundation in `.l1.l2.l3`,
+        variants in `.l1.l2`, state in `.l1`.
+      render: css
+      placeholder: |
+        .accordion            foundation
+        .accordion-item
+        .accordion-trigger
+        .accordion-outlined   variant
+        .accordion-open       state
+
+  - type: checkboxes
+    id: frameworks
+    attributes:
+      label: Does it need a JavaScript binding?
+      description: Leave all unchecked if it is CSS-only.
+      options:
+        - label: Svelte
+        - label: React
+        - label: Vue
+
+  - type: textarea
+    id: a11y
+    attributes:
+      label: Accessibility requirements
+      description: Roles, keyboard interaction, focus management, the relevant WAI-ARIA pattern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: priorart
+    attributes:
+      label: Prior art
+      description: How Material, Radix, Ark or others handle it, and where you would differ.

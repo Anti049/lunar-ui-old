@@ -106,17 +106,17 @@
 		{
 			"className": "tooltip-gap-*",
 			"type": "size",
-			"description": "Sets the gap between the trigger and the tooltip tail."
+			"description": "Gap between the trigger and the tail. Takes a spacing step (`tooltip-gap-2`) or an arbitrary value (`tooltip-gap-[3px]`, `tooltip-gap-[var(--x)]`)."
 		},
 		{
 			"className": "tooltip-tail-size-*",
 			"type": "size",
-			"description": "Sets the depth of the tooltip tail."
+			"description": "Depth of the tail, base to tip. Takes a spacing step (`tooltip-tail-size-3`) or an arbitrary value (`tooltip-tail-size-[0.5rem]`)."
 		},
 		{
 			"className": "tooltip-tail-width-*",
 			"type": "size",
-			"description": "Sets the base width of the tooltip tail."
+			"description": "Width of the tail base. Takes a spacing step (`tooltip-tail-width-4`) or an arbitrary value (`tooltip-tail-width-[1rem]`)."
 		}
 	]
 }

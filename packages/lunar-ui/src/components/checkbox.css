@@ -15,21 +15,17 @@
  * Usage:
  *   <input type="checkbox" class="checkbox checkbox-filled checkbox-primary checkbox-md" />
  *
- * Layer priority (declared in core/layers.css, LOW → HIGH):
- *   l3 — foundation (base .checkbox, always-on)
- *   l2 — axes (variants, colors, sizes)
- *   l1 — state (disabled — overrides everything else)
- *
- * ⚠️  Colors read from Tailwind's --color-* semantic tokens so scoped
- *     [data-theme] values apply. See button.css for the full rationale.
- * ========================================================================== */
+ * Layer priority (deeper nests weaker, LOW → HIGH):
+ *   l1.l2.l3 foundation (base .checkbox, always-on)
+ *   l1.l2    axes (variants, colors, sizes)
+ *   l1       state (disabled — overrides everything else)
 
 /* =============================================================================
  * FOUNDATION (l3)
  * The base .checkbox utility. Every checkbox has this.
  * ========================================================================== */
 @utility checkbox {
-	@layer checkbox.l3 {
+	@layer checkbox.l1.l2.l3 {
 		@apply relative inline-block shrink-0 cursor-pointer appearance-none rounded-sm border-0 bg-none bg-auto align-middle focusable transition-[background-color,color,border-color,box-shadow,scale];
 
 		/* Check */
@@ -135,7 +131,7 @@
  *   --checkbox-on-container  contrast color for the container
  * ========================================================================== */
 @utility checkbox-filled {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply bg-surface-container;
 		color: var(--checkbox-on-color, var(--color-on-primary));
 
@@ -149,7 +145,7 @@
 	}
 }
 @utility checkbox-tonal {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply bg-surface-container;
 		color: var(--checkbox-on-container, var(--color-on-primary-container));
 
@@ -163,13 +159,13 @@
 	}
 }
 @utility checkbox-elevated {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply bg-surface-container enabled:elevation-1;
 		color: var(--checkbox-color, var(--color-primary));
 	}
 }
 @utility checkbox-outlined {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply bg-transparent;
 		color: var(--checkbox-color, var(--color-on-surface));
 		border: 2px solid
@@ -182,7 +178,7 @@
  * Each color utility sets the CSS variables that variants consume.
  * ========================================================================== */
 @utility checkbox-primary {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-primary);
 		--checkbox-on-color: var(--color-on-primary);
 		--checkbox-container: var(--color-primary-container);
@@ -192,7 +188,7 @@
 }
 
 @utility checkbox-secondary {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-secondary);
 		--checkbox-on-color: var(--color-on-secondary);
 		--checkbox-container: var(--color-secondary-container);
@@ -202,7 +198,7 @@
 }
 
 @utility checkbox-tertiary {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-tertiary);
 		--checkbox-on-color: var(--color-on-tertiary);
 		--checkbox-container: var(--color-tertiary-container);
@@ -212,7 +208,7 @@
 }
 
 @utility checkbox-error {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-error);
 		--checkbox-on-color: var(--color-on-error);
 		--checkbox-container: var(--color-error-container);
@@ -222,7 +218,7 @@
 }
 
 @utility checkbox-surface {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-inverse-surface);
 		--checkbox-on-color: var(--color-on-inverse-surface);
 		--checkbox-container: var(--color-surface-container);
@@ -232,7 +228,7 @@
 }
 
 @utility checkbox-success {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-success);
 		--checkbox-on-color: var(--color-on-success);
 		--checkbox-container: var(--color-success-container);
@@ -242,7 +238,7 @@
 }
 
 @utility checkbox-warning {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-warning);
 		--checkbox-on-color: var(--color-on-warning);
 		--checkbox-container: var(--color-warning-container);
@@ -252,7 +248,7 @@
 }
 
 @utility checkbox-info {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-info);
 		--checkbox-on-color: var(--color-on-info);
 		--checkbox-container: var(--color-info-container);
@@ -262,7 +258,7 @@
 }
 
 @utility checkbox-alert {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		--checkbox-color: var(--color-alert);
 		--checkbox-on-color: var(--color-on-alert);
 		--checkbox-container: var(--color-alert-container);
@@ -276,27 +272,27 @@
  * Box size and check/icon size. Independent of variant and color.
  * ========================================================================== */
 @utility checkbox-xs {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply size-4 p-0.75;
 	}
 }
 @utility checkbox-sm {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply size-5 p-1;
 	}
 }
 @utility checkbox-md {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply size-8 p-1.5;
 	}
 }
 @utility checkbox-lg {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply size-10 p-1.75;
 	}
 }
 @utility checkbox-xl {
-	@layer checkbox.l2 {
+	@layer checkbox.l1.l2 {
 		@apply size-12 p-2;
 	}
 }

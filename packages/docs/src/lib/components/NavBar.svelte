@@ -163,7 +163,7 @@
 		aria-label="Navigation menu"
 		in:slideFade={{ y: 10, duration: 200 }}
 		out:slideFade={{ y: 10, duration: 150 }}
-		class="no-doc-scroll no-scrollbar fixed inset-x-0 top-16 bottom-0 z-40 flex flex-col gap-2 surface-container-low p-4 focus:outline-none compact:hidden"
+		class="no-doc-scroll fixed inset-x-0 top-16 bottom-0 z-40 flex no-scrollbar flex-col gap-2 surface-container-low p-4 focus:outline-none compact:hidden"
 	>
 		<NavLinks onnavigate={navigateFromMenu} />
 	</nav>

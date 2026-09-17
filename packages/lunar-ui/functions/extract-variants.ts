@@ -57,9 +57,9 @@ export function extractCustomVariants(coreSrc: string): Record<string, VariantSe
 	const variants: Record<string, VariantSelector> = {};
 
 	const visit = (dir: string): void => {
-		for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
-			a.name.localeCompare(b.name)
-		)) {
+		for (const entry of fs
+			.readdirSync(dir, { withFileTypes: true })
+			.sort((a, b) => a.name.localeCompare(b.name))) {
 			const full = path.join(dir, entry.name);
 			if (entry.isDirectory()) {
 				visit(full);

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ThemePreview } from '@anti049/lunar-ui-svelte';
 	import { theme, setTheme } from 'mode-watcher';
+	import { capitalCase } from 'change-case';
 
 	let themes = [
 		'default',
@@ -11,7 +12,8 @@
 		'catppuccin-mocha',
 		'dracula',
 		'alucard',
-		'gaziter'
+		'gaziter',
+		'brand'
 	];
 </script>
 
@@ -24,7 +26,7 @@
 		onchange={(e) => setTheme((e.currentTarget as HTMLSelectElement).value)}
 	>
 		{#each themes as theme (theme)}
-			<option value={theme}>{theme}</option>
+			<option value={theme}>{capitalCase(theme)}</option>
 		{/each}
 	</select>
 	<ThemePreview />

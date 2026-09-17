@@ -25,20 +25,20 @@
 	</ComponentPreview>
 	<!-- Force open -->
 	<ComponentPreview id="tooltip-force-open" title="Force Open">
-		<div class="tooltip-open tooltip" data-tooltip="This tooltip is forcefully open">
+		<div class="tooltip tooltip-open" data-tooltip="This tooltip is forcefully open">
 			<button class="button button-md button-elevated button-surface">Hover me</button>
 		</div>
 	</ComponentPreview>
 	<!-- Top -->
 	<ComponentPreview id="tooltip-top" title="Top">
 		<div class="flex flex-row items-center justify-center gap-8">
-			<div class="tooltip-open tooltip tooltip-top tooltip-start" data-tooltip="Left">
+			<div class="tooltip tooltip-top tooltip-open tooltip-start" data-tooltip="Left">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-top tooltip-center" data-tooltip="Center">
+			<div class="tooltip tooltip-top tooltip-open tooltip-center" data-tooltip="Center">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-top tooltip-end" data-tooltip="Right">
+			<div class="tooltip tooltip-top tooltip-open tooltip-end" data-tooltip="Right">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
 		</div>
@@ -46,13 +46,13 @@
 	<!-- Bottom -->
 	<ComponentPreview id="tooltip-bottom" title="Bottom">
 		<div class="flex flex-row items-center justify-center gap-8">
-			<div class="tooltip-open tooltip tooltip-bottom tooltip-start" data-tooltip="Left">
+			<div class="tooltip tooltip-bottom tooltip-open tooltip-start" data-tooltip="Left">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-bottom tooltip-center" data-tooltip="Center">
+			<div class="tooltip tooltip-bottom tooltip-open tooltip-center" data-tooltip="Center">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-bottom tooltip-end" data-tooltip="Right">
+			<div class="tooltip tooltip-bottom tooltip-open tooltip-end" data-tooltip="Right">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
 		</div>
@@ -60,13 +60,13 @@
 	<!-- Left -->
 	<ComponentPreview id="tooltip-left" title="Left">
 		<div class="flex flex-col items-center justify-center gap-8">
-			<div class="tooltip-open tooltip tooltip-left tooltip-start" data-tooltip="Top">
+			<div class="tooltip tooltip-left tooltip-open tooltip-start" data-tooltip="Top">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-left tooltip-center" data-tooltip="Center">
+			<div class="tooltip tooltip-left tooltip-open tooltip-center" data-tooltip="Center">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-left tooltip-end" data-tooltip="Bottom">
+			<div class="tooltip tooltip-left tooltip-open tooltip-end" data-tooltip="Bottom">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
 		</div>
@@ -74,13 +74,13 @@
 	<!-- Right -->
 	<ComponentPreview id="tooltip-right" title="Right">
 		<div class="flex flex-col items-center justify-center gap-8">
-			<div class="tooltip-open tooltip tooltip-right tooltip-start" data-tooltip="Top">
+			<div class="tooltip tooltip-right tooltip-open tooltip-start" data-tooltip="Top">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-right tooltip-center" data-tooltip="Center">
+			<div class="tooltip tooltip-right tooltip-open tooltip-center" data-tooltip="Center">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-right tooltip-end" data-tooltip="Bottom">
+			<div class="tooltip tooltip-right tooltip-open tooltip-end" data-tooltip="Bottom">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
 		</div>

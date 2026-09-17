@@ -21,7 +21,7 @@ const appendRule = (styles: StyleObject, selector: string, rule: Nested): void =
 };
 
 const wrapWithAtRules = (rule: Nested, atRules: string[]): Nested =>
-	atRules.reduceRight<Nested>((wrapped, atRule) => ({ [atRule]: wrapped } as StyleObject), rule);
+	atRules.reduceRight<Nested>((wrapped, atRule) => ({ [atRule]: wrapped }) as StyleObject, rule);
 
 const moveLayerRules = (styles: StyleObject, layerValue: Nested, atRules: string[]): void => {
 	for (const block of Array.isArray(layerValue) ? layerValue : [layerValue]) {

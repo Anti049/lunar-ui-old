@@ -7,7 +7,7 @@
  * The base .appbar utility. Every appbar has this.
  * ========================================================================== */
 @utility appbar {
-	@layer appbar.l3 {
+	@layer appbar.l1.l2.l3 {
 		@apply relative flex h-16 w-full items-center gap-2 surface-container-low px-3 py-2;
 	}
 }
@@ -27,7 +27,7 @@
  * Define different visual variants for the appbar component.
  * ========================================================================== */
 @utility appbar-centered {
-	@layer appbar.l2 {
+	@layer appbar.l1.l2 {
 		@apply justify-center;
 
 		/* With a leading or trailing slot present, spread items to the edges
@@ -43,7 +43,7 @@
  * Define different slots for the appbar component.
  * ========================================================================== */
 @utility appbar-leading {
-	@layer appbar.l2 {
+	@layer appbar.l1.l2 {
 		@apply inline-flex max-w-1/2 items-center gap-2;
 
 		/* Tighten the appbar's left edge when a leading slot is present. */
@@ -53,7 +53,7 @@
 	}
 }
 @utility appbar-trailing {
-	@layer appbar.l2 {
+	@layer appbar.l1.l2 {
 		@apply inline-flex max-w-1/2 items-center gap-2;
 
 		/* Tighten the appbar's right edge when a trailing slot is present. */
@@ -63,7 +63,7 @@
 	}
 }
 @utility appbar-body {
-	@layer appbar.l2 {
+	@layer appbar.l1.l2 {
 		/* min-w-0 lets the body shrink below its content width so the title
 		 * truncates instead of pushing the leading/trailing slots. */
 		@apply flex h-full w-full min-w-0 flex-col justify-center overflow-hidden select-none;
@@ -84,12 +84,12 @@
 	}
 }
 @utility appbar-title {
-	@layer appbar.l2 {
+	@layer appbar.l1.l2 {
 		@apply w-full truncate text-title-medium-emphasized text-on-surface;
 	}
 }
 @utility appbar-subtitle {
-	@layer appbar.l2 {
+	@layer appbar.l1.l2 {
 		@apply w-full truncate text-label-small text-on-surface-variant;
 	}
 }

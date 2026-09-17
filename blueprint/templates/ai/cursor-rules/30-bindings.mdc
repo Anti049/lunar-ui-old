@@ -1,0 +1,14 @@
+---
+description: Framework binding packages
+globs: ['packages/{svelte,react,vue}/**']
+alwaysApply: false
+---
+
+- Bindings are thin: markup, keyboard behaviour, ARIA. No visual logic. If you
+  reach for an inline style, the plugin is missing a class.
+- The three packages export the identical component set with identical props.
+  A component lands in all three or in none.
+- The plugin is a **peer** dependency, so a consumer installs one copy.
+- Each package exports a `styles.css` that registers its own files as a Tailwind
+  `@source`. Without it a consumer's scan never sees inside `node_modules` and
+  the components render unstyled.

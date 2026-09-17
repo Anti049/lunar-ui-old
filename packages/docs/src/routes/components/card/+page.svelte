@@ -1,2 +1,2 @@
-<h1 class="text-3xl font-bold mb-4">Card</h1>
+<h1 class="mb-4 text-3xl font-bold">Card</h1>
 <p>Documentation and examples for the Card component.</p>

@@ -1,0 +1,66 @@
+# Two deployment targets. Keep the one you want and delete the other job.
+#
+#   pages      — free, no external account, but a subpath (/project-name/) which
+#                means BASE_PATH and resolve() on every internal link. Static only.
+#   cloudflare — a real origin, no base path, preview URLs per PR, SSR later.
+
+name: Docs
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------- Pages ----
+  pages:
+    name: GitHub Pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      # The plugin must be built before the docs site can resolve it: production
+      # builds go through the exports map to dist/, not through the dev alias.
+      - run: bun run build:packages
+
+      - name: Build site
+        run: bun run --filter '@scope/project-name-docs' build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/docs/build
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  # ----------------------------------------------------------- Cloudflare ----
+  cloudflare:
+    name: Cloudflare Workers
+    runs-on: ubuntu-latest
+    if: false # flip to true and delete the `pages` job to use this instead
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build:packages
+      - run: bun run --filter '@scope/project-name-docs' build
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/docs
+          command: deploy

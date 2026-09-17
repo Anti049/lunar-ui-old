@@ -24,11 +24,10 @@
  *   swap-rotate — rotates the two elements as they cross-fade
  *   swap-flip   — 3D flip between the two elements
  *
- * Layer priority (declared in core/layers.css, LOW → HIGH):
- *   l3 — foundation (container + base child visibility)
- *   l2 — animation variants (rotate, flip)
- *   l1 — state (checked visibility overrides)
- * ========================================================================== */
+ * Layer priority (deeper nests weaker, LOW → HIGH):
+ *   l1.l2.l3 foundation (container + base child visibility)
+ *   l1.l2    animation variants (rotate, flip)
+ *   l1       state (checked visibility overrides)
 
 /* =============================================================================
  * FOUNDATION (l3)
@@ -36,7 +35,7 @@
  * ========================================================================== */
 
 @utility swap {
-	@layer swap.l3 {
+	@layer swap.l1.l2.l3 {
 		@apply relative inline-grid cursor-pointer place-items-center align-middle select-none;
 
 		/* Stack every direct child into the same grid cell so they overlap. */
@@ -53,13 +52,13 @@
 
 /* Default visibility: the OFF element is shown, the ON element is hidden. */
 @utility swap-on {
-	@layer swap.l3 {
+	@layer swap.l1.l2.l3 {
 		opacity: 0;
 	}
 }
 
 @utility swap-off {
-	@layer swap.l3 {
+	@layer swap.l1.l2.l3 {
 		opacity: 1;
 	}
 }
@@ -71,7 +70,7 @@
 
 /* ROTATE — the elements pivot as they cross-fade. */
 @utility swap-rotate {
-	@layer swap.l2 {
+	@layer swap.l1.l2 {
 		.swap-on {
 			transform: rotate(-45deg);
 		}
@@ -84,7 +83,7 @@
 
 /* FLIP — a 3D card flip. Visibility is driven by backface, not opacity. */
 @utility swap-flip {
-	@layer swap.l2 {
+	@layer swap.l1.l2 {
 		transform-style: preserve-3d;
 		perspective: 12rem;
 
@@ -111,36 +110,36 @@
 
 @utility swap {
 	&:has(> input:checked) {
-	@layer swap.l1 {
-		.swap-on {
-			opacity: 1;
+		@layer swap.l1 {
+			.swap-on {
+				opacity: 1;
+			}
+
+			.swap-off {
+				opacity: 0;
+			}
 		}
 
-		.swap-off {
-			opacity: 0;
+		/* ROTATE — swing the incoming element upright, spin the outgoing away. */
+		&.swap-rotate {
+			.swap-on {
+				transform: rotate(0deg);
+			}
+
+			.swap-off {
+				transform: rotate(45deg);
+			}
+		}
+
+		/* FLIP — rotate the card so the ON face comes forward. */
+		&.swap-flip {
+			.swap-on {
+				transform: rotateY(360deg);
+			}
+
+			.swap-off {
+				transform: rotateY(180deg);
+			}
 		}
 	}
-
-	/* ROTATE — swing the incoming element upright, spin the outgoing away. */
-	&.swap-rotate {
-		.swap-on {
-			transform: rotate(0deg);
-		}
-
-		.swap-off {
-			transform: rotate(45deg);
-		}
-	}
-
-	/* FLIP — rotate the card so the ON face comes forward. */
-	&.swap-flip {
-		.swap-on {
-			transform: rotateY(360deg);
-		}
-
-		.swap-off {
-			transform: rotateY(180deg);
-		}
-	}
-}
 }

@@ -11,7 +11,7 @@
 }
 
 @utility collapse {
-	@layer collapse.l3 {
+	@layer collapse.l1.l2.l3 {
 		@apply relative isolate grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[max-content_0fr] rounded-sm;
 
 		> input:is([type='checkbox'], [type='radio']) {

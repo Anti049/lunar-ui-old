@@ -1,2 +1,2 @@
-<h1 class="text-3xl font-bold mb-4">Switch</h1>
+<h1 class="mb-4 text-3xl font-bold">Switch</h1>
 <p>Documentation and examples for the Switch component.</p>

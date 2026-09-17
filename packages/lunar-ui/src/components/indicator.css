@@ -10,13 +10,13 @@
 }
 
 @utility indicator {
-	@layer indicator.l3 {
+	@layer indicator.l1.l2.l3 {
 		@apply relative inline-flex w-max;
 	}
 }
 
 @utility indicator-item {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		@apply absolute top-(--indicator-top,0) right-(--indicator-right,0) bottom-(--indicator-bottom,auto) left-(--indicator-left,auto) z-1 translate-x-(--indicator-translate-x,0) translate-y-(--indicator-translate-y,0) text-label-small;
 		/* Default is top right */
 		@apply indicator-right indicator-top;
@@ -24,7 +24,7 @@
 }
 
 @utility indicator-left {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		--indicator-left: 0;
 		--indicator-right: auto;
 		--indicator-translate-x: calc(-1 * var(--indicator-translate-amount, 50%));
@@ -32,7 +32,7 @@
 }
 
 @utility indicator-center {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		--indicator-left: 50%;
 		--indicator-right: auto;
 		--indicator-translate-x: calc(-1 * var(--indicator-translate-amount, 50%));
@@ -40,7 +40,7 @@
 }
 
 @utility indicator-right {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		--indicator-left: auto;
 		--indicator-right: 0;
 		--indicator-translate-x: var(--indicator-translate-amount, 50%);
@@ -48,7 +48,7 @@
 }
 
 @utility indicator-bottom {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		--indicator-top: auto;
 		--indicator-bottom: 0;
 		--indicator-translate-y: var(--indicator-translate-amount, 50%);
@@ -56,7 +56,7 @@
 }
 
 @utility indicator-middle {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		--indicator-top: 50%;
 		--indicator-bottom: auto;
 		--indicator-translate-y: calc(-1 * var(--indicator-translate-amount, 50%));
@@ -64,7 +64,7 @@
 }
 
 @utility indicator-top {
-	@layer indicator.l2 {
+	@layer indicator.l1.l2 {
 		--indicator-top: 0;
 		--indicator-bottom: auto;
 		--indicator-translate-y: calc(-1 * var(--indicator-translate-amount, 50%));

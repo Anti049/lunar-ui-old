@@ -1,0 +1,77 @@
+name: Bug report
+description: Something renders or behaves incorrectly
+labels: ['type:fix', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The single most useful field here is **which package** —
+        most reports stall because nobody can tell whether the problem is in the
+        plugin or in a framework binding.
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Which package?
+      description: If you are not sure, pick the one you were using when you saw it.
+      options:
+        - '@scope/project-name (the Tailwind plugin)'
+        - '@scope/project-name-svelte'
+        - '@scope/project-name-react'
+        - '@scope/project-name-vue'
+        - 'Documentation site'
+        - 'Not sure'
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: 'Output of `npm ls @scope/project-name`'
+      placeholder: '0.4.2'
+    validations:
+      required: true
+
+  - type: input
+    id: tailwind
+    attributes:
+      label: Tailwind CSS version
+      placeholder: '4.1.0'
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: |
+        A link to a minimal repository or StackBlitz is worth ten paragraphs.
+        Failing that: your `app.css`, the markup, and the rendered result.
+      render: html
+    validations:
+      required: true
+
+  - type: textarea
+    id: css
+    attributes:
+      label: Your Tailwind entry stylesheet
+      description: "The file containing `@import 'tailwindcss'` and `@plugin`."
+      render: css
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I imported the binding's `styles.css` (required, and the most common cause of unstyled components)
+        - label: I checked this against the latest release
+        - label: I searched existing issues

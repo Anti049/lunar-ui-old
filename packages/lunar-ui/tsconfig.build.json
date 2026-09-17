@@ -16,5 +16,5 @@
 		imports from the entries instead, which ships exactly what the runtime
 		reaches -- no hand-maintained list to fall out of date.
 	*/
-	"include": ["index.ts", "theme.ts", "types.ts", "generated/**/*.ts"]
+	"include": ["index.ts", "theme.ts", "themes.ts", "types.ts", "generated/**/*.ts"]
 }

@@ -1,0 +1,20 @@
+---
+description: Authoring the design system's CSS
+globs: ['packages/core/src/**/*.css']
+alwaysApply: false
+---
+
+- One component per file in `src/components/`, added to `_index.css`.
+- Layers nest and deeper is weaker: `@layer badge.l1.l2.l3` (foundation),
+  `.l1.l2` (variant), `.l1` (state). Never flatten to siblings — sibling layers
+  order by first appearance, so moving a block changes what wins.
+- The first layer segment is the bundle name; the build reads it to attribute
+  the rule.
+- `src/base/` emits tokens and no classes. A utility placed there becomes
+  invisible compile context and never ships.
+- A derived token gets its fallback at the point of use
+  (`var(--radius-button, var(--radius-field))`), never a `:root` default — a
+  custom property's `var()` resolves where it is declared, so a `:root` default
+  freezes the root's value and a theme override never reaches it.
+
+After any change: `bun run --filter '@scope/project-name' check`.

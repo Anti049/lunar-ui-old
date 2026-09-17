@@ -25,8 +25,8 @@ import type { DynamicScheme } from '@material/material-color-utilities';
 
 /** The tone steps lunar-ui's themes declare. Material's standard set. */
 const TONES = [
-	0, 2, 4, 5, 6, 10, 12, 17, 20, 22, 24, 30, 40, 50, 60, 65, 70, 75, 80, 84, 87, 90, 92, 94, 95,
-	96, 97, 98, 99, 100
+	0, 2, 4, 5, 6, 10, 12, 17, 20, 22, 24, 30, 40, 50, 60, 65, 70, 75, 80, 84, 87, 90, 92, 94, 95, 96,
+	97, 98, 99, 100
 ] as const;
 
 type SchemeConstructor = new (source: Hct, isDark: boolean, contrast: number) => DynamicScheme;
@@ -72,15 +72,78 @@ export const STATUS_HUES = {
 
 export type StatusPalette = keyof typeof STATUS_HUES;
 
+/*
+	The palettes Material derives from the scheme, and the option that overrides
+	each one.
+
+	`seed` decides the scheme, and the scheme decides all five of these. Giving a
+	role its own seed replaces just that palette and leaves the rest derived, so
+	you can pin a brand secondary without losing the relationships Material found
+	for everything else.
+*/
+export const CORE_PALETTES = [
+	{ token: 'primary', of: (s: DynamicScheme) => s.primaryPalette },
+	{ token: 'secondary', of: (s: DynamicScheme) => s.secondaryPalette },
+	{ token: 'tertiary', of: (s: DynamicScheme) => s.tertiaryPalette },
+	{ token: 'neutral', of: (s: DynamicScheme) => s.neutralPalette },
+	{ token: 'neutral-variant', of: (s: DynamicScheme) => s.neutralVariantPalette },
+	{ token: 'error', of: (s: DynamicScheme) => s.errorPalette }
+] as const;
+
+export type CorePalette = (typeof CORE_PALETTES)[number]['token'];
+
+/**
+ * The seed colours a theme is built from.
+ *
+ * `primary` is the only one required: it seeds the Material scheme, and the
+ * scheme derives every palette left unset. Naming one of the others replaces
+ * just that palette, so a brand colour can be pinned without losing the
+ * relationships Material found for the rest.
+ *
+ * Core seeds are taken exactly. Status seeds are harmonized toward `primary` by
+ * default, which is what keeps a green success and a blue theme reading as one
+ * palette rather than two unrelated ones -- see `harmonize`.
+ */
+export interface ThemeSeeds {
+	primary: string;
+	secondary?: string;
+	tertiary?: string;
+	neutral?: string;
+	'neutral-variant'?: string;
+	error?: string;
+	success?: string;
+	warning?: string;
+	alert?: string;
+	info?: string;
+}
+
+/** Every role that can be seeded, core then status. */
+export const SEED_ROLES: readonly (CorePalette | StatusPalette)[] = [
+	...CORE_PALETTES.map((p) => p.token),
+	...(Object.keys(STATUS_HUES) as StatusPalette[])
+];
+
+/*
+	The `@plugin` option that seeds a role.
+
+	`ThemeSeeds` is a nested object, and a CSS `@plugin` body cannot express one
+	-- Tailwind rejects `seeds: { primary: … }` with "Unexpected `@plugin`
+	option". So the CSS surface is flat, one key per role, and buildTheme folds
+	those back into a `ThemeSeeds` before anything else looks at them. There is
+	one shape internally; this is only how it is spelled in CSS.
+*/
+export const seedOption = (role: CorePalette | StatusPalette): string => `seed-${role}`;
+
+/** Every `seed-*` option name, for validation and error messages. */
+export const SEED_OPTIONS = SEED_ROLES.map(seedOption);
+
 export interface GenerateThemeOptions {
-	/** Seed colour, any hex Material accepts (`#0956AA`). */
-	seed: string;
+	/** The colours every palette is built from. `primary` seeds the scheme. */
+	seeds: ThemeSeeds;
 	/** Scheme variant; see VARIANT_NAMES. Matching ignores case, spaces and dashes. */
 	variant?: string;
 	/** Material contrast level, -1 (low) to 1 (high). */
 	contrast?: number;
-	/** Per-palette seed overrides for the four status roles. */
-	status?: Partial<Record<StatusPalette, string>>;
 	/**
 	 * Rotate the status palettes toward the seed's hue so they read as part of
 	 * the same palette. Material's `Blend.harmonize`, which shifts by at most 15
@@ -115,23 +178,50 @@ export function generateThemePalette(options: GenerateThemeOptions): Record<stri
 		);
 	}
 
+	const seeds = options.seeds;
+
 	let source: Hct;
 	try {
-		source = Hct.fromInt(argbFromHex(options.seed));
+		source = Hct.fromInt(argbFromHex(seeds.primary));
 	} catch {
-		throw new Error(`lunar-ui: could not parse seed colour "${options.seed}". Expected a hex colour.`);
+		throw new Error(
+			`lunar-ui: could not parse seed colour "${seeds.primary}". Expected a hex colour.`
+		);
 	}
 
 	const scheme = new Scheme(source, false, options.contrast ?? 0);
 
-	const declarations: Record<string, string> = {
-		...toneSteps(scheme.primaryPalette, 'primary'),
-		...toneSteps(scheme.secondaryPalette, 'secondary'),
-		...toneSteps(scheme.tertiaryPalette, 'tertiary'),
-		...toneSteps(scheme.neutralPalette, 'neutral'),
-		...toneSteps(scheme.neutralVariantPalette, 'neutral-variant'),
-		...toneSteps(scheme.errorPalette, 'error')
-	};
+	const declarations: Record<string, string> = {};
+
+	/*
+		A core palette comes from the scheme unless it was given its own seed, in
+		which case it is built straight from that colour. Core seeds are not
+		harmonized: the point of pinning one is to get that exact colour, where a
+		status seed is a starting hue that should read as part of the palette.
+	*/
+	for (const palette of CORE_PALETTES) {
+		/*
+			`primary` is the scheme's source, not an override of it. Taking it from
+			the scheme is what lets `variant` shape it -- read straight from the
+			seed instead, every variant would return the same primary palette and
+			only the other roles would change.
+		*/
+		const override = palette.token === 'primary' ? undefined : seeds[palette.token];
+		if (override === undefined) {
+			Object.assign(declarations, toneSteps(palette.of(scheme), palette.token));
+			continue;
+		}
+		let argb: number;
+		try {
+			argb = argbFromHex(override);
+		} catch {
+			throw new Error(
+				`lunar-ui: could not parse the "${seedOption(palette.token)}" colour "${override}". ` +
+					`Expected a hex colour.`
+			);
+		}
+		Object.assign(declarations, toneSteps(TonalPalette.fromInt(argb), palette.token));
+	}
 
 	/*
 		Harmonize applies to supplied seeds as well as the defaults, so `success`
@@ -140,13 +230,14 @@ export function generateThemePalette(options: GenerateThemeOptions): Record<stri
 	*/
 	const harmonize = options.harmonize ?? true;
 	for (const name of Object.keys(STATUS_HUES) as StatusPalette[]) {
-		const hex = options.status?.[name] ?? STATUS_HUES[name];
+		const hex = seeds[name] ?? STATUS_HUES[name];
 		let argb: number;
 		try {
 			argb = argbFromHex(hex);
 		} catch {
 			throw new Error(
-				`lunar-ui: could not parse the "${name}" colour "${hex}". Expected a hex colour.`
+				`lunar-ui: could not parse the "${seedOption(name)}" colour "${hex}". ` +
+					`Expected a hex colour.`
 			);
 		}
 		const resolved = harmonize ? Blend.harmonize(argb, source.toInt()) : argb;

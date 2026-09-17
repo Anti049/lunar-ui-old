@@ -1,0 +1,302 @@
+[
+	{
+		"title": "Scaffold the monorepo workspaces",
+		"milestone": "v0.1.0 — Repository foundation",
+		"labels": ["area:repo", "type:chore"],
+		"body": "Create `packages/{core,svelte,react,vue,docs}` with workspace manifests.\n\n**Done when**\n- `bun install` resolves every workspace\n- each package has `name`, `version`, `license`, `repository.directory`\n- `packages/core` takes the bare package name; bindings are suffixed\n\nSee `blueprint/guides/01-monorepo.md`."
+	},
+	{
+		"title": "Shared TypeScript, ESLint and Prettier config",
+		"milestone": "v0.1.0 — Repository foundation",
+		"labels": ["area:repo", "type:chore"],
+		"body": "One `tsconfig.base.json`, one flat `eslint.config.js`, one `.prettierrc`.\n\n**Done when**\n- `\"types\": []` is set in the base tsconfig so packages opt in explicitly\n- `eslint-config-prettier` is last in the chain\n- `bun run lint` passes on the empty tree\n\n**Trap:** point `tailwindStylesheet` at a dedicated stylesheet loading the plugin from source, never at the docs app's `app.css`."
+	},
+	{
+		"title": "Add LICENSE and license fields",
+		"milestone": "v0.1.0 — Repository foundation",
+		"labels": ["area:repo", "type:chore", "good first issue"],
+		"body": "A package published without a license shows as UNLICENSED and cannot legally be used. `publint` does not check this.\n\n**Done when**\n- `LICENSE` exists at the repository root\n- every publishable `package.json` has a matching `license` field"
+	},
+	{
+		"title": "CI workflow: lint, typecheck, test, build",
+		"milestone": "v0.1.0 — Repository foundation",
+		"labels": ["area:ci", "type:chore"],
+		"body": "**Done when**\n- runs on `pull_request` and push to `main`\n- `fetch-depth: 0` so commitlint can compare against the base branch\n- `bun install --frozen-lockfile`\n- branch protection requires it\n\n**Trap:** hooks are bypassable and do not run on web-UI PRs. CI is the only real gate."
+	},
+	{
+		"title": "Conventional Commits enforcement",
+		"milestone": "v0.1.0 — Repository foundation",
+		"labels": ["area:repo", "type:chore"],
+		"body": "commitlint + husky locally, commitlint in CI, VS Code settings and recommended extensions for authoring.\n\n**Done when**\n- `commitlint.config.js` pins the scope list to the package names\n- `.husky/commit-msg` runs commitlint\n- `.vscode/extensions.json` recommends the Conventional Commits extension\n- a badly formatted commit fails CI"
+	},
+	{
+		"title": "Changesets setup with fixed version group",
+		"milestone": "v0.1.0 — Repository foundation",
+		"labels": ["area:repo", "type:chore"],
+		"body": "**Done when**\n- the four publishable packages are in one `fixed` group\n- the docs site is in `ignore`\n- `changelog-github` is configured with the repo slug\n- a PR without a changeset fails CI unless labelled `skip-changeset`\n\n**Trap:** verify `bunx changeset version --dry-run` does not propose a major. Changesets majors any package with a peer dependency on a bumped package regardless of range."
+	},
+	{
+		"title": "Decide and document the component authoring convention",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:docs", "priority:high"],
+		"body": "Plain class selectors or `@utility` blocks, and the cascade layer shape. Both decisions are near-irreversible once components exist.\n\n**Done when**\n- the choice and its reasoning are in `docs/decisions/`\n- `AGENTS.md` states the rule in the imperative\n- one worked example exists in `src/components/`\n\nSee `blueprint/guides/00-prerequisites.md` for the trade-offs."
+	},
+	{
+		"title": "Source layout: base, utilities, components, themes",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:chore"],
+		"body": "Split `src/` by what a file emits, not by topic.\n\n**Done when**\n- `base/` declares tokens and no classes\n- `utilities/` holds non-namespaced utilities\n- each directory has an `_index.css` barrel\n- the split is documented, because a utility filed under `base/` becomes invisible context and silently never ships"
+	},
+	{
+		"title": "Build: compile CSS and partition into per-component bundles",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:feat", "priority:high"],
+		"body": "Differential compile — context alone, then context plus components — keeping the difference and attributing each rule to a bundle.\n\n**Done when**\n- attribution works by layer name, then class name, then classes inside an unknown at-rule\n- unattributed rules are reported, not silently dropped\n- output is written as `.ts` so `tsc` checks the runtime against the real shape\n\n**Trap:** `@reference` suppresses `@utility` emission entirely. Use a plain `@import` and diff."
+	},
+	{
+		"title": "Pin the compile to source(none)",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:fix", "priority:high"],
+		"body": "Without `source(none)`, Tailwind scans the repository for class candidates, so a class name written in a comment becomes a real utility baked into the shipped bundle.\n\n**Done when**\n- `context.css` uses `@import 'tailwindcss' source(none);`\n- candidates come only from the extracted class list via `@source inline()`\n- a test asserts the bundle contains no selector the source did not define"
+	},
+	{
+		"title": "Extractors for classes, variants and theme namespaces",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:feat"],
+		"body": "Derive every registry from the CSS. Hand-maintained lists have shipped incomplete more than once — in one case 1 of 3 custom variants, while the docs site used one of the missing two.\n\n**Done when**\n- class names, custom variants and theme namespaces are all extracted\n- no hand-written list of names remains in the build"
+	},
+	{
+		"title": "Detect and yield Tailwind built-in collisions",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:fix"],
+		"body": "Names like `collapse`, `table` and `select-text` are Tailwind's own. Claiming them pulls Tailwind's rules into your bundle.\n\n**Done when**\n- a bare-Tailwind probe compile identifies collisions\n- colliding names are left unclaimed and reported at build time\n- the probe uses bare Tailwind, not the full context, or it reports dozens of false positives"
+	},
+	{
+		"title": "Prefix option with an allowlist prefixer",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:feat"],
+		"body": "Rename only what the build extracted, rather than renaming everything and maintaining a denylist of exceptions.\n\n**Done when**\n- `@plugin '…' { prefix: x- }` renames every owned class and component-local custom property\n- Tailwind theme variables, consumer state hooks and third-party classes are untouched\n- the selector scanner survives quoted strings, comments, attribute selectors and escapes"
+	},
+	{
+		"title": "include / exclude options",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:feat"],
+		"body": "**Done when**\n- `include` ships only the named bundles; `exclude` ships all but\n- an unknown bundle name throws and lists the valid ones\n- a compile with `include` of one component emits only that component's rules"
+	},
+	{
+		"title": "Unconditional channel for runtime-written classes",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:fix", "priority:high"],
+		"body": "A class created by JavaScript at runtime — a ripple element, a portal root — has no candidate in any scanned file, so `addUtilities` never emits its rule and the feature is silently dead for plugin consumers.\n\n**Done when**\n- such classes are routed through `addBase`\n- the list lives in one named constant\n- a test asserts the rule appears with no candidate present"
+	},
+	{
+		"title": "Differential test harness",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:test", "priority:high"],
+		"body": "Compile every component twice from the same source — via `@import` and via `@plugin` — and compare selector by selector.\n\n**Done when**\n- benign differences are reported separately from real ones\n- mutating a value in the generated output makes it fail, naming the selector and property\n- standalone resolution, prefixing and themes are asserted in the same pass"
+	},
+	{
+		"title": "Unit tests for the pure build functions",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:test"],
+		"body": "The differential harness reports symptoms; these name the cause.\n\n**Done when**\n- `partition`, `addPrefix`, `nestCssLayers` and the extractors each have tests\n- kebab conversion covers vendor prefixes and array values\n- seeded mutations are each caught by name"
+	},
+	{
+		"title": "publint and are-the-types-wrong in check",
+		"milestone": "v0.2.0 — Plugin core",
+		"labels": ["area:core", "type:test"],
+		"body": "**Done when**\n- `check` runs build, typecheck, tests and `publint` in that order\n- `attw` passes for both module systems"
+	},
+	{
+		"title": "Button component",
+		"milestone": "v0.3.0 — First component set",
+		"labels": ["area:core", "type:feat", "component"],
+		"body": "Variants (filled, tonal, outlined, text), sizes, colours, icon and shape modifiers, disabled and selected states.\n\n**Done when**\n- authored in the agreed layer scheme\n- corner radius reads a token chain, not a hardcoded utility\n- a Tailwind utility on the element still overrides the component"
+	},
+	{
+		"title": "Badge component",
+		"milestone": "v0.3.0 — First component set",
+		"labels": ["area:core", "type:feat", "component"],
+		"body": "Variants, colours, sizes, and a dot form when empty."
+	},
+	{
+		"title": "Input and select components",
+		"milestone": "v0.3.0 — First component set",
+		"labels": ["area:core", "type:feat", "component"],
+		"body": "Field-shaped controls sharing a radius and size token with the button.\n\n**Done when**\n- both read `--radius-field` rather than a hardcoded value\n- disabled, invalid and focus states are covered"
+	},
+	{
+		"title": "Checkbox component",
+		"milestone": "v0.3.0 — First component set",
+		"labels": ["area:core", "type:feat", "component"],
+		"body": "Checked, unchecked and indeterminate, with a visible focus ring that survives a custom accent colour."
+	},
+	{
+		"title": "Tooltip component",
+		"milestone": "v0.3.0 — First component set",
+		"labels": ["area:core", "type:feat", "component"],
+		"body": "CSS-only, four placements, three alignments, with a tail.\n\n**Done when**\n- gap, tail size and tail width are settable per element\n- the tail and bubble share colour and transform so they move as one shape"
+	},
+	{
+		"title": "Shape tokens wired into components",
+		"milestone": "v0.3.0 — First component set",
+		"labels": ["area:core", "type:feat"],
+		"body": "`--radius-selector`, `--radius-field`, `--radius-box`, `--size-selector`, `--size-field`, `--border-width`, `--animation-duration`, `--animation-easing`.\n\n**Done when**\n- tokens are settable on the plugin and per theme\n- at least one component reads each\n- a derived token (`--radius-button`) falls back at the point of use, not via a `:root` default — a `:root` default bakes in the root's value and a theme override never reaches it"
+	},
+	{
+		"title": "Svelte package scaffold and build",
+		"milestone": "v0.4.0 — Svelte bindings",
+		"labels": ["area:svelte", "type:chore"],
+		"body": "`svelte-package`, exports map with the `svelte` condition, `publint` in the build.\n\n**Done when**\n- `styles.css` is exported and registers the package's `.svelte` files as a Tailwind `@source`\n- the plugin is a peer dependency, not a dependency\n\nStep-by-step setup: `blueprint/guides/04-svelte.md`."
+	},
+	{
+		"title": "Svelte components for the v0.3.0 set",
+		"milestone": "v0.4.0 — Svelte bindings",
+		"labels": ["area:svelte", "type:feat"],
+		"body": "Thin wrappers: markup, keyboard behaviour, ARIA. No visual logic.\n\n**Done when**\n- every component forwards rest props and merges an incoming `class`\n- no component sets an inline style for anything a class could do\n\nStep-by-step setup: `blueprint/guides/04-svelte.md`."
+	},
+	{
+		"title": "cn() helper and class-merge semantics",
+		"milestone": "v0.4.0 — Svelte bindings",
+		"labels": ["area:svelte", "type:feat"],
+		"body": "clsx + tailwind-merge, exported so consumers can compose predictably. Document that a consumer class wins over the component default.\n\nStep-by-step setup: `blueprint/guides/03-bindings.md`."
+	},
+	{
+		"title": "React package scaffold and dual ESM/CJS build",
+		"milestone": "v0.5.0 — React bindings",
+		"labels": ["area:react", "type:chore"],
+		"body": "**Done when**\n- `tsup` emits ESM, CJS and types\n- `sideEffects` lists CSS files rather than blanket-false\n- peer range covers React 18 and 19\n- `forwardRef` is kept for React 18 compatibility\n\nStep-by-step setup: `blueprint/guides/05-react.md`."
+	},
+	{
+		"title": "React components matching the Svelte inventory",
+		"milestone": "v0.5.0 — React bindings",
+		"labels": ["area:react", "type:feat"],
+		"body": "Same components, same prop names, same defaults.\n\nStep-by-step setup: `blueprint/guides/05-react.md`."
+	},
+	{
+		"title": "Vue package scaffold and build",
+		"milestone": "v0.6.0 — Vue bindings",
+		"labels": ["area:vue", "type:chore"],
+		"body": "Vite library build plus `vue-tsc` for declarations — plain `tsc` cannot read `<script setup>`.\n\nStep-by-step setup: `blueprint/guides/06-vue.md`."
+	},
+	{
+		"title": "Vue components matching the inventory",
+		"milestone": "v0.6.0 — Vue bindings",
+		"labels": ["area:vue", "type:feat"],
+		"body": "Same components, same props, same defaults.\n\nStep-by-step setup: `blueprint/guides/06-vue.md`."
+	},
+	{
+		"title": "Export-parity test across the three bindings",
+		"milestone": "v0.6.0 — Vue bindings",
+		"labels": ["area:repo", "type:test"],
+		"body": "Fail when the three packages stop exporting the same component set. Documentation cannot catch this drift; a test can.\n\nStep-by-step setup: `blueprint/guides/03-bindings.md`."
+	},
+	{
+		"title": "Docs site scaffold with live plugin reload",
+		"milestone": "v0.7.0 — Documentation site",
+		"labels": ["area:docs", "type:chore", "priority:high"],
+		"body": "**Done when**\n- editing `packages/core/src/**` updates the browser without a restart\n- the watcher runs as a child of the dev server, because `bun run --filter` serialises on workspace dependencies\n- dev aliases use anchored patterns, one per exported subpath\n- production builds resolve to `dist/`\n\nStep-by-step setup: `blueprint/guides/07-docs.md`."
+	},
+	{
+		"title": "Component pages with live previews for all three frameworks",
+		"milestone": "v0.7.0 — Documentation site",
+		"labels": ["area:docs", "type:feat"],
+		"body": "**Done when**\n- each page shows a rendered preview and copyable markup per framework\n- the class table is generated from the plugin's registry, not hand-written"
+	},
+	{
+		"title": "Installation and setup pages per framework",
+		"milestone": "v0.7.0 — Documentation site",
+		"labels": ["area:docs", "type:docs"],
+		"body": "**Done when**\n- each names the required `styles.css` import and says it is not optional\n- the Tailwind version requirement is stated\n- a copy-paste block gets someone to a styled button"
+	},
+	{
+		"title": "Deploy the docs site",
+		"milestone": "v0.7.0 — Documentation site",
+		"labels": ["area:ci", "area:docs", "type:chore"],
+		"body": "GitHub Pages or Cloudflare Workers.\n\n**Done when**\n- deploys on push to `main`\n- if Pages, the base path is configured and every internal link uses `resolve()`\n- the deploy is gated on the release job so the site never documents an unpublished version"
+	},
+	{
+		"title": "Custom themes from a seed colour",
+		"milestone": "v0.8.0 — Theming",
+		"labels": ["area:core", "type:feat", "priority:high"],
+		"body": "A second plugin entry that generates a full tonal palette from one colour.\n\n**Done when**\n- scheme variants are supported and validated\n- hand-declared roles override generated ones\n- a default theme applies at `:root:not([data-theme])`, never plain `:root` — they have equal specificity, so a default declared last would otherwise beat every other theme"
+	},
+	{
+		"title": "Per-role seeds",
+		"milestone": "v0.8.0 — Theming",
+		"labels": ["area:core", "type:feat"],
+		"body": "Pin any palette to an exact colour while the rest stay derived.\n\n**Done when**\n- the primary seed still seeds the scheme, so the variant reshapes it — reading it back as an override makes every variant produce an identical primary palette\n- core seeds are exact; status seeds stay harmonized\n- unknown option names are rejected with a suggestion"
+	},
+	{
+		"title": "Theme catalogue export for JavaScript",
+		"milestone": "v0.8.0 — Theming",
+		"labels": ["area:core", "type:feat"],
+		"body": "Ship theme names and a few representative colours per theme so consumers can build a picker.\n\n**Done when**\n- both light and dark values are resolved for every theme\n- the data entry point has no runtime dependencies, so a name list does not drag in the colour library\n- a helper resolves swatches for a consumer's own generated theme"
+	},
+	{
+		"title": "Theme generator page in the docs",
+		"milestone": "v0.8.0 — Theming",
+		"labels": ["area:docs", "type:feat"],
+		"body": "Pick a seed, preview live, copy the plugin call or the expanded CSS.\n\n**Done when**\n- the page calls the plugin's own builder, so what it shows is what the plugin emits\n- the preview container carries `data-theme` so the mode mapping re-resolves at that scope\n- an invalid seed shows an inline message and leaves the previous palette on screen"
+	},
+	{
+		"title": "Keyboard and screen-reader audit",
+		"milestone": "v0.9.0 — Accessibility and hardening",
+		"labels": ["area:repo", "type:a11y", "priority:high"],
+		"body": "Every interactive component, in all three bindings.\n\n**Done when**\n- focus is visible on every control against every shipped theme\n- tab order is sensible and nothing is a keyboard trap\n- findings are filed as individual issues"
+	},
+	{
+		"title": "Contrast checking on generated themes",
+		"milestone": "v0.9.0 — Accessibility and hardening",
+		"labels": ["area:core", "type:a11y"],
+		"body": "Compute contrast ratios at build time and fail when a generated foreground/background pair drops below 4.5:1. Cheaper and earlier than catching it in a browser."
+	},
+	{
+		"title": "Visual regression coverage",
+		"milestone": "v0.9.0 — Accessibility and hardening",
+		"labels": ["area:repo", "type:test"],
+		"body": "Playwright screenshots per component × theme × mode, plus axe-core in the same run. Gate on a label or run nightly — the matrix is too large for every PR."
+	},
+	{
+		"title": "Migration guide infrastructure",
+		"milestone": "v0.9.0 — Accessibility and hardening",
+		"labels": ["area:docs", "type:docs"],
+		"body": "A page per breaking release with before/after for each change, linked from the changelog entry. Include a codemod or a documented `sed` where a rename is mechanical."
+	},
+	{
+		"title": "Freeze the plugin option surface",
+		"milestone": "v1.0.0 — Stable API",
+		"labels": ["area:core", "type:docs", "priority:high"],
+		"body": "**Done when**\n- every `@plugin` option is documented with its type, default and validation\n- every emitted class and token is listed as public API\n- what counts as a breaking change is written down"
+	},
+	{
+		"title": "Version support matrix",
+		"milestone": "v1.0.0 — Stable API",
+		"labels": ["area:docs", "type:docs"],
+		"body": "Which Tailwind, Svelte, React, Vue and Node versions each release supports, in the README and on the site."
+	},
+	{
+		"title": "Architecture decision records",
+		"milestone": "v1.0.0 — Stable API",
+		"labels": ["area:repo", "type:docs"],
+		"body": "One short record per significant choice: plugin over stylesheet, layer shape, authoring convention, fixed version group. Six months later the reasoning is what stops someone undoing it."
+	},
+	{
+		"title": "Ship a stylesheet alongside the plugin",
+		"milestone": "Backlog",
+		"labels": ["area:core", "type:feat"],
+		"body": "For consumers with no build step. Roughly doubles the build surface and needs every responsive variant pre-expanded, so only worth it with a real audience asking."
+	},
+	{
+		"title": "Drop the runtime dependency on tailwindcss/plugin",
+		"milestone": "Backlog",
+		"labels": ["area:core", "type:chore"],
+		"body": "`plugin.withOptions` is about eight lines to reimplement, which would make the package immune to the export path moving. Keep the peer dependency regardless — it is the version contract."
+	},
+	{
+		"title": "Escape-aware selector scanning in the prefixer",
+		"milestone": "Backlog",
+		"labels": ["area:core", "type:chore"],
+		"body": "Handle full CSS hex escapes (`\\31 23`) rather than backslash-plus-one-character. No current selector triggers it; the failure mode would be silent under-prefixing."
+	}
+]
