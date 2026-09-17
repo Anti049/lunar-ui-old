@@ -21,51 +21,55 @@ declarations. Use **`tsup`** (esbuild under the hood) for JS and `tsc` for types
 
 ```jsonc
 {
-  "name": "@scope/project-name-react",
-  "version": "0.0.0",
-  "description": "React 19 components for project-name.",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/your-org/project-name.git",
-    "directory": "packages/react"
-  },
-  "scripts": {
-    "build": "tsup && publint",
-    "dev": "tsup --watch",
-    "check": "tsc --noEmit",
-    "test": "vitest run",
-    "prepack": "tsup && publint"
-  },
-  "sideEffects": ["**/*.css"],
-  "types": "./dist/index.d.ts",
-  "files": ["dist"],
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" },
-    "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
-  },
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
-  "dependencies": { "clsx": "^2.1.0", "tailwind-merge": "^3.0.0" },
-  "peerDependencies": {
-    "@scope/project-name": "workspace:^",
-    "react": "^18.3.0 || ^19.0.0",
-    "react-dom": "^18.3.0 || ^19.0.0"
-  },
-  "devDependencies": {
-    "@scope/project-name": "workspace:*",
-    "@testing-library/react": "^16.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "jsdom": "^25.0.0",
-    "publint": "^0.3.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tsup": "^8.3.0",
-    "typescript": "^5.7.0",
-    "vitest": "^2.0.0"
-  },
-  "keywords": ["react", "ui", "components"]
+	"name": "@scope/project-name-react",
+	"version": "0.0.0",
+	"description": "React 19 components for project-name.",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/your-org/project-name.git",
+		"directory": "packages/react"
+	},
+	"scripts": {
+		"build": "tsup && publint",
+		"dev": "tsup --watch",
+		"check": "tsc --noEmit",
+		"test": "vitest run",
+		"prepack": "tsup && publint"
+	},
+	"sideEffects": ["**/*.css"],
+	"types": "./dist/index.d.ts",
+	"files": ["dist"],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./styles.css": "./dist/styles.css",
+		"./package.json": "./package.json"
+	},
+	"publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
+	"dependencies": { "clsx": "^2.1.0", "tailwind-merge": "^3.0.0" },
+	"peerDependencies": {
+		"@scope/project-name": "workspace:^",
+		"react": "^18.3.0 || ^19.0.0",
+		"react-dom": "^18.3.0 || ^19.0.0"
+	},
+	"devDependencies": {
+		"@scope/project-name": "workspace:*",
+		"@testing-library/react": "^16.0.0",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"jsdom": "^25.0.0",
+		"publint": "^0.3.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"tsup": "^8.3.0",
+		"typescript": "^5.7.0",
+		"vitest": "^2.0.0"
+	},
+	"keywords": ["react", "ui", "components"]
 }
 ```
 
@@ -95,13 +99,13 @@ export default defineConfig({
 
 ```jsonc
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["react", "react-dom"]
-  },
-  "include": ["src"]
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"types": ["react", "react-dom"]
+	},
+	"include": ["src"]
 }
 ```
 
@@ -198,7 +202,7 @@ an action attaching listeners).
 `src/styles.css` (identical purpose to the Svelte bridge):
 
 ```css
-@source inline("ripple button button-filled button-outline button-text");
+@source inline('ripple button button-filled button-outline button-text');
 ```
 
 `src/index.ts`:
@@ -264,7 +268,7 @@ the cross-framework parity is structural, not copied.
 
 ## 8. Keeping the three libraries in lockstep
 
-Because the React, Svelte, and Vue components share the *same* prop → class
+Because the React, Svelte, and Vue components share the _same_ prop → class
 contract, drift is the main risk. Two safeguards:
 
 1. **A shared contract test.** A small JSON fixture (`variant`/`role` → expected

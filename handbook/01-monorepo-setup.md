@@ -7,11 +7,11 @@ assumes this foundation exists.
 
 ## 1. Install the prerequisites
 
-| Tool  | Minimum | Install                                                                 |
-| ----- | ------- | ----------------------------------------------------------------------- |
-| Bun   | 1.2     | `curl -fsSL https://bun.sh/install | bash` (macOS/Linux) · `powershell -c "irm bun.sh/install.ps1 | iex"` (Windows) |
-| Node  | 20 LTS  | https://nodejs.org or a version manager (`fnm`, `nvm`, `volta`)          |
-| Git   | 2.40    | https://git-scm.com                                                     |
+| Tool | Minimum | Install                                                         |
+| ---- | ------- | --------------------------------------------------------------- |
+| Bun  | 1.2     | `curl -fsSL https://bun.sh/install                              | bash`(macOS/Linux) ·`powershell -c "irm bun.sh/install.ps1 | iex"` (Windows) |
+| Node | 20 LTS  | https://nodejs.org or a version manager (`fnm`, `nvm`, `volta`) |
+| Git  | 2.40    | https://git-scm.com                                             |
 
 Verify:
 
@@ -75,46 +75,46 @@ dev tooling, and the orchestration scripts every chapter calls.
 
 ```jsonc
 {
-  "name": "project-name-monorepo",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "packageManager": "bun@1.2.0",
-  "engines": { "node": ">=20", "bun": ">=1.2" },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/your-org/project-name.git"
-  },
-  "workspaces": ["packages/*"],
-  "scripts": {
-    "dev": "bun run --filter '@scope/project-name-docs' dev",
-    "build": "bun run --filter '*' build",
-    "build:packages": "bun run --filter '@scope/project-name' --filter '@scope/project-name-svelte' --filter '@scope/project-name-react' --filter '@scope/project-name-vue' build",
-    "check": "bun run --filter '*' check",
-    "lint": "prettier --check . && eslint .",
-    "format": "prettier --write .",
-    "test": "bun run --filter '*' test",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "bun run build:packages && changeset publish",
-    "prepare": "husky"
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.29.0",
-    "@commitlint/cli": "^19.6.0",
-    "@commitlint/config-conventional": "^19.6.0",
-    "@eslint/js": "^9.17.0",
-    "eslint": "^9.17.0",
-    "eslint-config-prettier": "^9.1.0",
-    "globals": "^15.14.0",
-    "husky": "^9.1.0",
-    "lint-staged": "^15.2.0",
-    "prettier": "^3.4.0",
-    "prettier-plugin-svelte": "^3.3.0",
-    "prettier-plugin-tailwindcss": "^0.6.0",
-    "typescript": "^5.7.0",
-    "typescript-eslint": "^8.19.0"
-  }
+	"name": "project-name-monorepo",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"packageManager": "bun@1.2.0",
+	"engines": { "node": ">=20", "bun": ">=1.2" },
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/your-org/project-name.git"
+	},
+	"workspaces": ["packages/*"],
+	"scripts": {
+		"dev": "bun run --filter '@scope/project-name-docs' dev",
+		"build": "bun run --filter '*' build",
+		"build:packages": "bun run --filter '@scope/project-name' --filter '@scope/project-name-svelte' --filter '@scope/project-name-react' --filter '@scope/project-name-vue' build",
+		"check": "bun run --filter '*' check",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"test": "bun run --filter '*' test",
+		"changeset": "changeset",
+		"version": "changeset version",
+		"release": "bun run build:packages && changeset publish",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.29.0",
+		"@commitlint/cli": "^19.6.0",
+		"@commitlint/config-conventional": "^19.6.0",
+		"@eslint/js": "^9.17.0",
+		"eslint": "^9.17.0",
+		"eslint-config-prettier": "^9.1.0",
+		"globals": "^15.14.0",
+		"husky": "^9.1.0",
+		"lint-staged": "^15.2.0",
+		"prettier": "^3.4.0",
+		"prettier-plugin-svelte": "^3.3.0",
+		"prettier-plugin-tailwindcss": "^0.6.0",
+		"typescript": "^5.7.0",
+		"typescript-eslint": "^8.19.0"
+	}
 }
 ```
 
@@ -142,23 +142,23 @@ strictness and module resolution.
 
 ```jsonc
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": [],
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noFallthroughCasesInSwitch": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": true,
-    "sourceMap": true
-  }
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"types": [],
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"declaration": true,
+		"sourceMap": true
+	}
 }
 ```
 
@@ -178,24 +178,18 @@ import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 
 export default ts.config(
-  js.configs.recommended,
-  ...ts.configs.recommended,
-  {
-    languageOptions: {
-      globals: { ...globals.browser, ...globals.node }
-    }
-  },
-  {
-    ignores: [
-      '**/dist/',
-      '**/build/',
-      '**/.svelte-kit/',
-      '**/generated/',
-      'bun.lock'
-    ]
-  },
-  // Must be last: turns off rules that conflict with Prettier.
-  prettier
+	js.configs.recommended,
+	...ts.configs.recommended,
+	{
+		languageOptions: {
+			globals: { ...globals.browser, ...globals.node }
+		}
+	},
+	{
+		ignores: ['**/dist/', '**/build/', '**/.svelte-kit/', '**/generated/', 'bun.lock']
+	},
+	// Must be last: turns off rules that conflict with Prettier.
+	prettier
 );
 ```
 
@@ -209,12 +203,12 @@ export default ts.config(
 
 ```json
 {
-  "useTabs": true,
-  "singleQuote": true,
-  "trailingComma": "none",
-  "printWidth": 100,
-  "plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
-  "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
+	"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
 }
 ```
 
@@ -261,13 +255,13 @@ right defaults:
 
 ```jsonc
 {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
-  "eslint.useFlatConfig": true,
-  "files.eol": "\n",
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "[svelte]": { "editor.defaultFormatter": "svelte.svelte-vscode" }
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+	"eslint.useFlatConfig": true,
+	"files.eol": "\n",
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"[svelte]": { "editor.defaultFormatter": "svelte.svelte-vscode" }
 }
 ```
 
@@ -275,14 +269,14 @@ And recommend the extensions everyone needs — `.vscode/extensions.json`:
 
 ```json
 {
-  "recommendations": [
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "svelte.svelte-vscode",
-    "bradlc.vscode-tailwindcss",
-    "vue.volar",
-    "editorconfig.editorconfig"
-  ]
+	"recommendations": [
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint",
+		"svelte.svelte-vscode",
+		"bradlc.vscode-tailwindcss",
+		"vue.volar",
+		"editorconfig.editorconfig"
+	]
 }
 ```
 
@@ -308,15 +302,15 @@ present from §3, so nothing changes there).
 
 ### Which files you create vs. edit
 
-| File                    | After `husky init`?                     | Your action                                  |
-| ----------------------- | --------------------------------------- | -------------------------------------------- |
-| `.husky/pre-commit`     | Exists, with a placeholder `bun test`   | **Replace** its contents (below).            |
-| `.husky/commit-msg`     | **Does not exist** — init never makes it | **Create** it (below).                       |
-| `commitlint.config.js`  | No                                      | **Create** it (below).                       |
-| `lint-staged` config    | No                                      | **Add** a block to the root `package.json`.  |
-| `"prepare": "husky"`    | Added by init                           | Nothing — already in §3's manifest.          |
+| File                   | After `husky init`?                      | Your action                                 |
+| ---------------------- | ---------------------------------------- | ------------------------------------------- |
+| `.husky/pre-commit`    | Exists, with a placeholder `bun test`    | **Replace** its contents (below).           |
+| `.husky/commit-msg`    | **Does not exist** — init never makes it | **Create** it (below).                      |
+| `commitlint.config.js` | No                                       | **Create** it (below).                      |
+| `lint-staged` config   | No                                       | **Add** a block to the root `package.json`. |
+| `"prepare": "husky"`   | Added by init                            | Nothing — already in §3's manifest.         |
 
-The one file `husky init` will *not* scaffold is `.husky/commit-msg`; without it,
+The one file `husky init` will _not_ scaffold is `.husky/commit-msg`; without it,
 commitlint never runs and malformed commit messages sail through.
 
 ### `.husky/pre-commit`
@@ -356,10 +350,10 @@ though a standalone `.lintstagedrc.json` with the inner object works too):
 
 ```jsonc
 {
-  "lint-staged": {
-    "*.{js,ts,svelte,vue,css,json,md}": ["prettier --write"],
-    "*.{js,ts,svelte,vue}": ["eslint --fix"]
-  }
+	"lint-staged": {
+		"*.{js,ts,svelte,vue,css,json,md}": ["prettier --write"],
+		"*.{js,ts,svelte,vue}": ["eslint --fix"]
+	}
 }
 ```
 

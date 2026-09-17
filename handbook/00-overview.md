@@ -1,6 +1,6 @@
 # 00 — Overview & Architecture
 
-This chapter explains *what* the system is and *why* each decision was made,
+This chapter explains _what_ the system is and _why_ each decision was made,
 before any code exists. Read it once; the rest of the handbook builds on the
 vocabulary and reasoning established here.
 
@@ -47,19 +47,19 @@ The single most important architectural decision: **all visual design lives in
 the Tailwind plugin, expressed as CSS**, and the framework libraries emit only
 class names.
 
-Consider a button. The *look* of a button — its padding, radius, color roles,
+Consider a button. The _look_ of a button — its padding, radius, color roles,
 hover and focus states, elevation — is identical whether it is rendered by
-Svelte, React, or Vue. Only the *behavior* (event wiring, slots/children,
+Svelte, React, or Vue. Only the _behavior_ (event wiring, slots/children,
 accessibility attributes, ripple effects) differs per framework.
 
 So we split the concerns:
 
-| Concern                    | Lives in            | Example                                        |
-| -------------------------- | ------------------- | ---------------------------------------------- |
-| Color, spacing, radius     | Plugin (design tokens) | `--color-primary`, `--rounded-button`       |
-| Component look             | Plugin (component CSS) | `.button`, `.button-filled`, `.button-primary` |
-| Component behavior         | Framework library   | `onclick`, ripple, `aria-pressed`             |
-| Composition & pages        | Docs / consumer app | `<Button variant="filled">Save</Button>`      |
+| Concern                | Lives in               | Example                                        |
+| ---------------------- | ---------------------- | ---------------------------------------------- |
+| Color, spacing, radius | Plugin (design tokens) | `--color-primary`, `--rounded-button`          |
+| Component look         | Plugin (component CSS) | `.button`, `.button-filled`, `.button-primary` |
+| Component behavior     | Framework library      | `onclick`, ripple, `aria-pressed`              |
+| Composition & pages    | Docs / consumer app    | `<Button variant="filled">Save</Button>`       |
 
 The payoff:
 
@@ -70,10 +70,10 @@ The payoff:
 3. **Consumers can opt out of components entirely.** A team using plain HTML
    still gets the whole design system by installing only the plugin.
 4. **Cross-framework parity is structural, not aspirational.** The React button
-   *cannot* drift from the Svelte button's appearance, because neither owns the
+   _cannot_ drift from the Svelte button's appearance, because neither owns the
    appearance.
 
-## 3. Why Tailwind v4, and why a *plugin* rather than a stylesheet
+## 3. Why Tailwind v4, and why a _plugin_ rather than a stylesheet
 
 Tailwind CSS v4 moved configuration into CSS itself (`@theme`, `@plugin`,
 `@utility`, `@variant`, `@layer`). A v4 **plugin** can register:
@@ -85,33 +85,33 @@ Tailwind CSS v4 moved configuration into CSS itself (`@theme`, `@plugin`,
 - **`@property` registrations** for typed custom properties used in animations.
 
 Crucially, a plugin is evaluated **inside the consumer's own Tailwind build**.
-That is why the plugin ships *logic that produces CSS*, not a pre-built
+That is why the plugin ships _logic that produces CSS_, not a pre-built
 stylesheet: Tailwind must process `@theme`/`@layer` in the context of the app
 that consumes it, so tree-shaking and the consumer's own utilities interleave
 correctly.
 
 > **Consequence.** The plugin package has no "bundle a big CSS file" step in the
-> traditional sense. Instead it authors CSS in `src/`, *compiles that CSS into
-> data* (`generated/*.ts`), and ships small runtime code that hands that data to
+> traditional sense. Instead it authors CSS in `src/`, _compiles that CSS into
+> data_ (`generated/*.ts`), and ships small runtime code that hands that data to
 > Tailwind's plugin API. [02-plugin-package.md](02-plugin-package.md) builds
 > this pipeline step by step.
 
 ## 4. Technology choices and the reasoning
 
-| Area              | Choice                         | Why                                                                                  |
-| ----------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
-| Package manager   | **Bun** workspaces             | Fast installs, built-in test runner and TS execution, `--filter` for per-package runs. |
-| Language          | **TypeScript** everywhere      | Types across the build pipeline catch generated/runtime mismatches at compile time.  |
-| CSS engine        | **Tailwind CSS v4**            | CSS-native config, `@plugin`, layers, and first-class custom properties.             |
-| Color engine      | **Material Color Utilities**   | Generates tonal palettes and accessible role colors from a single seed color.        |
-| Svelte build      | **`@sveltejs/package`**        | The canonical way to publish Svelte components with correct export maps.             |
-| React build       | **`tsup`** (esbuild) + `tsc`   | Fast ESM/CJS output; `tsc` emits `.d.ts`.                                             |
-| Vue build         | **Vite library mode** + `vue-tsc` | Compiles SFCs and emits types.                                                    |
-| Docs framework    | **SvelteKit**                  | SSR + routing; the same team already maintains the Svelte library.                  |
-| Versioning        | **Changesets**                 | Human-authored intent files → SemVer bumps + changelogs + lockstep publishing.       |
-| Commit convention | **Conventional Commits**       | Machine-readable history; feeds tooling and release notes.                            |
-| CI/CD             | **GitHub Actions**             | Native to the host; matrix builds; official Changesets and deploy actions.           |
-| Docs hosting      | **Cloudflare Workers** and/or **GitHub Pages** | Two independent, documented paths; pick one or run both.               |
+| Area              | Choice                                         | Why                                                                                    |
+| ----------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Package manager   | **Bun** workspaces                             | Fast installs, built-in test runner and TS execution, `--filter` for per-package runs. |
+| Language          | **TypeScript** everywhere                      | Types across the build pipeline catch generated/runtime mismatches at compile time.    |
+| CSS engine        | **Tailwind CSS v4**                            | CSS-native config, `@plugin`, layers, and first-class custom properties.               |
+| Color engine      | **Material Color Utilities**                   | Generates tonal palettes and accessible role colors from a single seed color.          |
+| Svelte build      | **`@sveltejs/package`**                        | The canonical way to publish Svelte components with correct export maps.               |
+| React build       | **`tsup`** (esbuild) + `tsc`                   | Fast ESM/CJS output; `tsc` emits `.d.ts`.                                              |
+| Vue build         | **Vite library mode** + `vue-tsc`              | Compiles SFCs and emits types.                                                         |
+| Docs framework    | **SvelteKit**                                  | SSR + routing; the same team already maintains the Svelte library.                     |
+| Versioning        | **Changesets**                                 | Human-authored intent files → SemVer bumps + changelogs + lockstep publishing.         |
+| Commit convention | **Conventional Commits**                       | Machine-readable history; feeds tooling and release notes.                             |
+| CI/CD             | **GitHub Actions**                             | Native to the host; matrix builds; official Changesets and deploy actions.             |
+| Docs hosting      | **Cloudflare Workers** and/or **GitHub Pages** | Two independent, documented paths; pick one or run both.                               |
 
 You can substitute pieces (pnpm for Bun, Vitest for `bun test`, etc.); each
 chapter notes where a substitution changes the instructions.
@@ -134,7 +134,7 @@ graph LR
 A concrete example that recurs throughout the handbook — **border-radius
 resolution for a button**, in ascending priority:
 
-1. `--rounded-field` — the default radius for all *field-like* elements.
+1. `--rounded-field` — the default radius for all _field-like_ elements.
 2. `--rounded-button` — a button-specific radius; **falls back to
    `--rounded-field`** when a theme does not set it, and **overrides it** when a
    theme does.
@@ -144,10 +144,10 @@ In CSS this is a fallback chain:
 
 ```css
 .button {
-  /* inline `rounded-*` wins because Tailwind's utility comes later in the
+	/* inline `rounded-*` wins because Tailwind's utility comes later in the
      cascade and sets border-radius directly; the custom-property chain below
      supplies the default when no utility is present. */
-  border-radius: var(--rounded-button, var(--rounded-field));
+	border-radius: var(--rounded-button, var(--rounded-field));
 }
 ```
 

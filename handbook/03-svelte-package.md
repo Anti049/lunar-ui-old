@@ -10,14 +10,14 @@ if Svelte is not your target.
 
 ## 1. What a framework library is responsible for
 
-| Responsibility                              | Owned here? |
-| ------------------------------------------- | ----------- |
-| Padding, radius, color, elevation           | No — plugin |
-| Which classes to emit for a given prop set   | **Yes**     |
-| Event handlers, controlled/uncontrolled state| **Yes**     |
-| ARIA attributes, keyboard interaction        | **Yes**     |
-| Ripple / focus-visible behavior              | **Yes**     |
-| Slot/children composition                    | **Yes**     |
+| Responsibility                                | Owned here? |
+| --------------------------------------------- | ----------- |
+| Padding, radius, color, elevation             | No — plugin |
+| Which classes to emit for a given prop set    | **Yes**     |
+| Event handlers, controlled/uncontrolled state | **Yes**     |
+| ARIA attributes, keyboard interaction         | **Yes**     |
+| Ripple / focus-visible behavior               | **Yes**     |
+| Slot/children composition                     | **Yes**     |
 
 The single most important helper is a class-merging function; every component
 uses it to combine "base + variant + role + consumer-supplied" classes safely.
@@ -33,45 +33,49 @@ mkdir svelte && cd svelte
 
 ```jsonc
 {
-  "name": "@scope/project-name-svelte",
-  "version": "0.0.0",
-  "description": "Svelte 5 components for project-name.",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/your-org/project-name.git",
-    "directory": "packages/svelte"
-  },
-  "scripts": {
-    "build": "svelte-package && publint",
-    "dev": "svelte-package --watch",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "vitest run",
-    "prepack": "svelte-package && publint"
-  },
-  "sideEffects": ["**/*.css"],
-  "svelte": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": ["dist", "!dist/**/*.test.*", "!dist/**/*.spec.*"],
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "svelte": "./dist/index.js", "default": "./dist/index.js" },
-    "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
-  },
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
-  "dependencies": { "clsx": "^2.1.0", "tailwind-merge": "^3.0.0" },
-  "peerDependencies": { "@scope/project-name": "workspace:^", "svelte": "^5.0.0" },
-  "devDependencies": {
-    "@scope/project-name": "workspace:*",
-    "@sveltejs/package": "^2.3.0",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "publint": "^0.3.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "^2.0.0"
-  },
-  "keywords": ["svelte", "svelte5", "ui", "components"]
+	"name": "@scope/project-name-svelte",
+	"version": "0.0.0",
+	"description": "Svelte 5 components for project-name.",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/your-org/project-name.git",
+		"directory": "packages/svelte"
+	},
+	"scripts": {
+		"build": "svelte-package && publint",
+		"dev": "svelte-package --watch",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"test": "vitest run",
+		"prepack": "svelte-package && publint"
+	},
+	"sideEffects": ["**/*.css"],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": ["dist", "!dist/**/*.test.*", "!dist/**/*.spec.*"],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./styles.css": "./dist/styles.css",
+		"./package.json": "./package.json"
+	},
+	"publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
+	"dependencies": { "clsx": "^2.1.0", "tailwind-merge": "^3.0.0" },
+	"peerDependencies": { "@scope/project-name": "workspace:^", "svelte": "^5.0.0" },
+	"devDependencies": {
+		"@scope/project-name": "workspace:*",
+		"@sveltejs/package": "^2.3.0",
+		"@sveltejs/vite-plugin-svelte": "^4.0.0",
+		"publint": "^0.3.0",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"typescript": "^5.7.0",
+		"vitest": "^2.0.0"
+	},
+	"keywords": ["svelte", "svelte5", "ui", "components"]
 }
 ```
 
@@ -98,9 +102,9 @@ export default { preprocess: vitePreprocess() };
 
 ```jsonc
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["svelte"], "moduleResolution": "bundler" },
-  "include": ["src/**/*.ts", "src/**/*.svelte"]
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": { "types": ["svelte"], "moduleResolution": "bundler" },
+	"include": ["src/**/*.ts", "src/**/*.svelte"]
 }
 ```
 
@@ -134,38 +138,38 @@ export function cn(...inputs: ClassValue[]): string {
 
 ```svelte
 <script lang="ts">
-  import type { Snippet } from 'svelte';
-  import type { HTMLButtonAttributes } from 'svelte/elements';
-  import { cn } from '../utils/cn.js';
-  import { ripple } from '../actions/ripple.js';
+	import type { Snippet } from 'svelte';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { cn } from '../utils/cn.js';
+	import { ripple } from '../actions/ripple.js';
 
-  type Variant = 'filled' | 'outline' | 'text';
-  type Role = 'primary' | 'secondary' | 'danger';
+	type Variant = 'filled' | 'outline' | 'text';
+	type Role = 'primary' | 'secondary' | 'danger';
 
-  interface Props extends HTMLButtonAttributes {
-    variant?: Variant;
-    role?: Role;
-    /** Disable the ripple effect. */
-    rippleless?: boolean;
-    children: Snippet;
-  }
+	interface Props extends HTMLButtonAttributes {
+		variant?: Variant;
+		role?: Role;
+		/** Disable the ripple effect. */
+		rippleless?: boolean;
+		children: Snippet;
+	}
 
-  let {
-    variant = 'filled',
-    role = 'primary',
-    rippleless = false,
-    class: klass,
-    children,
-    ...rest
-  }: Props = $props();
+	let {
+		variant = 'filled',
+		role = 'primary',
+		rippleless = false,
+		class: klass,
+		children,
+		...rest
+	}: Props = $props();
 </script>
 
 <button
-  class={cn('button', `button-${variant}`, `button-${role}`, klass)}
-  use:ripple={{ disabled: rippleless }}
-  {...rest}
+	class={cn('button', `button-${variant}`, `button-${role}`, klass)}
+	use:ripple={{ disabled: rippleless }}
+	{...rest}
 >
-  {@render children()}
+	{@render children()}
 </button>
 ```
 
@@ -220,7 +224,7 @@ consumers import it once:
 ```css
 /* Safelist for classes this library uses imperatively. Imported by consumers
    as `@scope/project-name-svelte/styles.css` so they are never purged. */
-@source inline("ripple button button-filled button-outline button-text");
+@source inline('ripple button button-filled button-outline button-text');
 ```
 
 `svelte-package` copies this to `dist/styles.css`, matching the `./styles.css`
@@ -238,7 +242,7 @@ export { ripple } from './actions/ripple.js';
 export { cn } from './utils/cn.js';
 ```
 
-Keep this list curated — it *is* the package's public surface, and `publint`
+Keep this list curated — it _is_ the package's public surface, and `publint`
 checks that everything it references is actually shipped.
 
 ## 8. Build, check, and test

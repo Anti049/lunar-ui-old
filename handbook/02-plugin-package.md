@@ -21,7 +21,7 @@ finished stylesheet, because `@theme`, `@layer`, and `@utility` must be processe
 in the consumer's own Tailwind context so that tree-shaking and the consumer's
 utilities interleave correctly.
 
-So the plugin ships *code that produces CSS-in-JS objects*, which it registers
+So the plugin ships _code that produces CSS-in-JS objects_, which it registers
 through the plugin API (`addBase`, `addUtilities`, `addVariant`, `matchUtilities`,
 `addComponents`). We still want to **author** in real CSS — it is far more
 readable than nested JS objects — so we add a compile step:
@@ -51,48 +51,48 @@ mkdir project-name && cd project-name
 
 ```jsonc
 {
-  "name": "@scope/project-name",
-  "version": "0.0.0",
-  "description": "Tailwind CSS v4 plugin: components, foundations, themes, and design tokens.",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/your-org/project-name.git",
-    "directory": "packages/project-name"
-  },
-  "scripts": {
-    "dev": "bun functions/watch.ts",
-    "build": "bun functions/build.ts && tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:unit": "bun test test/unit",
-    "test:e2e": "bun test/e2e.test.ts",
-    "test": "bun run test:unit && bun run test:e2e",
-    "check": "bun run build && bun run typecheck && bun run test && publint",
-    "package": "bun run build && npm pack --pack-destination ../../build"
-  },
-  "files": ["dist", "README.md"],
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./theme": { "types": "./dist/theme.d.ts", "default": "./dist/theme.js" },
-    "./themes": { "types": "./dist/themes.d.ts", "default": "./dist/themes.js" },
-    "./package.json": "./package.json"
-  },
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
-  "dependencies": {
-    "@material/material-color-utilities": "^0.3.0"
-  },
-  "peerDependencies": { "tailwindcss": "^4.0.0" },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^20",
-    "postcss": "^8.4.0",
-    "postcss-js": "^4.0.1",
-    "publint": "^0.3.0",
-    "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.0"
-  },
-  "keywords": ["tailwindcss", "tailwind-plugin", "design-system", "ui"]
+	"name": "@scope/project-name",
+	"version": "0.0.0",
+	"description": "Tailwind CSS v4 plugin: components, foundations, themes, and design tokens.",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/your-org/project-name.git",
+		"directory": "packages/project-name"
+	},
+	"scripts": {
+		"dev": "bun functions/watch.ts",
+		"build": "bun functions/build.ts && tsc -p tsconfig.build.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"test:unit": "bun test test/unit",
+		"test:e2e": "bun test/e2e.test.ts",
+		"test": "bun run test:unit && bun run test:e2e",
+		"check": "bun run build && bun run typecheck && bun run test && publint",
+		"package": "bun run build && npm pack --pack-destination ../../build"
+	},
+	"files": ["dist", "README.md"],
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+		"./theme": { "types": "./dist/theme.d.ts", "default": "./dist/theme.js" },
+		"./themes": { "types": "./dist/themes.d.ts", "default": "./dist/themes.js" },
+		"./package.json": "./package.json"
+	},
+	"publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
+	"dependencies": {
+		"@material/material-color-utilities": "^0.3.0"
+	},
+	"peerDependencies": { "tailwindcss": "^4.0.0" },
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/node": "^20",
+		"postcss": "^8.4.0",
+		"postcss-js": "^4.0.1",
+		"publint": "^0.3.0",
+		"tailwindcss": "^4.0.0",
+		"typescript": "^5.7.0"
+	},
+	"keywords": ["tailwindcss", "tailwind-plugin", "design-system", "ui"]
 }
 ```
 
@@ -114,9 +114,9 @@ Two TypeScript configs:
 
 ```jsonc
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["bun", "node"], "noEmit": true },
-  "include": ["index.ts", "theme.ts", "themes.ts", "types.ts", "functions", "generated", "test"]
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": { "types": ["bun", "node"], "noEmit": true },
+	"include": ["index.ts", "theme.ts", "themes.ts", "types.ts", "functions", "generated", "test"]
 }
 ```
 
@@ -124,20 +124,20 @@ Two TypeScript configs:
 
 ```jsonc
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": ".",
-    "types": ["node"],
-    "declaration": true
-  },
-  "include": ["index.ts", "theme.ts", "themes.ts", "types.ts", "generated"]
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": ".",
+		"types": ["node"],
+		"declaration": true
+	},
+	"include": ["index.ts", "theme.ts", "themes.ts", "types.ts", "generated"]
 }
 ```
 
-> **Why `generated/` is in the build `include`.** Compiling the runtime *together*
+> **Why `generated/` is in the build `include`.** Compiling the runtime _together_
 > with the generated data means `tsc` type-checks your hand-written `index.ts`
-> against the *actual shape* of what `build.ts` produced. If codegen and runtime
+> against the _actual shape_ of what `build.ts` produced. If codegen and runtime
 > drift, the build fails instead of shipping broken types.
 
 ## 3. Authoring CSS in `src/`
@@ -168,17 +168,17 @@ src/
 
 ```css
 @theme {
-  /* Shape — the radius scale the whole system references. */
-  --rounded-none: 0px;
-  --rounded-sm: 0.25rem;
-  --rounded-field: 0.5rem;   /* default radius for field-like elements */
-  --rounded-lg: 1rem;
-  --rounded-full: 9999px;
+	/* Shape — the radius scale the whole system references. */
+	--rounded-none: 0px;
+	--rounded-sm: 0.25rem;
+	--rounded-field: 0.5rem; /* default radius for field-like elements */
+	--rounded-lg: 1rem;
+	--rounded-full: 9999px;
 
-  /* Spacing, typography, elevation, motion … */
-  --elevation-1: 0 1px 2px rgb(0 0 0 / 0.08);
-  --duration-fast: 120ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+	/* Spacing, typography, elevation, motion … */
+	--elevation-1: 0 1px 2px rgb(0 0 0 / 0.08);
+	--duration-fast: 120ms;
+	--ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
 ```
 
@@ -194,14 +194,14 @@ them. `src/base/properties.css`:
 
 ```css
 @property --interactive {
-  syntax: '<integer>';
-  inherits: false;
-  initial-value: 0;
+	syntax: '<integer>';
+	inherits: false;
+	initial-value: 0;
 }
 @property --ripple-scale {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 0;
+	syntax: '<number>';
+	inherits: false;
+	initial-value: 0;
 }
 ```
 
@@ -215,15 +215,15 @@ This is the concrete example the whole handbook returns to.
 
 ```css
 @layer components {
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    height: var(--button-height, 2.5rem);
-    padding-inline: 1rem;
+	.button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		height: var(--button-height, 2.5rem);
+		padding-inline: 1rem;
 
-    /*
+		/*
       Border-radius resolution, lowest priority first:
         1. --rounded-field   default for all field-like elements
         2. --rounded-button  button-specific; overrides field when a theme
@@ -231,17 +231,27 @@ This is the concrete example the whole handbook returns to.
       An inline utility (e.g. `rounded-full`) beats both because Tailwind emits
       it in the utilities layer, which cascades after this components layer.
     */
-    border-radius: var(--rounded-button, var(--rounded-field));
+		border-radius: var(--rounded-button, var(--rounded-field));
 
-    transition: background-color var(--duration-fast) var(--ease-standard);
-  }
+		transition: background-color var(--duration-fast) var(--ease-standard);
+	}
 
-  /* Variants describe fill/emphasis; color roles are applied separately so any
+	/* Variants describe fill/emphasis; color roles are applied separately so any
      variant can pair with any role. */
-  .button-filled  { background: var(--color-primary); color: var(--color-on-primary); }
-  .button-outline { background: transparent; border: 1px solid currentColor; }
-  .button-primary   { --color-primary: var(--color-primary); }
-  .button-secondary { --color-primary: var(--color-secondary); }
+	.button-filled {
+		background: var(--color-primary);
+		color: var(--color-on-primary);
+	}
+	.button-outline {
+		background: transparent;
+		border: 1px solid currentColor;
+	}
+	.button-primary {
+		--color-primary: var(--color-primary);
+	}
+	.button-secondary {
+		--color-primary: var(--color-secondary);
+	}
 }
 ```
 
@@ -264,7 +274,7 @@ radius inline — exactly the priority order specified in the requirements.
 
 /* A functional utility with an arbitrary value, e.g. `tooltip-gap-2`. */
 @utility tooltip-gap-* {
-  --tooltip-gap: --value(--spacing- *);
+	--tooltip-gap: --value(--spacing-*);
 }
 ```
 
@@ -540,7 +550,7 @@ broken export map fails locally, not after publishing.
 
 `bun run package` produces a real tarball in `build/` (via `npm pack`) so you can
 `npm install ../../build/scope-project-name-x.y.z.tgz` in a scratch app and
-verify the *installed* experience before releasing.
+verify the _installed_ experience before releasing.
 
 ## 10. The consumer's experience
 
@@ -551,15 +561,15 @@ What a consumer writes after `npm install @scope/project-name`:
 @import 'tailwindcss';
 
 @plugin '@scope/project-name' {
-  prefix: ui-;             /* optional */
-  themes: default, ocean;  /* optional; default always included */
-  exclude: badge;          /* optional */
-  --rounded-button: 9999px; /* optional global shape override */
+	prefix: ui-; /* optional */
+	themes: default, ocean; /* optional; default always included */
+	exclude: badge; /* optional */
+	--rounded-button: 9999px; /* optional global shape override */
 }
 ```
 
 No CSS `@import` from the plugin is needed — the tokens the components depend on
-ship *with* the plugin and are registered through `addBase`.
+ship _with_ the plugin and are registered through `addBase`.
 
 ## Checklist
 

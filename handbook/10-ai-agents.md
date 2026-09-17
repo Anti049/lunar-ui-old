@@ -6,11 +6,11 @@ that opens this repo understands its architecture, conventions, and the
 cross-framework parity rule — so it does not, for example, add a component to
 Svelte and forget React and Vue.
 
-| Assistant       | Reads                                                        |
-| --------------- | ----------------------------------------------------------- |
-| Claude Code     | `CLAUDE.md`, `AGENTS.md`, `.claude/skills/*/SKILL.md`        |
-| GitHub Copilot  | `.github/copilot-instructions.md`, `AGENTS.md`, `*.instructions.md` |
-| Cursor          | `.cursor/rules/*.mdc`, `AGENTS.md`                           |
+| Assistant      | Reads                                                               |
+| -------------- | ------------------------------------------------------------------- |
+| Claude Code    | `CLAUDE.md`, `AGENTS.md`, `.claude/skills/*/SKILL.md`               |
+| GitHub Copilot | `.github/copilot-instructions.md`, `AGENTS.md`, `*.instructions.md` |
+| Cursor         | `.cursor/rules/*.mdc`, `AGENTS.md`                                  |
 
 ## 1. The shared source of truth: `AGENTS.md`
 
@@ -23,10 +23,12 @@ facts here once; the tool-specific files stay thin and point at it.
 # AGENTS.md
 
 ## What this repo is
+
 A monorepo for a design system: a Tailwind v4 plugin (all styling) plus Svelte,
 React, and Vue component libraries (behavior only) and a SvelteKit docs site.
 
 ## Golden rules
+
 1. **All styling lives in the plugin** (`packages/project-name`). Framework
    libraries emit the plugin's class names and add only behavior. Never put
    colors/spacing/radii in a framework component.
@@ -41,16 +43,19 @@ React, and Vue component libraries (behavior only) and a SvelteKit docs site.
    `type(scope): summary`. Scopes: plugin, svelte, react, vue, docs, ci, build.
 
 ## Layout
+
 - `packages/project-name` — Tailwind plugin; author CSS in `src/`, compiled to
   `generated/`, published as `dist/`.
 - `packages/svelte|react|vue` — component libraries; peer-depend on the plugin.
 - `packages/docs` — SvelteKit site + theme generator (never published).
 
 ## Commands
+
 - `bun install` · `bun run dev` (docs) · `bun run build` · `bun run check`
   · `bun run lint` · `bun run test` · `bun run changeset`.
 
 ## Definition of done for a component
+
 Exists in: plugin CSS (`src/components/<name>.css`), all three libraries, the
 docs (reference page + live demo), and passes the contract test.
 ```
@@ -66,10 +71,12 @@ Claude-specific etiquette:
 Read **AGENTS.md** first — it holds the golden rules and layout.
 
 ## When asked to add or change a component
+
 Use the `add-component` skill (`.claude/skills/add-component/SKILL.md`). Do not
 hand-edit `generated/`. After changes, run `bun run check` and add a changeset.
 
 ## Verification
+
 Before claiming done, run the `verify-plugin` skill to confirm the compiled CSS
 contains the expected classes.
 ```
@@ -92,7 +99,7 @@ Given a component name and spec:
 1. **Plugin CSS.** Create `packages/project-name/src/components/<name>.css` inside
    `@layer components`. Use design tokens; follow the radius model
    (`var(--rounded-<name>, var(--rounded-field))`). Rebuild: `bun run --filter
-   '@scope/project-name' build`.
+'@scope/project-name' build`.
 2. **Svelte.** Add `packages/svelte/src/lib/components/<Name>.svelte`, mapping
    props to the plugin classes via `cn`; export it from the barrel; safelist any
    runtime classes.
@@ -152,6 +159,7 @@ Path-scoped guidance via `*.instructions.md` (VS Code + Copilot honor the
 ---
 applyTo: 'packages/project-name/**'
 ---
+
 Author CSS in `src/`; never touch `generated/`. Register everything through the
 Tailwind plugin API in `index.ts`. Follow the token layering and radius fallback
 model. Add unit tests for any new extraction helper.
@@ -163,6 +171,7 @@ model. Add unit tests for any new extraction helper.
 ---
 applyTo: 'packages/{svelte,react,vue}/**'
 ---
+
 Components are behavior-only wrappers over plugin classes. Map props to classes
 via `cn`, pass the consumer's `class` last, spread native attributes. Keep the
 three libraries in parity and update the shared contract fixture.
@@ -180,6 +189,7 @@ Cursor reads `.mdc` rule files under `.cursor/rules/`. Split by scope with
 description: Core repo rules, always applied.
 alwaysApply: true
 ---
+
 - Read AGENTS.md. All styling lives in the Tailwind plugin; libraries are
   behavior-only and must stay in cross-framework parity.
 - Never edit `packages/project-name/generated/`.
@@ -193,6 +203,7 @@ alwaysApply: true
 description: Tailwind plugin authoring rules.
 globs: packages/project-name/**
 ---
+
 Author CSS in `src/`, compiled to `generated/` by `functions/build.ts`. Use the
 radius fallback model and design tokens. Register via the plugin API in index.ts.
 ```
@@ -204,6 +215,7 @@ radius fallback model and design tokens. Register via the plugin API in index.ts
 description: Framework library rules.
 globs: packages/{svelte,react,vue}/**
 ---
+
 Emit plugin classes only. Compose with `cn`. Keep Svelte/React/Vue in parity and
 update the shared contract fixture and tests.
 ```

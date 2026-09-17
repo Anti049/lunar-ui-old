@@ -182,7 +182,7 @@ issue for security reports. We aim to acknowledge within 3 business days.
 `CONTRIBUTING.md` — the on-ramp. It should link heavily into this handbook
 rather than duplicate it:
 
-```markdown
+````markdown
 # Contributing
 
 Thanks for helping! Start with the [developer handbook](handbook/README.md).
@@ -193,6 +193,7 @@ Thanks for helping! Start with the [developer handbook](handbook/README.md).
 bun install
 bun run dev        # docs site with live-reload
 ```
+````
 
 ## Workflow
 
@@ -212,7 +213,8 @@ exists in the plugin CSS, all three libraries, and the docs.
 
 - Commits & versions: handbook/11.
 - Code style: Prettier + ESLint, enforced on commit and in CI.
-```
+
+````
 
 ## 7. Code of conduct
 
@@ -227,7 +229,7 @@ from `CONTRIBUTING.md`.
 ```yaml
 github: [your-org]
 open_collective: project-name
-```
+````
 
 ## 9. Root README and per-package READMEs
 

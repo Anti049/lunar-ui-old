@@ -17,15 +17,15 @@ the three framework libraries version in lockstep — see
 [11-conventions.md](11-conventions.md)). The docs site is unversioned; it
 continuously deploys.
 
-| Milestone | Target version | Theme                                             |
-| --------- | -------------- | ------------------------------------------------- |
-| M1        | `v0.1.0`       | Monorepo foundation & the plugin's core tokens.   |
-| M2        | `v0.2.0`       | Plugin component CSS + the Svelte library.        |
-| M3        | `v0.3.0`       | React library at parity.                          |
-| M4        | `v0.4.0`       | Vue library at parity.                            |
-| M5        | `v0.5.0`       | Docs site + live theme generator.                 |
-| M6        | `v0.9.0`       | CI/CD, publishing, and deploys automated.         |
-| M7        | `v1.0.0`       | Stabilization, a11y audit, docs polish, 1.0.      |
+| Milestone | Target version | Theme                                              |
+| --------- | -------------- | -------------------------------------------------- |
+| M1        | `v0.1.0`       | Monorepo foundation & the plugin's core tokens.    |
+| M2        | `v0.2.0`       | Plugin component CSS + the Svelte library.         |
+| M3        | `v0.3.0`       | React library at parity.                           |
+| M4        | `v0.4.0`       | Vue library at parity.                             |
+| M5        | `v0.5.0`       | Docs site + live theme generator.                  |
+| M6        | `v0.9.0`       | CI/CD, publishing, and deploys automated.          |
+| M7        | `v1.0.0`       | Stabilization, a11y audit, docs polish, 1.0.       |
 | M8        | `v1.1.0+`      | Post-1.0 expansion (more components, more themes). |
 
 `0.x` communicates "pre-stable; minor may break". `1.0.0` is the compatibility
@@ -109,20 +109,20 @@ previewed theme exactly.
 The full set lives in [roadmap/issues.json](roadmap/issues.json). Each issue has
 a title, body, labels, and a milestone. A representative slice:
 
-| # | Title                                             | Milestone | Labels                       |
-| - | ------------------------------------------------- | --------- | ---------------------------- |
-| 1 | Initialize Bun workspace and shared tooling       | M1        | `area:build`, `type:chore`   |
-| 2 | Wire Husky + commitlint + lint-staged             | M1        | `area:build`, `type:chore`   |
-| 3 | Author design tokens and `@property` registrations | M1       | `area:plugin`, `type:feat`   |
-| 4 | Build the CSS→data compile pipeline               | M1        | `area:plugin`, `type:feat`   |
-| 5 | Implement layered border-radius for buttons       | M2        | `area:plugin`, `type:feat`   |
-| 6 | Svelte `Button` + ripple action                   | M2        | `area:svelte`, `type:feat`   |
-| 7 | React `Button` + `useRipple`                       | M3        | `area:react`, `type:feat`    |
-| 8 | Vue `Button` + ripple directive                    | M4        | `area:vue`, `type:feat`      |
-| 9 | Live theme generator page                          | M5        | `area:docs`, `type:feat`     |
-| 10| Changesets release workflow                        | M6        | `area:ci`, `type:chore`      |
-| 11| Docs deploy: Cloudflare + Pages                    | M6        | `area:ci`, `type:chore`      |
-| 12| Accessibility audit for 1.0                        | M7        | `area:a11y`, `type:chore`    |
+| #   | Title                                              | Milestone | Labels                     |
+| --- | -------------------------------------------------- | --------- | -------------------------- |
+| 1   | Initialize Bun workspace and shared tooling        | M1        | `area:build`, `type:chore` |
+| 2   | Wire Husky + commitlint + lint-staged              | M1        | `area:build`, `type:chore` |
+| 3   | Author design tokens and `@property` registrations | M1        | `area:plugin`, `type:feat` |
+| 4   | Build the CSS→data compile pipeline                | M1        | `area:plugin`, `type:feat` |
+| 5   | Implement layered border-radius for buttons        | M2        | `area:plugin`, `type:feat` |
+| 6   | Svelte `Button` + ripple action                    | M2        | `area:svelte`, `type:feat` |
+| 7   | React `Button` + `useRipple`                       | M3        | `area:react`, `type:feat`  |
+| 8   | Vue `Button` + ripple directive                    | M4        | `area:vue`, `type:feat`    |
+| 9   | Live theme generator page                          | M5        | `area:docs`, `type:feat`   |
+| 10  | Changesets release workflow                        | M6        | `area:ci`, `type:chore`    |
+| 11  | Docs deploy: Cloudflare + Pages                    | M6        | `area:ci`, `type:chore`    |
+| 12  | Accessibility audit for 1.0                        | M7        | `area:a11y`, `type:chore`  |
 
 ## 4. Label taxonomy
 

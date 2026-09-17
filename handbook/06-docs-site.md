@@ -17,36 +17,36 @@ Then align it with the monorepo. `packages/docs/package.json`:
 
 ```jsonc
 {
-  "name": "@scope/project-name-docs",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
-  },
-  "dependencies": {
-    "@scope/project-name": "workspace:*",
-    "@scope/project-name-svelte": "workspace:*",
-    "shiki": "^1.24.0",
-    "mode-watcher": "^0.5.0"
-  },
-  "devDependencies": {
-    "@scope/project-name": "workspace:*",
-    "@sveltejs/adapter-auto": "^3.3.0",
-    "@sveltejs/adapter-cloudflare": "^7.0.0",
-    "@sveltejs/adapter-static": "^3.0.0",
-    "@sveltejs/kit": "^2.15.0",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "@tailwindcss/vite": "^4.0.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "tailwindcss": "^4.0.0",
-    "vite": "^6.0.0"
-  }
+	"name": "@scope/project-name-docs",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+	},
+	"dependencies": {
+		"@scope/project-name": "workspace:*",
+		"@scope/project-name-svelte": "workspace:*",
+		"shiki": "^1.24.0",
+		"mode-watcher": "^0.5.0"
+	},
+	"devDependencies": {
+		"@scope/project-name": "workspace:*",
+		"@sveltejs/adapter-auto": "^3.3.0",
+		"@sveltejs/adapter-cloudflare": "^7.0.0",
+		"@sveltejs/adapter-static": "^3.0.0",
+		"@sveltejs/kit": "^2.15.0",
+		"@sveltejs/vite-plugin-svelte": "^4.0.0",
+		"@tailwindcss/vite": "^4.0.0",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"tailwindcss": "^4.0.0",
+		"vite": "^6.0.0"
+	}
 }
 ```
 
@@ -151,7 +151,9 @@ safelist so runtime classes survive:
 
 ```css
 @import 'tailwindcss';
-@plugin '@scope/project-name' { themes: default, ocean, forest; }
+@plugin '@scope/project-name' {
+	themes: default, ocean, forest;
+}
 @import '@scope/project-name-svelte/styles.css';
 
 /* Fonts are the app's choice, not the plugin's. */
@@ -236,17 +238,18 @@ Example output the user copies:
 
 ```css
 [data-theme='brand'] {
-  --color-primary: #4f46e5;
-  --color-on-primary: #ffffff;
-  --color-secondary: #7c5cff;
-  --color-surface: #fbfbff;
-  --color-on-surface: #1a1b1f;
-  --rounded-button: 9999px;
+	--color-primary: #4f46e5;
+	--color-on-primary: #ffffff;
+	--color-secondary: #7c5cff;
+	--color-surface: #fbfbff;
+	--color-on-surface: #1a1b1f;
+	--rounded-button: 9999px;
 }
 
-[data-theme='brand'].dark, [data-theme='brand'][data-mode='dark'] {
-  --color-primary: #c4c0ff;
-  /* … */
+[data-theme='brand'].dark,
+[data-theme='brand'][data-mode='dark'] {
+	--color-primary: #c4c0ff;
+	/* … */
 }
 ```
 
@@ -256,20 +259,24 @@ Example output the user copies:
 
 ```svelte
 <script lang="ts">
-  import { generateThemeCss } from '$lib/theme/generate';
-  import CodeBlock from '$lib/components/CodeBlock.svelte';
-  import { Button } from '@scope/project-name-svelte';
+	import { generateThemeCss } from '$lib/theme/generate';
+	import CodeBlock from '$lib/components/CodeBlock.svelte';
+	import { Button } from '@scope/project-name-svelte';
 
-  let seed = $state('#4f46e5');
-  let name = $state('brand');
-  let rounded = $state('');
-  const css = $derived(generateThemeCss({ seed, name, rounded: rounded || undefined }));
+	let seed = $state('#4f46e5');
+	let name = $state('brand');
+	let rounded = $state('');
+	const css = $derived(generateThemeCss({ seed, name, rounded: rounded || undefined }));
 
-  // Apply the generated theme live to a preview region by injecting a <style>.
-  let styleEl: HTMLStyleElement;
-  $effect(() => { styleEl.textContent = css; });
+	// Apply the generated theme live to a preview region by injecting a <style>.
+	let styleEl: HTMLStyleElement;
+	$effect(() => {
+		styleEl.textContent = css;
+	});
 
-  async function copy() { await navigator.clipboard.writeText(css); }
+	async function copy() {
+		await navigator.clipboard.writeText(css);
+	}
 </script>
 
 <svelte:head><style bind:this={styleEl}></style></svelte:head>
@@ -279,9 +286,9 @@ Example output the user copies:
 <label>Button radius <input placeholder="e.g. 9999px" bind:value={rounded} /></label>
 
 <section data-theme={name}>
-  <!-- Live preview: components re-render with the generated palette. -->
-  <Button variant="filled" role="primary">Primary</Button>
-  <Button variant="outline" role="secondary">Secondary</Button>
+	<!-- Live preview: components re-render with the generated palette. -->
+	<Button variant="filled" role="primary">Primary</Button>
+	<Button variant="outline" role="secondary">Secondary</Button>
 </section>
 
 <CodeBlock language="css" code={css} />
@@ -289,7 +296,7 @@ Example output the user copies:
 ```
 
 Because the preview `<section data-theme={name}>` uses the same selector the
-generated CSS targets, editing the seed updates the preview *and* the copyable
+generated CSS targets, editing the seed updates the preview _and_ the copyable
 output simultaneously — the generator is a live demo of itself.
 
 > **Client-only.** `generateThemeCss` and clipboard access run in the browser.
@@ -309,18 +316,20 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 const target = process.env.DOCS_TARGET; // 'cloudflare' | 'static' | undefined
 const adapter =
-  target === 'cloudflare' ? adapterCloudflare()
-  : target === 'static'   ? adapterStatic({ fallback: '404.html' })
-  :                          adapterAuto();
+	target === 'cloudflare'
+		? adapterCloudflare()
+		: target === 'static'
+			? adapterStatic({ fallback: '404.html' })
+			: adapterAuto();
 
 export default {
-  preprocess: vitePreprocess(),
-  kit: {
-    adapter,
-    // GitHub Pages serves from a subpath; set it only for the static build.
-    paths: target === 'static' ? { base: process.env.BASE_PATH ?? '' } : undefined,
-    prerender: { handleHttpError: 'warn' }
-  }
+	preprocess: vitePreprocess(),
+	kit: {
+		adapter,
+		// GitHub Pages serves from a subpath; set it only for the static build.
+		paths: target === 'static' ? { base: process.env.BASE_PATH ?? '' } : undefined,
+		prerender: { handleHttpError: 'warn' }
+	}
 };
 ```
 

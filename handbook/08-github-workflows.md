@@ -2,14 +2,14 @@
 
 Every automated process lives in `.github/workflows/`. This chapter builds four:
 
-| Workflow                | Trigger              | Purpose                                             |
-| ----------------------- | -------------------- | --------------------------------------------------- |
-| `ci.yml`                | PRs, pushes          | Lint, typecheck, test, build, `publint`.            |
-| `release.yml`           | push to `main`       | Version PR, then publish packages to npm.           |
-| `docs-cloudflare.yml`   | push to `main`       | Deploy the docs site to Cloudflare Workers.         |
-| `docs-pages.yml`        | push to `main`       | Deploy the docs site to GitHub Pages.               |
+| Workflow              | Trigger        | Purpose                                     |
+| --------------------- | -------------- | ------------------------------------------- |
+| `ci.yml`              | PRs, pushes    | Lint, typecheck, test, build, `publint`.    |
+| `release.yml`         | push to `main` | Version PR, then publish packages to npm.   |
+| `docs-cloudflare.yml` | push to `main` | Deploy the docs site to Cloudflare Workers. |
+| `docs-pages.yml`      | push to `main` | Deploy the docs site to GitHub Pages.       |
 
-Run the Cloudflare workflow *or* the Pages workflow *or* both — they are
+Run the Cloudflare workflow _or_ the Pages workflow _or_ both — they are
 independent. Both are documented in full so you can choose.
 
 ## 1. Shared setup: a composite action
@@ -61,11 +61,11 @@ jobs:
       - name: Lint
         run: bun run lint
       - name: Typecheck & package checks
-        run: bun run check          # svelte-check / tsc / vue-tsc + publint per package
+        run: bun run check # svelte-check / tsc / vue-tsc + publint per package
       - name: Test
-        run: bun run test           # unit + e2e across the workspace
+        run: bun run test # unit + e2e across the workspace
       - name: Build
-        run: bun run build          # every package + the docs site
+        run: bun run build # every package + the docs site
 ```
 
 Notes:
@@ -103,16 +103,16 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write        # push the version PR and tags
-  pull-requests: write   # open/update the version PR
-  id-token: write        # npm provenance (OIDC)
+  contents: write # push the version PR and tags
+  pull-requests: write # open/update the version PR
+  id-token: write # npm provenance (OIDC)
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }   # Changesets needs full history
+        with: { fetch-depth: 0 } # Changesets needs full history
       - uses: ./.github/actions/setup
 
       - name: Build publishable packages
@@ -220,7 +220,7 @@ jobs:
         run: bun run --filter '@scope/project-name-docs' build
         env:
           DOCS_TARGET: static
-          BASE_PATH: /project-name        # repo name; '' for a user/org root site
+          BASE_PATH: /project-name # repo name; '' for a user/org root site
       - uses: actions/upload-pages-artifact@v3
         with: { path: packages/docs/build }
 

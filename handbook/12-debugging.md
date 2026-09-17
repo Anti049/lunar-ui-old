@@ -43,52 +43,52 @@ them together.
 
 ```jsonc
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      // SERVER: start `vite dev` under the Node debugger.
-      "type": "node",
-      "request": "launch",
-      "name": "docs: server (vite dev)",
-      "cwd": "${workspaceFolder}/packages/docs",
-      "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "dev"],
-      "console": "integratedTerminal",
-      "serverReadyAction": {
-        // When Vite prints the URL, launch the client debugger against it.
-        "pattern": "Local:\\s+(https?://\\S+)",
-        "uriFormat": "%s",
-        "action": "startDebugging",
-        "name": "docs: client (browser)"
-      }
-    },
-    {
-      // CLIENT: open the site in Chrome/Edge with source maps.
-      "type": "chrome",              // use "msedge" for Edge
-      "request": "launch",
-      "name": "docs: client (browser)",
-      "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/packages/docs",
-      "sourceMapPathOverrides": {
-        "webpack://project-name-docs/*": "${workspaceFolder}/packages/docs/*"
-      }
-    },
-    {
-      // CLIENT (attach): attach to a Chrome you started with --remote-debugging-port=9222.
-      "type": "chrome",
-      "request": "attach",
-      "name": "docs: client (attach 9222)",
-      "port": 9222,
-      "webRoot": "${workspaceFolder}/packages/docs"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "docs: full stack",
-      "configurations": ["docs: server (vite dev)"],
-      "stopAll": true
-    }
-  ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			// SERVER: start `vite dev` under the Node debugger.
+			"type": "node",
+			"request": "launch",
+			"name": "docs: server (vite dev)",
+			"cwd": "${workspaceFolder}/packages/docs",
+			"runtimeExecutable": "bun",
+			"runtimeArgs": ["run", "dev"],
+			"console": "integratedTerminal",
+			"serverReadyAction": {
+				// When Vite prints the URL, launch the client debugger against it.
+				"pattern": "Local:\\s+(https?://\\S+)",
+				"uriFormat": "%s",
+				"action": "startDebugging",
+				"name": "docs: client (browser)"
+			}
+		},
+		{
+			// CLIENT: open the site in Chrome/Edge with source maps.
+			"type": "chrome", // use "msedge" for Edge
+			"request": "launch",
+			"name": "docs: client (browser)",
+			"url": "http://localhost:5173",
+			"webRoot": "${workspaceFolder}/packages/docs",
+			"sourceMapPathOverrides": {
+				"webpack://project-name-docs/*": "${workspaceFolder}/packages/docs/*"
+			}
+		},
+		{
+			// CLIENT (attach): attach to a Chrome you started with --remote-debugging-port=9222.
+			"type": "chrome",
+			"request": "attach",
+			"name": "docs: client (attach 9222)",
+			"port": 9222,
+			"webRoot": "${workspaceFolder}/packages/docs"
+		}
+	],
+	"compounds": [
+		{
+			"name": "docs: full stack",
+			"configurations": ["docs: server (vite dev)"],
+			"stopAll": true
+		}
+	]
 }
 ```
 
@@ -99,7 +99,7 @@ Why it is shaped this way:
   `+page.server.ts`, `+layout.server.ts`, `hooks.server.ts`, and endpoints.
 - **`serverReadyAction`** watches the server's stdout for Vite's `Local:` URL and
   then automatically launches the **client** browser config against it — so the
-  single compound "docs: full stack" boots the server *and* the browser debugger.
+  single compound "docs: full stack" boots the server _and_ the browser debugger.
   No need to run two configs by hand.
 - **`stopAll`** tears down both when you stop debugging.
 
@@ -157,13 +157,13 @@ Add a config to step through Vitest/Bun tests:
 
 ```jsonc
 {
-  "type": "node",
-  "request": "launch",
-  "name": "debug: current test file",
-  "cwd": "${workspaceFolder}",
-  "runtimeExecutable": "bunx",
-  "runtimeArgs": ["vitest", "run", "${relativeFile}"],
-  "console": "integratedTerminal"
+	"type": "node",
+	"request": "launch",
+	"name": "debug: current test file",
+	"cwd": "${workspaceFolder}",
+	"runtimeExecutable": "bunx",
+	"runtimeArgs": ["vitest", "run", "${relativeFile}"],
+	"console": "integratedTerminal"
 }
 ```
 
@@ -182,18 +182,18 @@ string.
   you can set breakpoints directly in `packages/svelte/src/lib/**` and they bind
   while debugging the docs — no `dist/` in the way.
 - **Two debuggers, one browser.** Do not also have `serverReadyAction` launch a
-  browser *and* run the standalone client config — you will open two windows.
+  browser _and_ run the standalone client config — you will open two windows.
   Use the compound (server only; it spawns the client) for the normal flow.
 
 ## 8. Quick reference
 
-| I want to debug…                     | Config to run                | Where to break                         |
-| ------------------------------------ | ---------------------------- | -------------------------------------- |
-| SSR load / endpoint / hook           | docs: full stack             | `*.server.ts`, `+server.ts`, `hooks.server.ts` |
-| A component / browser interaction    | docs: full stack             | `.svelte`, `$lib/**` client modules    |
-| The theme generator                  | docs: full stack             | `$lib/theme/generate.ts`, the page     |
-| An already-open Chrome               | docs: client (attach 9222)   | any client module                      |
-| A unit/e2e test                      | debug: current test file     | the `*.test.ts`                        |
+| I want to debug…                  | Config to run              | Where to break                                 |
+| --------------------------------- | -------------------------- | ---------------------------------------------- |
+| SSR load / endpoint / hook        | docs: full stack           | `*.server.ts`, `+server.ts`, `hooks.server.ts` |
+| A component / browser interaction | docs: full stack           | `.svelte`, `$lib/**` client modules            |
+| The theme generator               | docs: full stack           | `$lib/theme/generate.ts`, the page             |
+| An already-open Chrome            | docs: client (attach 9222) | any client module                              |
+| A unit/e2e test                   | debug: current test file   | the `*.test.ts`                                |
 
 With this, the entire docs stack — server render, client hydration, the theme
 generator, and the tests — is debuggable without leaving VS Code.

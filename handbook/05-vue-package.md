@@ -17,46 +17,50 @@ mkdir vue && cd vue
 
 ```jsonc
 {
-  "name": "@scope/project-name-vue",
-  "version": "0.0.0",
-  "description": "Vue 3 components for project-name.",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/your-org/project-name.git",
-    "directory": "packages/vue"
-  },
-  "scripts": {
-    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly -p tsconfig.build.json && publint",
-    "dev": "vite build --watch",
-    "check": "vue-tsc --noEmit",
-    "test": "vitest run",
-    "prepack": "bun run build"
-  },
-  "sideEffects": ["**/*.css"],
-  "types": "./dist/index.d.ts",
-  "files": ["dist"],
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" },
-    "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json"
-  },
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
-  "dependencies": { "clsx": "^2.1.0", "tailwind-merge": "^3.0.0" },
-  "peerDependencies": { "@scope/project-name": "workspace:^", "vue": "^3.5.0" },
-  "devDependencies": {
-    "@scope/project-name": "workspace:*",
-    "@testing-library/vue": "^8.1.0",
-    "@vitejs/plugin-vue": "^5.2.0",
-    "jsdom": "^25.0.0",
-    "publint": "^0.3.0",
-    "vite": "^6.0.0",
-    "vitest": "^2.0.0",
-    "vue": "^3.5.0",
-    "vue-tsc": "^2.1.0",
-    "typescript": "^5.7.0"
-  },
-  "keywords": ["vue", "vue3", "ui", "components"]
+	"name": "@scope/project-name-vue",
+	"version": "0.0.0",
+	"description": "Vue 3 components for project-name.",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/your-org/project-name.git",
+		"directory": "packages/vue"
+	},
+	"scripts": {
+		"build": "vite build && vue-tsc --declaration --emitDeclarationOnly -p tsconfig.build.json && publint",
+		"dev": "vite build --watch",
+		"check": "vue-tsc --noEmit",
+		"test": "vitest run",
+		"prepack": "bun run build"
+	},
+	"sideEffects": ["**/*.css"],
+	"types": "./dist/index.d.ts",
+	"files": ["dist"],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./styles.css": "./dist/styles.css",
+		"./package.json": "./package.json"
+	},
+	"publishConfig": { "access": "public", "registry": "https://registry.npmjs.org" },
+	"dependencies": { "clsx": "^2.1.0", "tailwind-merge": "^3.0.0" },
+	"peerDependencies": { "@scope/project-name": "workspace:^", "vue": "^3.5.0" },
+	"devDependencies": {
+		"@scope/project-name": "workspace:*",
+		"@testing-library/vue": "^8.1.0",
+		"@vitejs/plugin-vue": "^5.2.0",
+		"jsdom": "^25.0.0",
+		"publint": "^0.3.0",
+		"vite": "^6.0.0",
+		"vitest": "^2.0.0",
+		"vue": "^3.5.0",
+		"vue-tsc": "^2.1.0",
+		"typescript": "^5.7.0"
+	},
+	"keywords": ["vue", "vue3", "ui", "components"]
 }
 ```
 
@@ -89,17 +93,17 @@ export default defineConfig({
 ```jsonc
 // tsconfig.json
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["vite/client"], "jsx": "preserve" },
-  "include": ["src/**/*.ts", "src/**/*.vue"]
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": { "types": ["vite/client"], "jsx": "preserve" },
+	"include": ["src/**/*.ts", "src/**/*.vue"]
 }
 ```
 
 ```jsonc
 // tsconfig.build.json — emits declarations only; Vite emits the JS
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": { "declaration": true, "emitDeclarationOnly": true, "outDir": "dist" }
+	"extends": "./tsconfig.json",
+	"compilerOptions": { "declaration": true, "emitDeclarationOnly": true, "outDir": "dist" }
 }
 ```
 
@@ -132,20 +136,24 @@ type Variant = 'filled' | 'outline' | 'text';
 type Role = 'primary' | 'secondary' | 'danger';
 
 const props = withDefaults(
-  defineProps<{ variant?: Variant; role?: Role; rippleless?: boolean }>(),
-  { variant: 'filled', role: 'primary', rippleless: false }
+	defineProps<{ variant?: Variant; role?: Role; rippleless?: boolean }>(),
+	{ variant: 'filled', role: 'primary', rippleless: false }
 );
 
 const attrs = useAttrs();
 const classes = computed(() =>
-  cn('button', `button-${props.variant}`, `button-${props.role}`, attrs.class as string)
+	cn('button', `button-${props.variant}`, `button-${props.role}`, attrs.class as string)
 );
 </script>
 
 <template>
-  <button v-ripple="{ disabled: rippleless }" :class="classes" v-bind="{ ...attrs, class: undefined }">
-    <slot />
-  </button>
+	<button
+		v-ripple="{ disabled: rippleless }"
+		:class="classes"
+		v-bind="{ ...attrs, class: undefined }"
+	>
+		<slot />
+	</button>
 </template>
 ```
 
@@ -184,7 +192,7 @@ export const vRipple: Directive<HTMLElement, { disabled?: boolean }> = {
 `src/styles.css`:
 
 ```css
-@source inline("ripple button button-filled button-outline button-text");
+@source inline('ripple button button-filled button-outline button-text');
 ```
 
 Import it into the library entry so Vite bundles it as `dist/styles.css`
@@ -264,7 +272,7 @@ import { Button } from '@scope/project-name-vue';
 </script>
 
 <template>
-  <Button variant="filled" role="primary" class="rounded-full">Save</Button>
+	<Button variant="filled" role="primary" class="rounded-full">Save</Button>
 </template>
 ```
 

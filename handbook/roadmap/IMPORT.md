@@ -5,11 +5,11 @@ documented: the **script** (recommended) and **manual `gh` commands**.
 
 ## Files
 
-| File                                 | What it is                                             |
-| ------------------------------------ | ------------------------------------------------------ |
-| [milestones.json](milestones.json)   | Milestones with titles, states, and descriptions.      |
-| [issues.json](issues.json)           | Labels and issues (each mapped to a milestone).         |
-| [import.ts](import.ts)               | Bun script that creates labels → milestones → issues.  |
+| File                               | What it is                                            |
+| ---------------------------------- | ----------------------------------------------------- |
+| [milestones.json](milestones.json) | Milestones with titles, states, and descriptions.     |
+| [issues.json](issues.json)         | Labels and issues (each mapped to a milestone).       |
+| [import.ts](import.ts)             | Bun script that creates labels → milestones → issues. |
 
 ## Prerequisites
 

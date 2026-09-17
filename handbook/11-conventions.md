@@ -9,11 +9,11 @@ here is the full policy and rationale.
 
 Published packages follow [SemVer](https://semver.org): `MAJOR.MINOR.PATCH`.
 
-| Bump  | When                                                        | Example              |
-| ----- | ----------------------------------------------------------- | -------------------- |
-| MAJOR | A breaking change to a public API.                          | Remove a prop.       |
-| MINOR | A backward-compatible feature.                              | Add a component.     |
-| PATCH | A backward-compatible bug fix.                              | Fix a hover color.   |
+| Bump  | When                               | Example            |
+| ----- | ---------------------------------- | ------------------ |
+| MAJOR | A breaking change to a public API. | Remove a prop.     |
+| MINOR | A backward-compatible feature.     | Add a component.   |
+| PATCH | A backward-compatible bug fix.     | Fix a hover color. |
 
 During `0.x`, treat **minor** as "may break" and **patch** as "safe" — SemVer's
 special pre-1.0 rule. The jump to `1.0.0` is the stability promise
@@ -67,13 +67,13 @@ and release notes stop being hand-written guesswork.
 
 This project uses **both**, for different jobs:
 
-- **commitlint** validates every *commit message* against Conventional Commits
+- **commitlint** validates every _commit message_ against Conventional Commits
   (enforced by a git hook). It keeps history clean and reviewable.
-- **Changesets** decides *version bumps and changelogs* per release, from
+- **Changesets** decides _version bumps and changelogs_ per release, from
   intent files contributors write. It drives publishing.
 
-They are not redundant: commitlint governs the *history*, Changesets governs the
-*release*. A team can use commit-derived versioning instead of Changesets (see
+They are not redundant: commitlint governs the _history_, Changesets governs the
+_release_. A team can use commit-derived versioning instead of Changesets (see
 §7), but Changesets shines in a multi-package repo with lockstep versioning.
 
 ## 4. Changesets configuration
@@ -82,28 +82,30 @@ They are not redundant: commitlint governs the *history*, Changesets governs the
 
 ```jsonc
 {
-  "$schema": "https://unpkg.com/@changesets/config/schema.json",
-  "changelog": "@changesets/changelog-github",
-  "commit": false,
-  "access": "public",
-  "baseBranch": "main",
-  // Lockstep: bump these four together to the same version.
-  "linked": [[
-    "@scope/project-name",
-    "@scope/project-name-svelte",
-    "@scope/project-name-react",
-    "@scope/project-name-vue"
-  ]],
-  // The docs site is private and never versioned/published.
-  "ignore": ["@scope/project-name-docs"]
+	"$schema": "https://unpkg.com/@changesets/config/schema.json",
+	"changelog": "@changesets/changelog-github",
+	"commit": false,
+	"access": "public",
+	"baseBranch": "main",
+	// Lockstep: bump these four together to the same version.
+	"linked": [
+		[
+			"@scope/project-name",
+			"@scope/project-name-svelte",
+			"@scope/project-name-react",
+			"@scope/project-name-vue"
+		]
+	],
+	// The docs site is private and never versioned/published.
+	"ignore": ["@scope/project-name-docs"]
 }
 ```
 
 `@changesets/changelog-github` writes changelog entries that link back to the PR
 and thank the author; it needs a `GITHUB_TOKEN` (present in Actions).
 
-> **`linked` vs `fixed`.** `linked` bumps the group together *only when at least
-> one of them changes*; `fixed` always bumps all of them on every release. For a
+> **`linked` vs `fixed`.** `linked` bumps the group together _only when at least
+> one of them changes_; `fixed` always bumps all of them on every release. For a
 > tightly coupled set that should share a version, `linked` is usually right —
 > unchanged packages still get bumped when any sibling in the group is released,
 > keeping the numbers aligned.
@@ -122,7 +124,7 @@ and thank the author; it needs a `GITHUB_TOKEN` (present in Actions).
 
    ```markdown
    ---
-   "@scope/project-name-svelte": minor
+   '@scope/project-name-svelte': minor
    ---
 
    Add a Tooltip component with `placement` and `delay` props.
@@ -165,7 +167,7 @@ gh release create @scope/project-name@1.3.0 \
 
 ## 7. Alternative: commit-derived versioning
 
-If you prefer *not* to write changeset files, you can derive versions and
+If you prefer _not_ to write changeset files, you can derive versions and
 changelogs from Conventional Commits directly with
 [`release-please`](https://github.com/googleapis/release-please) or
 [`semantic-release`](https://semantic-release.gitbook.io). Trade-off: less
@@ -197,11 +199,11 @@ correctly formatted message — so contributors do not have to memorize the gram
 
 ```json
 {
-  "recommendations": [
-    "vivaxy.vscode-conventional-commits",
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint"
-  ]
+	"recommendations": [
+		"vivaxy.vscode-conventional-commits",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint"
+	]
 }
 ```
 
@@ -228,7 +230,7 @@ git config commit.template .gitmessage.txt
 
 ### 8.4 CI enforcement (hard block, remote)
 
-Add a PR check that lints commit messages *and* the PR title (squash-merge uses
+Add a PR check that lints commit messages _and_ the PR title (squash-merge uses
 the PR title as the commit, so lint it too):
 
 `.github/workflows/commitlint.yml`:
