@@ -37,15 +37,35 @@ sets of tokens, and a support burden nobody enjoys.
 **`packages/{svelte,react,vue}/package.json`** — the same shape in all three:
 
 ```jsonc
+// The range CONSUMERS resolve against. A real semver range, always.
 "peerDependencies": {
-  "@scope/project-name": "workspace:^",
-  "svelte": "^5.57.0"
+  "@anti049/test": "^0.0.0",
+  "svelte": "^5.0.0"
+},
+// What makes it resolve locally, inside the workspace.
+"devDependencies": {
+  "@anti049/test": "workspace:*"
 }
 ```
 
-`workspace:^` resolves locally in development and is rewritten to a real range at
-publish time by Changesets. Hand-writing `^0.1.0` means three manual bumps per
-release and one will be forgotten.
+**Do not put `workspace:^` in `peerDependencies`.** It is tempting — it resolves
+locally, and some package managers rewrite it when they publish. But `npm pack`
+and `npm publish` do **not**, so any tarball npm builds — every local test
+tarball, and every release published through npm — carries a protocol npm
+cannot install:
+
+```text
+error: Unsupported URL Type "workspace:"
+```
+
+That message names neither your package nor which field it came from, and it
+only appears once somebody installs the tarball — which is exactly why
+[guide 17](17-rehearsal.md) exists and checks for it.
+
+The split above costs nothing: the `devDependencies` entry is what the workspace
+links, and Changesets keeps the peer range current through
+`updateInternalDependencies` in `.changeset/config.json`, so you are not bumping
+three ranges by hand each release.
 
 **2. Every package exports a `styles.css` that registers its own files.**
 
@@ -63,8 +83,8 @@ document it as non-optional.
 
 ```css
 @import 'tailwindcss';
-@plugin '@scope/project-name';
-@import '@scope/project-name-svelte/styles.css'; /* required */
+@plugin '@anti049/test';
+@import '@anti049/test-svelte/styles.css'; /* required */
 ```
 
 **3. The component inventory is identical across all three.** A component lands
@@ -254,7 +274,61 @@ git commit -m "test(core): assert export parity across bindings"
 
 The test cannot pass yet — it imports three `dist/` directories that do not
 exist. Commit it anyway: it is the contract guides 4–6 are written against,
-and it goes green at the end of [guide 6](06-vue.md).
+and it goes green at the end of [guide 6](06-vue.md). Until then the plugin's
+own `check` fails too — its unit tests include this file — so run the binding
+packages' checks in guides 4 and 5, not the plugin's.
+
+---
+
+## Checkpoint
+
+This guide writes a contract, not a package, so there is nothing to install
+yet. Two checks: the parity test fails for the reason it should, and rule 1's
+`workspace:` warning holds on your own npm.
+
+**1. The parity test fails, and only because the bindings are not built.**
+
+```powershell
+bun test packages/core/test/unit/export-parity.test.ts
+```
+
+It must fail with `Cannot find module` naming `svelte/dist/index.js`. Any other
+error — a syntax error, a missing `expect` — means the test itself is broken,
+and it will still be broken when guide 6 makes those modules exist.
+
+**2. `workspace:` survives `npm pack`.** A skeleton of two packages in
+`$env:TEMP\test-checkpoint\03`, shaped the way rule 1 says not to:
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\03"
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force "$cp\packages\plugin", "$cp\packages\binding", "$cp\consumer" | Out-Null
+Push-Location $cp
+
+'{ "name": "probe", "private": true, "workspaces": ["packages/*"] }' | Set-Content package.json
+'{ "name": "probe-plugin", "version": "1.0.0" }' | Set-Content packages/plugin/package.json
+'{ "name": "probe-binding", "version": "1.0.0", "peerDependencies": { "probe-plugin": "workspace:^" } }' |
+	Set-Content packages/binding/package.json
+bun install
+
+Push-Location packages/binding
+$bad = npm pack --pack-destination $cp | Select-Object -Last 1
+Pop-Location
+tar -xzOf "$cp\$bad" package/package.json | Select-String 'workspace:'   # one match: not rewritten
+
+Set-Location consumer
+'{ "name": "consumer", "private": true }' | Set-Content package.json
+npm install --no-audit --no-fund "$cp\$bad"; $LASTEXITCODE   # non-zero: Unsupported URL Type "workspace:"
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** the parity test fails only on the missing `dist/`, and the
+probe install fails on `workspace:`. That second failure is what every binding
+manifest in guides 4–6 is shaped to avoid, and their checkpoints check the real
+tarballs for it.
+
 ---
 
 Next: [Svelte](04-svelte.md) · [React](05-react.md) · [Vue](06-vue.md)

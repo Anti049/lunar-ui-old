@@ -3,8 +3,8 @@
 ## Setup
 
 ```sh
-git clone https://github.com/acme/project-name.git
-cd project-name
+git clone https://github.com/Anti049/test.git
+cd test
 bun install
 bun run build:packages   # a fresh clone cannot typecheck until it has built once
 bun run dev              # docs site, with live reload from the plugin's CSS

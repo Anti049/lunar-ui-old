@@ -2,8 +2,8 @@
 	Imports milestones, labels and issues into a GitHub repository.
 
 	    gh auth login
-	    bun blueprint/roadmap/import.ts --repo acme/project-name --dry-run
-	    bun blueprint/roadmap/import.ts --repo acme/project-name
+	    bun blueprint/roadmap/import.ts --repo Anti049/test --dry-run
+	    bun blueprint/roadmap/import.ts --repo Anti049/test
 
 	Idempotent: milestones and labels are matched by name and skipped if present,
 	and an issue with an identical title is not created twice. Safe to re-run

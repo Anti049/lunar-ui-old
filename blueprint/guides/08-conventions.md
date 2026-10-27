@@ -11,7 +11,9 @@ are verifying and using it.
 
 ## 1. Adopt Conventional Commits
 
-The format:
+### What it is
+
+A grammar for the first line of a commit message:
 
 ```text
 <type>(<scope>)<!>: <subject>
@@ -21,7 +23,79 @@ The format:
 <footer>
 ```
 
-### Types
+Everything except `<type>` and `<subject>` is optional. `feat: add a badge` is
+valid; so is the fully-loaded form with a scope, a breaking marker and a footer.
+
+### What it actually buys you
+
+Be clear-eyed about this, because the honest answer is narrower than the
+advocacy suggests.
+
+**The history becomes queryable.** This is the real benefit and it compounds.
+Six months in, questions you cannot otherwise answer become one command:
+
+```powershell
+# Everything that touched the plugin since the last tag.
+git log v1.4.0..HEAD --oneline --grep '^[a-z]*(core)'
+
+# Every breaking change, ever.
+git log --grep 'BREAKING CHANGE' --grep '!:' --all-match --oneline
+
+# What shipped to React consumers this quarter.
+git log --since='3 months ago' --oneline --grep '(react)'
+```
+
+**It forces one decision per commit.** Writing `feat(core)` means noticing that
+you also touched the Svelte package, which usually means the commit should have
+been two. That pressure is most of the value and it happens before the commit
+exists.
+
+**It gives reviewers the shape of a change before they read the diff.**
+`refactor(core/build)` and `fix(svelte)` invite completely different reading.
+
+**It is a shared vocabulary that survives you.** Contributors who have used it
+elsewhere need no onboarding, and the ones who have not learn it from the hook.
+
+### What it costs
+
+**The types are a lie at the margins.** Is a dependency bump that fixes a bug
+`fix` or `build`? Is deleting dead code `refactor` or `chore`? These questions
+have no correct answer, and time spent on them is wasted. Pick one, write it in
+`CONTRIBUTING.md`, and stop thinking about it. The convention is worth having
+because it is consistent, not because it is right.
+
+**It does not write your changelog.** This is the most common misconception.
+Commit subjects are written for reviewers who have the diff in front of them;
+changelog entries are written for consumers who do not. `fix(core): handle
+undefined` is a fine commit and a useless changelog line. That gap is exactly
+why [step 3](#3-install-and-configure-changesets) adds Changesets rather than
+generating notes from the history.
+
+**It adds friction to every commit**, including the trivial ones. The hook in
+step 5 rejects `wip`, and sometimes `wip` is what you meant. `git commit
+--no-verify` exists; using it occasionally is fine and does not make the
+convention worthless.
+
+**Squash-merging can erase it.** If GitHub's squash button composes a subject
+from the PR title, every commit in the repository ends up shaped by whatever
+people type into a web form. [Guide 9](09-github.md) step 9 sets the default
+squash message to the PR title for that reason — so at least the PR title is
+linted in CI.
+
+### What you are choosing instead of
+
+| Alternative              | Why not here                                                                                                                                                                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No convention            | Perfectly viable for a solo project that never releases. The moment you need "what changed for React consumers", it is too late.                                                                                                             |
+| `semantic-release`       | Derives versions from commit types automatically. Powerful, and wrong for a design system: the commit that renames a CSS class looks like a `feat`, and only a human knows it is breaking. Changesets keeps that judgement where it belongs. |
+| Gitmoji                  | Same idea, emoji instead of words. Harder to grep, harder to type, and `scope-enum` has no equivalent.                                                                                                                                       |
+| Free-text + good reviews | Works while the team is small and everyone remembers. Does not survive a contributor who has not read the last two years of history.                                                                                                         |
+
+**Take Conventional Commits, and do not take `semantic-release` with it.** The
+combination looks efficient and quietly removes the one decision — is this
+breaking? — that you most want a person to make.
+
+### The types, in full
 
 | Type       | Use for                    | Release effect          |
 | ---------- | -------------------------- | ----------------------- |
@@ -36,6 +110,19 @@ The format:
 | `chore`    | everything else            | none                    |
 | `revert`   | reverts a previous commit  | matches what it reverts |
 
+"Release effect" is what a **reader** should infer, not what any tool does.
+Nothing in this setup reads commit types to decide a version — changesets do
+that, and a `feat` commit with no changeset releases nothing.
+
+Two worth calling out because they are routinely misused:
+
+- **`chore` is not a dumping ground.** If it changed what a consumer receives,
+  it is not a chore. A `chore` commit that needs a changeset is a mistyped
+  `feat` or `fix`.
+- **`refactor` means the output is identical.** For this repository that is
+  testable: the parity harness in [guide 12](12-testing.md) will tell you
+  whether a `refactor(core)` really was one.
+
 ### Scopes
 
 Use the package directory, or a subsystem within one:
@@ -49,10 +136,14 @@ Decide the list now and put it in `commitlint.config.js` (step 5). An open-ended
 scope list means `core`, `plugin` and `lunar` all appear in one history and none
 of them can be filtered on.
 
+`repo` is the escape hatch for anything that is not a package — CI, the root
+config, the blueprint itself. `deps` is for dependency bumps, and exists mainly
+so Dependabot's commits do not all land in `chore` with no scope.
+
 ### Breaking changes
 
-Either a `!` before the colon, or a `BREAKING CHANGE:` footer. Both, for anything
-significant:
+Either a `!` before the colon, or a `BREAKING CHANGE:` footer. Both, for
+anything significant:
 
 ```text
 feat(core)!: replace `seed` with the `seeds` object
@@ -63,15 +154,23 @@ BREAKING CHANGE: `@plugin '.../theme' { seed: #0956aa }` is now
 suggestion rather than ignored.
 ```
 
-Write the footer for the person reading the changelog six months from now, not
-for the reviewer who already knows what you did. Always say what to change _to_.
+The `!` is for scanning; the footer is for the person who has hit the break and
+needs to know what to do. Write the footer for someone reading the changelog six
+months from now, not for the reviewer who already knows what you did, and
+**always say what to change it to**.
+
+For this project specifically, the CSS class names and tokens are public API —
+[step 2](#2-decide-your-versioning-policy) has the list of what that makes
+breaking. It is longer than people expect.
 
 ### Subject line rules
 
-- imperative mood — "add", not "added" or "adds"
+- imperative mood — "add", not "added" or "adds". The test: the subject should
+  complete the sentence "if applied, this commit will …".
 - no trailing period
-- ≤ 72 characters
+- ≤ 72 characters, so `git log --oneline` stays one line in a terminal
 - lowercase after the colon, unless it starts with an identifier
+  (`fix(core): --radius-button now falls back correctly`)
 
 ---
 
@@ -117,56 +216,175 @@ reviewers forget.
 ## 3. Install and configure Changesets
 
 ```powershell
-bun add -D @changesets/cli @changesets/changelog-github
+bun add -D '@changesets/cli' '@changesets/changelog-github'
 bunx changeset init
 ```
 
-`init` writes a `.changeset/` directory with a default config. Replace it.
+### `init` is interactive, and asks three questions
 
-**`.changeset/config.json`** — replace the whole file:
+Changesets 3.x prompts rather than writing a default file. Answer them like
+this:
+
+```text
+◇  Should the GitHub integration be used for changelogs?
+Yes
+◇  What is the GitHub repository? (e.g. org/repo)
+Anti049/test
+◇  Should changeset files and version bumps be automatically committed?
+No
+```
+
+| Prompt                             | Answer         | What it sets                                                                                                                                               |
+| ---------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub integration for changelogs? | **Yes**        | `"changelog": ["@changesets/changelog-github", { "repo": … }]`. This is the npm package, not the bot — see below.                                          |
+| Which repository?                  | `Anti049/test` | `owner/repo` only. Not a URL, no `.git` suffix. Wrong here and the changelog links 404, silently, for every release.                                       |
+| Auto-commit?                       | **No**         | `"commit": false`. The release workflow makes the commit; `true` makes the CLI commit as you write each changeset, which fights any rebase-based workflow. |
+
+Cancelling at any prompt writes nothing — re-run it. And note that `init` asks
+about **two** of the eight options that matter; the rest are added by hand
+below, and `fixed` in particular is the one that actually shapes your releases.
+
+### "The GitHub integration" is three separate things
+
+They are routinely confused, and you want two of the three.
+
+| Thing                          | What it is                                                                  | Take it?                                          |
+| ------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------- |
+| `@changesets/changelog-github` | An npm package. Formats changelog entries with the PR and author linked.    | **Yes**                                           |
+| `changesets/action`            | A GitHub Action. Opens the Version PR and publishes.                        | **Yes** — [guide 9](09-github.md) already uses it |
+| The Changeset bot              | A third-party GitHub **App**, installed on the repository. Comments on PRs. | **Only if you take outside contributions**        |
+
+#### `@changesets/changelog-github` — take it
+
+The default changelog generator writes the entry text and nothing else.
+`changelog-github` adds the PR number, a link to it, and the author's handle:
+
+```md
+## 2.1.0
+
+### Minor Changes
+
+- [#142](https://github.com/Anti049/test/pull/142)
+  [`a1b2c3d`](https://github.com/Anti049/test/commit/a1b2c3d)
+  Thanks [@someone](https://github.com/someone)! - Per-role seeds…
+```
+
+Worth the extra dependency: when someone reports a regression against 2.1.0, the
+changelog takes you to the PR in one click rather than to a commit you then have
+to trace.
+
+**It needs a `GITHUB_TOKEN` when `changeset version` runs.** In CI the release
+workflow provides it. Locally, `changeset version` without one fails with a
+GitHub API error that says nothing about tokens. There is no dry-run flag, and
+`version` consumes the changesets and rewrites every manifest it bumps — so to
+preview the changelog, run it in a throwaway worktree:
+
+```powershell
+$env:GITHUB_TOKEN = (gh auth token)
+git worktree add "$env:TEMP\changeset-preview" HEAD
+Push-Location "$env:TEMP\changeset-preview"
+bun install; bunx changeset version; git diff
+Pop-Location
+git worktree remove --force "$env:TEMP\changeset-preview"
+Remove-Item Env:GITHUB_TOKEN
+```
+
+For the version **numbers** alone, `bunx changeset status --verbose` is enough:
+it prints the release plan, writes nothing, and needs no token.
+
+#### The Changeset bot — probably not, yet
+
+[`github.com/apps/changeset-bot`](https://github.com/apps/changeset-bot) is a
+GitHub App that comments on every PR saying whether a changeset is present, with
+an "Add a changeset" link that opens the GitHub editor pre-filled.
+
+**For:** a first-time contributor can add a changeset from the browser without
+cloning, and the comment updates itself when they do. That is genuinely nice on
+a repository with drive-by contributions.
+
+**Against:** it is a third-party App with write access to your repository's pull
+requests, and [guide 9](09-github.md) step 5 already enforces the same rule as a
+required check that cannot be bypassed. The bot **advises**; the workflow
+**gates**. Running both is fine and mildly redundant; running only the bot means
+a PR can merge without a changeset.
+
+**Take the workflow. Add the bot later if and when outside PRs start arriving.**
+Do not replace the workflow with it.
+
+### The configuration, option by option
+
+**`.changeset/config.json`** — `init` wrote the first three lines; add the rest.
+This is the whole file:
 
 ```jsonc
 {
 	"$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
-	"changelog": ["@changesets/changelog-github", { "repo": "acme/project-name" }],
+	"changelog": ["@changesets/changelog-github", { "repo": "Anti049/test" }],
 	"commit": false,
-	"fixed": [
-		[
-			"@scope/project-name",
-			"@scope/project-name-svelte",
-			"@scope/project-name-react",
-			"@scope/project-name-vue"
-		]
-	],
+	"fixed": [["@anti049/test", "@anti049/test-svelte", "@anti049/test-react", "@anti049/test-vue"]],
 	"linked": [],
 	"access": "public",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
-	"ignore": ["@scope/project-name-docs"]
+	"ignore": ["@anti049/test-docs"]
 }
 ```
 
-Two choices worth understanding:
+| Option                       | Value here                  | Why, and what the alternative costs                                                                                                                                                   |
+| ---------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `changelog`                  | `changelog-github`          | See above. `"@changesets/cli/changelog"` is the dependency-free default and produces entries with no links; `false` disables changelogs entirely.                                     |
+| `commit`                     | `false`                     | The release workflow makes the commit. `true` makes the CLI commit as you write each changeset, which fights any rebase-based workflow.                                               |
+| `fixed`                      | the four published packages | See below.                                                                                                                                                                            |
+| `linked`                     | `[]`                        | Mutually exclusive with `fixed` for the same packages. See below.                                                                                                                     |
+| `access`                     | `"public"`                  | Scoped packages default to restricted, and a restricted publish on a free account simply fails. `publishConfig.access` in each manifest says the same thing; both is belt and braces. |
+| `baseBranch`                 | `"main"`                    | What `changeset status` diffs against. Wrong here and the changeset check passes when it should fail.                                                                                 |
+| `updateInternalDependencies` | `"patch"`                   | When one package in the group bumps, dependents get a patch. `"minor"` is the alternative and inflates every release.                                                                 |
+| `ignore`                     | the docs site               | It is private and never published. Without this, Changesets asks about it on every `bun changeset` and can propose versioning it.                                                     |
 
-**`fixed` versus `linked`.** `fixed` keeps all four packages on the _same_ number
-always — a release of one releases all. `linked` only aligns them when they
-happen to release together. `fixed` is simpler to reason about and to document
-("install v2 of everything"); the cost is version churn on packages that did not
-change.
+#### `fixed` versus `linked` — the one real decision
 
-**`changelog-github`** turns each entry into a line with the PR and author
-linked. Worth the extra dependency. It needs a `GITHUB_TOKEN` in the environment
-when `changeset version` runs, which the release workflow in
-[guide 9](09-github.md) provides.
+Both keep a group of packages' versions related. They differ in what happens to
+a package that did not change.
 
-`ignore` keeps the docs site out of versioning entirely — it is private and never
-published, and without this Changesets asks about it on every `bun changeset`.
+**`fixed`** — the whole group moves together, always. Change only the plugin,
+and all four publish at the new number.
 
-Check the config parses before moving on:
+- _For:_ one number to document and to support. "Install v2 of everything" is a
+  sentence you can put in a README, and a bug report that says "2.1.0" is
+  unambiguous. Peer ranges between your own packages stay trivially satisfiable.
+- _Against:_ churn. `@anti049/test-vue` publishes releases containing no change,
+  and its changelog fills with "Updated dependencies" entries.
+
+**`linked`** — versions align only when packages happen to release together, and
+drift otherwise.
+
+- _For:_ no empty releases. A package's version reflects its own history.
+- _Against:_ four numbers to reason about. "Which version of the Vue package
+  works with plugin 2.3?" becomes a question with a real answer you have to look
+  up, and a compatibility matrix in the README that has to be maintained.
+
+**Take `fixed` for a design system.** The packages are useless apart — the
+bindings are thin wrappers over the plugin and have no independent life — so
+tying them together costs only registry noise, and buys a support story that
+fits in one line. Take `linked` when packages genuinely can be used separately.
+
+Either way, `ignore` the docs site: it must not appear in either list.
+
+#### One option deliberately absent
+
+`privatePackages` is not set, which leaves the default `{ version: true, tag: true }`. It does not matter here because the only private package is
+`ignore`d. If you later add a private package you _do_ want versioned — an
+internal tooling package, say — remove it from `ignore` rather than touching
+this.
+
+### Check it parses
 
 ```powershell
 bunx changeset status
 ```
+
+Expect "There are no changesets" and exit code 0. An error here is a malformed
+config, and it is much easier to fix now than during a release.
 
 ---
 
@@ -182,13 +400,13 @@ seen your diff:
 
 ```md
 ---
-'@scope/project-name': minor
+'@anti049/test': minor
 ---
 
 Per-role seeds. A theme can now pin any palette to an exact colour instead of
 deriving everything from one seed:
 
-    @plugin '@scope/project-name/theme' {
+    @plugin '@anti049/test/theme' {
     	name: brand;
     	seed-primary: #0956aa;
     	seed-secondary: #52e2ac;
@@ -380,14 +598,13 @@ On a scratch branch:
 ```powershell
 git commit --allow-empty -m "feat(core): add a thing"   # hook passes
 bun changeset                                            # write one, pick minor
-bunx changeset status --since=main                       # lists the pending bump
-bunx changeset version --dry-run                         # shows the numbers
-git clean -fd                                            # remove dry-run leftovers
+bunx changeset status --since=main --verbose             # the release plan, with new versions
 ```
 
-`changeset version --dry-run` is the step people skip and should not. It tells
-you what the release workflow will do, before a release is on the line — and it
-is where you catch the peer-dependency majoring trap below.
+`status --verbose` is the step people skip and should not. It prints the
+version every package will move to — exactly what the release workflow will
+do, before a release is on the line — and it is where you catch the
+peer-dependency majoring trap below.
 
 ---
 
@@ -450,7 +667,7 @@ hooks work for anyone who clones the repository rather than only for you.
 	// Each entry becomes a changelog line with the PR and author linked. Needs
 	// GITHUB_TOKEN in the environment when `changeset version` runs, which the
 	// release workflow in guide 9 provides.
-	"changelog": ["@changesets/changelog-github", { "repo": "acme/project-name" }],
+	"changelog": ["@changesets/changelog-github", { "repo": "Anti049/test" }],
 
 	// The release workflow commits; Changesets should not do it too.
 	"commit": false,
@@ -464,14 +681,7 @@ hooks work for anyone who clones the repository rather than only for you.
 		of everything"). The cost is version churn on packages that did not
 		change, which is cheap.
 	*/
-	"fixed": [
-		[
-			"@scope/project-name",
-			"@scope/project-name-svelte",
-			"@scope/project-name-react",
-			"@scope/project-name-vue"
-		]
-	],
+	"fixed": [["@anti049/test", "@anti049/test-svelte", "@anti049/test-react", "@anti049/test-vue"]],
 	"linked": [],
 
 	"access": "public",
@@ -483,7 +693,7 @@ hooks work for anyone who clones the repository rather than only for you.
 
 	// The docs site is private and never published. Without this, Changesets
 	// asks about it on every `bun changeset`.
-	"ignore": ["@scope/project-name-docs"]
+	"ignore": ["@anti049/test-docs"]
 }
 ```
 
@@ -666,14 +876,16 @@ person who has it.
 >
 > **Fix:** `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.onlyUpdatePeerDependentsWhenOutOfRange: true`,
 > plus a peer range wide enough to survive the bump. Verify with
-> `bunx changeset version --dry-run` — this is not something to discover at
+> `bunx changeset status --verbose` — this is not something to discover at
 > publish time.
 
-> **`changeset version` leaves untracked `CHANGELOG.md` files behind after a dry
-> run.** `git checkout` does not remove untracked files, so they linger and get
-> committed by accident.
+> **You run `changeset version` locally to "see what happens".** There is no
+> dry-run flag: it deletes the changesets it consumes, rewrites manifests and
+> writes `CHANGELOG.md` files, and `git checkout` does not remove the untracked
+> ones.
 >
-> **Fix:** `git clean -fd` after any dry run, or run it in a worktree.
+> **Fix:** `changeset status --verbose` for the numbers; a throwaway worktree
+> (step 3) for the changelog text.
 
 > **Someone force-pushes over a published tag.** npm will not let you republish a
 > version, so the tag and the registry disagree forever.
@@ -708,6 +920,69 @@ message.
 From the next commit onward, anything that changes what a consumer receives
 also needs a changeset. This one does not: it touches only repository
 tooling.
+
+---
+
+## Checkpoint
+
+Step 9 checked the chain in your own clone, where the hooks were installed by
+hand. This checks a **fresh** clone, which is what every contributor gets: the
+hooks must install themselves, and every rule must bite.
+
+**Skeleton:** a clone in `$env:TEMP\test-checkpoint\08`. Commits made here never
+leave it.
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\08"
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+git clone --quiet . $cp
+Push-Location $cp
+bun install --frozen-lockfile
+
+# husky's `prepare` script ran on install.
+git config core.hooksPath                         # .husky/_
+
+# commit-msg: each of these must be rejected, and the message must say why.
+git commit --allow-empty -m "bad message"; $LASTEXITCODE            # non-zero: type missing
+git commit --allow-empty -m "feat(nope): add a thing"; $LASTEXITCODE  # non-zero: scope-enum
+git commit --allow-empty -m "feat(core): Add a thing"; $LASTEXITCODE  # non-zero: subject-case
+git commit --allow-empty -m "feat(core): add a thing"; $LASTEXITCODE  # 0
+
+# pre-commit: lint-staged reformats what is staged.
+'export const  probe  =  1' | Set-Content packages/core/probe.ts
+git add packages/core/probe.ts
+git commit -m "chore(core): probe the pre-commit hook"
+git show HEAD:packages/core/probe.ts              # export const probe = 1;
+
+# Changesets: the plan for one minor change to the plugin.
+@'
+---
+'@anti049/test': minor
+---
+
+Checkpoint entry.
+'@ | Set-Content .changeset/checkpoint.md
+git add .changeset; git commit -m "chore(repo): add a checkpoint changeset"
+bunx changeset status --verbose
+```
+
+Read the `status` output. The plugin is listed as `minor`. If `fixed` groups
+the four publishable packages, the three bindings are listed too, at the
+**same** new version. The docs site is not listed at all.
+
+```powershell
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** every line prints what its comment says and the release plan
+reads as above.
+
+**If it does not:** an empty `core.hooksPath` means the `prepare` script did
+not run on install — check it is in the root `package.json`, not just in your
+shell history. A binding listed as `major` is the peer-dependency trap below:
+a peer range on the plugin that the bump falls outside of.
+
 ---
 
 Next: [GitHub](09-github.md)

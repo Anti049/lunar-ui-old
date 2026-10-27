@@ -58,18 +58,18 @@ never packaged.
 
 ```jsonc
 {
-	"name": "@scope/project-name-react",
+	"name": "@anti049/test-react",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/react"
 	},
 	"scripts": {
 		"dev": "vite",
-		"build": "tsup && cp src/lib/styles.css dist/styles.css && publint",
+		"build": "tsup && node -e \"require('node:fs').copyFileSync('src/lib/styles.css','dist/styles.css')\" && publint",
 		"check": "tsc --noEmit"
 	},
 	"files": ["dist"],
@@ -87,7 +87,7 @@ never packaged.
 	},
 	"sideEffects": ["**/*.css"],
 	"peerDependencies": {
-		"@scope/project-name": "workspace:^",
+		"@anti049/test": "^0.0.0",
 		"react": "^18 || ^19",
 		"react-dom": "^18 || ^19"
 	},
@@ -135,7 +135,7 @@ export default defineConfig({
 	treeshake: true,
 	// Never bundle these — the consumer brings their own, and two copies of
 	// React in one app is the classic "invalid hook call" crash.
-	external: ['react', 'react-dom', '@scope/project-name'],
+	external: ['react', 'react-dom', '@anti049/test'],
 	outExtension: ({ format }) => ({ js: format === 'cjs' ? '.cjs' : '.js' })
 });
 ```
@@ -174,8 +174,9 @@ start resolving class conflicts differently and nobody notices for months.
 @source '../**/*.{ts,tsx}';
 ```
 
-`tsup` does not copy assets, which is why `build` has an explicit `cp`. On
-Windows without a POSIX shell, use `cpy-cli` or a two-line Node script instead.
+`tsup` does not copy assets, which is why `build` copies it explicitly — with
+a Node one-liner rather than `cp`, because package scripts run under `cmd.exe`
+on Windows, where `cp` does not exist ([guide 0](00-prerequisites.md)).
 
 ---
 
@@ -362,7 +363,7 @@ published.
 
 ```css
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 @source '../lib/**/*.{ts,tsx}';
 ```
 
@@ -383,7 +384,7 @@ export default defineConfig({
 ```
 
 ```powershell
-bun run --filter '@scope/project-name-react' dev
+bun run --filter '@anti049/test-react' dev
 ```
 
 ---
@@ -400,8 +401,8 @@ ls dist            # index.js, index.cjs, index.d.ts, styles.css
 Check **both** module systems resolve, which is the whole reason for dual output:
 
 ```powershell
-node --input-type=module -e "import('@scope/project-name-react').then(m => console.log('esm', Object.keys(m)))"
-node -e "console.log('cjs', Object.keys(require('@scope/project-name-react')))"
+node --input-type=module -e "import('@anti049/test-react').then(m => console.log('esm', Object.keys(m)))"
+node -e "console.log('cjs', Object.keys(require('@anti049/test-react')))"
 ```
 
 Then run `attw` — it catches types that resolve for one system and not the other,
@@ -445,15 +446,15 @@ Build output, gitignored: `packages/react/dist/`.
 
 ```json
 {
-	"name": "@scope/project-name-react",
+	"name": "@anti049/test-react",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
-	"description": "React components for the project-name design system.",
+	"description": "React components for the test design system.",
 	"keywords": ["react", "tailwindcss", "ui", "components", "design-system"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/react"
 	},
 	"scripts": {
@@ -476,7 +477,7 @@ Build output, gitignored: `packages/react/dist/`.
 	},
 	"sideEffects": ["**/*.css"],
 	"peerDependencies": {
-		"@scope/project-name": "workspace:^",
+		"@anti049/test": "^0.0.0",
 		"react": "^18 || ^19",
 		"react-dom": "^18 || ^19"
 	},
@@ -485,6 +486,7 @@ Build output, gitignored: `packages/react/dist/`.
 		"tailwind-merge": "^3.7.0"
 	},
 	"devDependencies": {
+		"@anti049/test": "workspace:*",
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
@@ -522,7 +524,7 @@ would bundle it into `dist/index.css` and the exports map would disagree with
 itself. So a React consumer must import the stylesheet themselves:
 
 ```ts
-import '@scope/project-name-react/styles.css';
+import '@anti049/test-react/styles.css';
 ```
 
 Put that line in the package README and in the docs site's install page. It is
@@ -560,7 +562,7 @@ export default defineConfig({
 		one app is the classic "Invalid hook call" crash — which reads like a bug
 		in your components and is not.
 	*/
-	external: ['react', 'react-dom', '@scope/project-name'],
+	external: ['react', 'react-dom', '@anti049/test'],
 
 	// `.cjs` rather than `.js` for the CommonJS build, so `"type": "module"` in
 	// package.json does not cause Node to parse it as ESM.
@@ -655,7 +657,7 @@ export const cn = (...inputs: ClassValue[]): string => twMerge(clsx(inputs));
 	Unlike Svelte and Vue, this file is NOT imported by index.ts (see the
 	package.json notes). A React consumer imports it explicitly:
 
-	    import '@scope/project-name-react/styles.css';
+	    import '@anti049/test-react/styles.css';
 */
 @source '../**/*.{ts,tsx}';
 ```
@@ -818,7 +820,7 @@ because `vite.config.ts` sets `root: 'src/demo'`.
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>project-name — React</title>
+		<title>test — React</title>
 	</head>
 	<body>
 		<div id="root"></div>
@@ -869,7 +871,7 @@ the playground reflects your edits without a build.
 	something a consumer could not write, that is a bug in the plugin.
 */
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 
 /*
 	Scan this package's own components. Without it the playground renders
@@ -913,10 +915,105 @@ the playground reflects your edits without a build.
 Verify, then commit:
 
 ```powershell
-bun run --filter '@scope/project-name-react' check
+bun run --filter '@anti049/test-react' check
 git add -A
 git commit -m "feat(react): add React bindings"
 ```
+
+---
+
+## Checkpoint
+
+Step 10 proved both module systems resolve inside the workspace. This proves a
+Vite + React app can install the tarball, type-check against it, and ship
+production CSS containing the classes the components use.
+
+**Skeleton:** a `create-vite` React app in `$env:TEMP\test-checkpoint\05-react`.
+Run from the repository root:
+
+```powershell
+$cp   = "$env:TEMP\test-checkpoint"
+$pkgs = "$cp\pkgs"
+$app  = "$cp\05-react"
+Remove-Item -Recurse -Force $pkgs, $app -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $pkgs | Out-Null
+
+bun run --filter '@anti049/test' --filter '@anti049/test-react' build
+'core', 'react' | ForEach-Object {
+	Push-Location "packages/$_"
+	npm pack --pack-destination $pkgs | Out-Null
+	Pop-Location
+}
+$tgz = (Get-ChildItem $pkgs -Filter *.tgz).FullName
+$react = $tgz | Where-Object { $_ -match '-react-' }
+
+tar -xzOf $react package/package.json | Select-String 'workspace:'   # prints nothing
+tar -tzf $react                                                      # dist/index.js, index.cjs, index.d.ts, styles.css
+
+Push-Location $cp
+bunx create-vite@latest 05-react --template react-ts --no-interactive
+Set-Location 05-react
+npm install --no-audit --no-fund
+npm install --no-audit --no-fund -D tailwindcss '@tailwindcss/vite'
+npm install --no-audit --no-fund $tgz
+
+# Both module systems, from a real consumer's node_modules.
+node --input-type=module -e "import('@anti049/test-react').then(m => console.log('esm', Object.keys(m).join(', ')))"
+node -e "console.log('cjs', Object.keys(require('@anti049/test-react')).join(', '))"
+```
+
+**`vite.config.ts`** — replace it:
+
+```ts
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [react(), tailwindcss()] });
+```
+
+**`src/index.css`** — replace it. `main.tsx` already imports it.
+
+```css
+@import 'tailwindcss';
+@plugin '@anti049/test';
+@import '@anti049/test-react/styles.css';
+```
+
+**`src/App.tsx`** — replace it:
+
+```tsx
+import { Badge, Button } from '@anti049/test-react';
+
+export default function App() {
+	return (
+		<>
+			<Button variant="filled">Filled</Button>
+			<Badge>3</Badge>
+		</>
+	);
+}
+```
+
+```powershell
+npm run build          # tsc -b && vite build — type-checks against the published .d.ts
+
+$css = (Get-ChildItem dist/assets -Filter *.css).FullName
+(Select-String -Path $css -Pattern '\.badge\b').Count           # > 0
+(Select-String -Path $css -Pattern '\.badge-primary\b').Count   # > 0
+(Select-String -Path $css -Pattern '\.button-filled\b').Count   # > 0
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** every line prints what its comment says, and the ESM and CJS
+lines list the same exports.
+
+**If it does not:** an empty CJS list is a `tsup` `format` problem. A class
+missing from the production CSS is worth reading `styles.css` in the tarball
+for: its `@source` glob is resolved relative to `dist/`, and it can only match
+files the tarball actually contains.
 
 ---
 

@@ -6,13 +6,13 @@ Five decisions here are expensive to reverse. Make them deliberately.
 
 ## Toolchain
 
-| Tool       | Version | Why this one                                                                               |
-| ---------- | ------- | ------------------------------------------------------------------------------------------ |
-| Node       | ≥ 22    | The registry tooling and `corepack` assume it. Even on Bun, publishing goes through `npm`. |
-| Bun        | ≥ 1.2   | Runs TypeScript directly, which removes a compile step from the plugin build.              |
-| Git        | ≥ 2.40  | `git switch`, and sane `--no-rebase` defaults.                                             |
-| GitHub CLI | ≥ 2.40  | Required to import the roadmap. `gh auth login` before you start.                          |
-| VS Code    | current | The debugging and enforcement setup in guides 5 and 8 is VS Code specific.                 |
+| Tool       | Version | Why this one                                                                  |
+| ---------- | ------- | ----------------------------------------------------------------------------- |
+| Node       | ≥ 22.17 | SvelteKit 3 requires it. Even on Bun, publishing goes through `npm`.          |
+| Bun        | ≥ 1.2   | Runs TypeScript directly, which removes a compile step from the plugin build. |
+| Git        | ≥ 2.40  | `git switch`, and sane `--no-rebase` defaults.                                |
+| GitHub CLI | ≥ 2.40  | Required to import the roadmap. `gh auth login` before you start.             |
+| VS Code    | current | The enforcement and debugging setup in guides 8 and 11 is VS Code specific.   |
 
 ```powershell
 node --version; bun --version; git --version; gh --version
@@ -30,17 +30,17 @@ Three placeholders run through every guide. Decide them before you start — a
 rename after the first publish means a deprecation notice on the old name, a
 redirect nobody reads, and a week of stale links.
 
-| Placeholder    | What it is                           | Example         | Where it appears                                |
-| -------------- | ------------------------------------ | --------------- | ----------------------------------------------- |
-| `@scope`       | your npm scope, with the leading `@` | `@moonlight-ui` | every `package.json`, every import, `@plugin`   |
-| `project-name` | the package and repository name      | `moonlight`     | package names, directory paths, the Pages URL   |
-| `acme`         | your GitHub user or organisation     | `nploetz049`    | repository URLs, CODEOWNERS, the roadmap import |
+| Placeholder | What it is                           | Example         | Where it appears                                |
+| ----------- | ------------------------------------ | --------------- | ----------------------------------------------- |
+| `@anti049`  | your npm scope, with the leading `@` | `@moonlight-ui` | every `package.json`, every import, `@plugin`   |
+| `test`      | the package and repository name      | `moonlight`     | package names, directory paths, the Pages URL   |
+| `Anti049`   | your GitHub user or organisation     | `nploetz049`    | repository URLs, CODEOWNERS, the roadmap import |
 
 Check the scope is free before committing to it:
 
 ```powershell
 # Quote the name: PowerShell treats a bare leading @ as a splat expression.
-npm view '@scope/project-name'          # E404 means available
+npm view '@anti049/test'          # E404 means available
 ```
 
 ### Substituting them
@@ -167,7 +167,7 @@ These are not oversights, and converting them breaks things:
    ```
 
    or a cross-platform helper (`rimraf`, `cpy-cli`). [Guide 5](05-react.md)
-   step 3 has the `cp` case, which is the one that bites.
+   step 3 has the copy case, which is the one that bites.
 
 ### Two Windows settings to change now
 
@@ -210,23 +210,23 @@ that Bun's hoisting hides. npm workspaces work but are slow at this size.
 ## Decision 2 — the scope and the package names
 
 ```text
-@scope/project-name           the plugin        ← the short name goes to the plugin
-@scope/project-name-svelte    Svelte bindings
-@scope/project-name-react     React bindings
-@scope/project-name-vue       Vue bindings
+@anti049/test           the plugin        ← the short name goes to the plugin
+@anti049/test-svelte    Svelte bindings
+@anti049/test-react     React bindings
+@anti049/test-vue       Vue bindings
 ```
 
 The plugin takes the bare name because it is the thing people install first and
 the thing they name in `@plugin`. Framework packages are suffixed, not scoped
-into subpaths — `@scope/project-name/svelte` would force one package to contain
+into subpaths — `@anti049/test/svelte` would force one package to contain
 every framework's dependencies.
 
 Check availability before writing a line of code:
 
 ```powershell
 # Quote the name: PowerShell treats a bare leading @ as a splat expression.
-npm view '@scope/project-name'          # E404 means available
-npm view '@scope/project-name-svelte'
+npm view '@anti049/test'          # E404 means available
+npm view '@anti049/test-svelte'
 ```
 
 **The directory names do not have to match the package names.** Using
@@ -435,7 +435,7 @@ Decide now, because it determines:
 - the shape of the `@plugin '.../theme'` option surface, which is public API
   from the first publish
 
-[Guide 14](14-themes.md) builds the generated version end to end, including the
+[Guide 15](15-themes.md) builds the generated version end to end, including the
 hand-declared override path.
 
 ---
@@ -451,6 +451,61 @@ nobody noticed until a consumer reported a missing class.
 
 If you are about to type out a list of things that already exist in the CSS,
 write an extractor instead. It is almost always fewer lines than the list.
+
+---
+
+## Checkpoint
+
+Prove the toolchain behaves the way guides 1–17 assume, in a throwaway
+two-package workspace — before a real repository exists to muddy the results.
+
+**Skeleton:** a bare Bun workspace in `$env:TEMP\test-checkpoint\00`, deleted
+at the end.
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\00"
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force "$cp\packages\a", "$cp\packages\b" | Out-Null
+Push-Location $cp
+
+'{ "name": "probe", "private": true, "workspaces": ["packages/*"] }' | Set-Content package.json
+'{ "name": "probe-a", "version": "0.0.0", "dependencies": { "probe-b": "workspace:*" } }' |
+	Set-Content packages/a/package.json
+'{ "name": "probe-b", "version": "0.0.0" }' | Set-Content packages/b/package.json
+bun install
+
+# 1. Workspace links are symlinks, so Developer Mode is on.
+(Get-Item node_modules/probe-b).LinkType          # SymbolicLink
+
+# 2. Tailwind resolves from node_modules, and there is no global copy to shadow it.
+bun add -d tailwindcss '@tailwindcss/cli'
+'@import "tailwindcss" source(none); @source inline("flex");' | Set-Content probe.css
+$cli = node -e "const p=require('path');console.log(p.join(p.dirname(require.resolve('@tailwindcss/cli/package.json')),'dist/index.mjs'))"
+node $cli -i probe.css -o probe.out.css
+(Select-String -Path probe.out.css -Pattern '\.flex\b').Count   # 1
+Get-Command tailwindcss -ErrorAction SilentlyContinue           # prints nothing
+
+# 3. Git settings the byte-for-byte harness depends on.
+git config --global --get core.autocrlf           # false
+git config --global --get core.longpaths          # true
+
+# 4. Shell, GitHub CLI, and the name.
+$PSVersionTable.PSVersion.Major                   # 7 or greater
+node --version                                    # v22.17 or later
+gh auth status                                    # Logged in
+npm view '@anti049/test' 2>&1 | Select-String E404   # a match means the name is free
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** every line prints what its comment says.
+
+**If it does not:** an empty `LinkType` means Developer Mode is off — see
+[Two Windows settings to change now](#two-windows-settings-to-change-now). A
+`tailwindcss` found by `Get-Command` is a global install to remove before
+guide 2. No `E404` means the name is taken, and now is the cheapest moment to
+pick another.
 
 ---
 

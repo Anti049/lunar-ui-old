@@ -22,13 +22,14 @@ or embarrassing to fix later.
       the root one.
 - [ ] `keywords` include `tailwindcss` and `tailwind-plugin`; that is how people
       find it.
-- [ ] Names are actually available: `npm view @scope/project-name`.
-- [ ] A tarball has been installed into a scratch app and compiled
-      ([guide 12](12-testing.md), step 7).
+- [ ] Names are actually available: `npm view @anti049/test`.
+- [ ] The full rehearsal passes: `bun run rehearse`
+      ([guide 17](17-rehearsal.md)). This is the one that sees what a consumer
+      sees.
 
 The name check is the one to do **first**, not last. Discovering the scope is
 taken after you have written four `package.json` files, a README and a docs site
-full of `@scope/…` imports is an afternoon of find-and-replace.
+full of `@anti049/…` imports is an afternoon of find-and-replace.
 
 ---
 
@@ -66,8 +67,8 @@ Then immediately verify from the outside, in a directory that is not the repo:
 ```powershell
 # Outside the repo, so the workspace link cannot satisfy it.
 Set-Location $env:TEMP
-npm view '@scope/project-name'
-bun add '@scope/project-name'   # in a scratch app; compile something with it
+npm view '@anti049/test'
+bun add '@anti049/test'   # in a scratch app; compile something with it
 ```
 
 `--access public` is required for the first publish of a scoped package. After
@@ -128,17 +129,18 @@ into a warning. In a CSS plugin the old name is usually three lines that
 ## 7. Deprecate; never unpublish
 
 **Never `npm unpublish`.** It breaks every lockfile pinning that version, and
-within 72 hours it is not even possible.
+after the first 72 hours npm usually refuses it anyway. Even when it succeeds,
+that version number can never be published again.
 
 ```powershell
-npm deprecate @scope/project-name@1.2.3 "Broken theme resolution; use 1.2.4"
+npm deprecate @anti049/test@1.2.3 "Broken theme resolution; use 1.2.4"
 ```
 
 Then publish a fixed patch. The deprecation shows on install without breaking
 anyone already pinned.
 
 Deprecate the **exact version**, not a range, unless you really mean the range —
-`@scope/project-name@"<2"` deprecates every 1.x release including the good ones,
+`@anti049/test@"<2"` deprecates every 1.x release including the good ones,
 and undoing it means a second `npm deprecate` with an empty message.
 
 ---
@@ -211,6 +213,49 @@ and which framework versions a release supports:
 
 ---
 
+## Files after this phase
+
+**This guide creates no files.** It is the only one that does not, and that is
+worth saying explicitly rather than leaving you looking for a manifest that is
+not there.
+
+What it changes instead:
+
+| Thing                             | Changed by           | Committed?                         |
+| --------------------------------- | -------------------- | ---------------------------------- |
+| `packages/*/package.json` version | `changeset version`  | Yes — in the Version PR            |
+| `packages/*/CHANGELOG.md`         | `changeset version`  | Yes — created on the first release |
+| `.changeset/*.md`                 | consumed and deleted | Yes — their removal is the diff    |
+| Git tags (`@anti049/name@1.2.0`)    | `changeset publish`  | Pushed by the release workflow     |
+| The npm registry                  | `changeset publish`  | Not a file, and not reversible     |
+
+Every one of these is produced by the workflow from
+[guide 9](09-github.md) step 3. You should never edit a `CHANGELOG.md` or a
+version field by hand — the next `changeset version` overwrites the version and
+appends above your changelog edit, so a hand-fix survives exactly one release
+and then confuses whoever finds it.
+
+The one exception: **the changeset files in an open Version PR are editable.**
+That is the intended way to reword a release note. Push to the PR branch and
+Changesets re-computes.
+
+---
+
+### What you should write, that this guide does not
+
+Two things this guide recommends but cannot template, because they are specific
+to what you broke:
+
+- `packages/docs/src/routes/migrating/<version>/+page.svelte` — a migration guide
+  per breaking release, with before/after for each change. Link it from the
+  changelog entry.
+- A codemod, when a rename is mechanical. Even a documented `-replace` is
+  better than nothing.
+
+Both are covered in step 9.
+
+---
+
 ## Traps
 
 > **Publishing from a dirty working tree.** `npm publish` packs the working
@@ -234,9 +279,115 @@ and which framework versions a release supports:
 
 ---
 
+## Checkpoint
+
+npm will not let you take a publish back, so rehearse the operations in this
+guide against a registry that will: **Verdaccio**, a private npm registry
+running on your machine. Publish, install by name, deprecate, publish a patch
+over it — all of it, before any of it is real.
+
+**Skeleton:** a registry in `$env:TEMP\test-checkpoint\13\registry`, a clone
+that publishes to it, and a consumer that installs from it.
+
+```powershell
+New-Item -ItemType Directory -Force "$env:TEMP\test-checkpoint\13\registry" | Out-Null
+```
+
+**`$env:TEMP\test-checkpoint\13\registry\config.yaml`** — new file:
+
+```yaml
+storage: ./storage
+auth:
+  htpasswd:
+    file: ./htpasswd
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+packages:
+  # No `proxy` for your scope: it never falls through to the real registry, so
+  # a package of the same name on npmjs cannot be installed by mistake.
+  '@anti049/*':
+    access: $all
+    publish: $authenticated
+  '**':
+    access: $all
+    proxy: npmjs
+log: { type: stdout, format: pretty, level: warn }
+```
+
+In a **second terminal**, start it:
+
+```powershell
+npx --yes verdaccio@6 --config "$env:TEMP\test-checkpoint\13\registry\config.yaml" --listen 4873
+```
+
+Back in the first, from the repository root:
+
+```powershell
+$cp  = "$env:TEMP\test-checkpoint\13"
+$reg = 'http://localhost:4873'
+Remove-Item -Recurse -Force "$cp\repo", "$cp\app" -ErrorAction SilentlyContinue
+git clone --quiet . "$cp\repo"
+Push-Location "$cp\repo"
+bun install --frozen-lockfile
+
+# Provenance needs a CI identity, so it fails on a laptop. Strip it in the clone only.
+'core', 'svelte', 'react', 'vue' | ForEach-Object { npm pkg delete publishConfig.provenance --prefix "packages/$_" }
+
+npm adduser --registry $reg --auth-type=legacy    # any username and password; Verdaccio creates it
+
+# The same command release.yml runs, pointed at the local registry.
+$env:npm_config_registry = $reg
+bun run build:packages
+bunx changeset publish
+Remove-Item Env:npm_config_registry
+
+npm view '@anti049/test' version --registry $reg          # 0.0.0
+npm view '@anti049/test-docs' --registry $reg 2>&1 | Select-String E404   # the docs site never publishes
+git tag                                                    # one tag per published package
+Pop-Location
+```
+
+Install **by name**, the way a consumer does — unlike a tarball, this resolves
+the peer graph through the registry:
+
+```powershell
+New-Item -ItemType Directory -Force "$cp\app" | Out-Null
+Push-Location "$cp\app"
+'{ "name": "consumer", "private": true, "type": "module" }' | Set-Content package.json
+npm install --no-audit --no-fund --registry $reg '@anti049/test' '@anti049/test-react' react react-dom
+npm ls '@anti049/test'                                     # one copy, deduped under the binding
+
+# Step 7: deprecate, never unpublish.
+npm deprecate '@anti049/test@0.0.0' 'Checkpoint: use 0.0.1' --registry $reg
+npm install --no-audit --no-fund --registry $reg '@anti049/test@0.0.0'   # prints the deprecation warning
+Pop-Location
+
+# A published version cannot be replaced — only superseded.
+Push-Location "$cp\repo\packages\core"
+npm publish --registry $reg; $LASTEXITCODE                 # non-zero: cannot publish over 0.0.0
+npm version patch --no-git-tag-version
+npm publish --registry $reg
+Pop-Location
+npm view '@anti049/test' versions --registry $reg          # [ '0.0.0', '0.0.1' ]
+```
+
+Then clean up: `npm logout --registry http://localhost:4873`, stop Verdaccio
+with Ctrl-C, and `Remove-Item -Recurse -Force "$env:TEMP\test-checkpoint"`.
+
+**Passes when** every line prints what its comment says.
+
+**If it does not:** a `changeset publish` that publishes the docs site means
+`private: true` is missing from its manifest. Two copies of the plugin under
+`npm ls` is a binding whose peer range does not include the version that
+published. A republish of the same version that succeeds is not something npm
+will ever do — check you were not still pointed at a fresh Verdaccio storage.
+
+---
+
 Back to the [index](../README.md) · Then the [roadmap](../roadmap/README.md)
 
-The three guides that extend the plugin — [14. Themes](14-themes.md),
-[15. The token layer](15-tokens.md) and
+The three guides that extend the plugin — [14. The token layer](14-tokens.md),
+[15. Themes](15-themes.md) and
 [16. The plugin option surface](16-options.md) — are done after guide 2, not
 after this one.

@@ -12,7 +12,7 @@ catches those.
 ## 1. The repository's own check
 
 ```sh
-bun run --filter '@scope/project-name' check
+bun run --filter '@anti049/test' check
 ```
 
 Read the parity categories. Benign differences (inlined `var()` fallbacks,
@@ -34,7 +34,7 @@ cd /tmp
 bunx sv create app --template minimal --types ts --no-add-ons
 cd app
 bun add -d tailwindcss @tailwindcss/vite
-bun add /tmp/scope-project-name-*.tgz
+bun add "$TMPDIR/$(cd packages/core && npm pack --pack-destination "$TMPDIR" | tail -1)"
 ```
 
 ## 3. Compile against it
@@ -42,7 +42,7 @@ bun add /tmp/scope-project-name-*.tgz
 ```css
 /* src/app.css */
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 ```
 
 ```sh

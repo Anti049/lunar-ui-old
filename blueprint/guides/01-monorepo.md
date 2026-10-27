@@ -15,11 +15,11 @@ it — the annotation follows the block.
 
 Pick these before step 1 and never change them:
 
-| Placeholder    | Example          | Where it appears                           |
-| -------------- | ---------------- | ------------------------------------------ |
-| `@scope`       | `@acme`          | every `package.json`, every import         |
-| `project-name` | `moonlight`      | the plugin's package name, `@plugin` calls |
-| repo slug      | `acme/moonlight` | CI, Pages URL, issue links                 |
+| Placeholder | Example             | Where it appears                           |
+| ----------- | ------------------- | ------------------------------------------ |
+| `@anti049`  | `@Anti049`          | every `package.json`, every import         |
+| `test`      | `moonlight`         | the plugin's package name, `@plugin` calls |
+| repo slug   | `Anti049/moonlight` | CI, Pages URL, issue links                 |
 
 A rename after the first publish means a deprecation notice on the old name, a
 redirect nobody reads, and a week of stale links.
@@ -29,7 +29,7 @@ redirect nobody reads, and a week of stale links.
 ## 1. Create the repository
 
 ```powershell
-mkdir project-name; Set-Location project-name
+mkdir test; Set-Location test
 git init -b main
 
 # New-Item takes an array. PowerShell has no brace expansion, so the paths are
@@ -41,7 +41,7 @@ mkdir packages/core, packages/svelte, packages/react, packages/vue, packages/doc
 <summary>bash / zsh</summary>
 
 ```sh
-mkdir project-name && cd project-name
+mkdir test && cd test
 git init -b main
 mkdir -p packages/{core,svelte,react,vue,docs}
 ```
@@ -49,7 +49,7 @@ mkdir -p packages/{core,svelte,react,vue,docs}
 </details>
 
 Directory names deliberately do not match package names — `packages/core` is
-shorter than `packages/project-name` and the tree stays readable.
+shorter than `packages/test` and the tree stays readable.
 
 ---
 
@@ -59,14 +59,14 @@ shorter than `packages/project-name` and the tree stays readable.
 
 ```json
 {
-	"name": "project-name-monorepo",
+	"name": "test-monorepo",
 	"private": true,
 	"type": "module",
 	"workspaces": ["packages/*"],
 	"scripts": {
-		"dev": "bun run --filter '@scope/project-name-docs' dev",
+		"dev": "bun run --filter '@anti049/test-docs' dev",
 		"build": "bun run --filter '*' build",
-		"build:packages": "bun run --filter '@scope/project-name' --filter '@scope/project-name-svelte' --filter '@scope/project-name-react' --filter '@scope/project-name-vue' build",
+		"build:packages": "bun run --filter '@anti049/test' --filter '@anti049/test-svelte' --filter '@anti049/test-react' --filter '@anti049/test-vue' build",
 		"check": "bun run --filter '*' check",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
@@ -271,7 +271,7 @@ so the annotation is below it rather than inside:
 
 	WHY IT LOADS THE PLUGIN FROM SOURCE
 	`@plugin './packages/core/index.ts'` — a relative path to the TypeScript
-	entry, NOT the package specifier '@scope/project-name'. Tailwind loads
+	entry, NOT the package specifier '@anti049/test'. Tailwind loads
 	plugins through jiti, which reads TypeScript directly, so formatting never
 	depends on the package having been compiled. Point this at the built
 	`dist/` and every `prettier --check` fails on a clean checkout.
@@ -438,7 +438,7 @@ replace the year and the holder:
 ```text
 MIT License
 
-Copyright (c) 2026 Your Name
+Copyright (c) 2026 Anti049
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -474,13 +474,13 @@ other four follow:
 
 ```json
 {
-	"name": "@scope/project-name",
+	"name": "@anti049/test",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/core"
 	},
 	"files": ["dist", "README.md"],
@@ -505,7 +505,7 @@ other four follow:
 | `publishConfig.provenance`  | Records which workflow run built the tarball. Requires GitHub Actions with `id-token: write` ([guide 9](09-github.md)). Configured halfway it **fails** the publish rather than skipping, so set both or neither. |
 | `peerDependencies`          | Tailwind is the consumer's, not yours. A regular dependency would install a second copy and the plugin would register against the wrong instance.                                                                 |
 
-The `exports` map grows as the plugin does — [guide 14](14-themes.md) adds
+The `exports` map grows as the plugin does — [guide 15](15-themes.md) adds
 `./theme` and `./themes`. Every new entry needs a matching alias in the docs
 site's Vite config ([guide 7](07-docs.md), step 7).
 
@@ -524,7 +524,7 @@ Confirm the workspace links resolved rather than fetching from the registry.
 Every entry should report as a symlink pointing into `packages/`:
 
 ```powershell
-Get-ChildItem node_modules/@scope |
+Get-ChildItem node_modules/@anti049 |
 	Select-Object Name, LinkType, @{n = 'Target'; e = { $_.Target } }
 
 bun pm ls | Select-Object -First 10
@@ -538,16 +538,16 @@ cannot create the symlink and Bun copies instead.
 
 ---
 
-## 11. Verify and commit
+## 11. Verify
 
 ```powershell
-bun run lint          # passes, or lists real findings only
-git add -A
-git commit -m "chore: scaffold monorepo"
+bunx eslint .         # passes, or lists real findings only
 ```
 
-At this point `bun run check` and `bun run build` will do nothing useful — no
-package has those scripts yet. That is expected; they come online in guide 2.
+`bunx prettier --check .` reports one expected error until guide 2: `Unable to
+load plugin` naming `packages/core/index.ts`, which `prettier-tailwind.css`
+loads before it exists. Anything else is a real finding. Then commit — see
+[Commit](#commit) at the end.
 
 ---
 
@@ -566,7 +566,7 @@ The full contents follow.
 | `.prettierignore`                          | added  | never                                                           |
 | `eslint.config.js`                         | added  | never                                                           |
 | `LICENSE`                                  | added  | never                                                           |
-| `packages/core/package.json`               | added  | [guide 2](02-plugin.md) — scripts, [14](14-themes.md) — exports |
+| `packages/core/package.json`               | added  | [guide 2](02-plugin.md) — scripts, [14](15-themes.md) — exports |
 | `packages/{svelte,react,vue}/package.json` | added  | guides [4](04-svelte.md), [5](05-react.md), [6](06-vue.md)      |
 | `packages/docs/package.json`               | added  | [guide 7](07-docs.md)                                           |
 | `packages/*/README.md`                     | added  | as each package gains a surface                                 |
@@ -582,14 +582,14 @@ until [guide 2](02-plugin.md) step 11 creates it.
 
 ```json
 {
-	"name": "project-name-monorepo",
+	"name": "test-monorepo",
 	"private": true,
 	"type": "module",
 	"workspaces": ["packages/*"],
 	"scripts": {
-		"dev": "bun run --filter '@scope/project-name-docs' dev",
+		"dev": "bun run --filter '@anti049/test-docs' dev",
 		"build": "bun run --filter '*' build",
-		"build:packages": "bun run --filter '@scope/project-name' --filter '@scope/project-name-svelte' --filter '@scope/project-name-react' --filter '@scope/project-name-vue' build",
+		"build:packages": "bun run --filter '@anti049/test' --filter '@anti049/test-svelte' --filter '@anti049/test-react' --filter '@anti049/test-vue' build",
 		"check": "bun run --filter '*' check",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
@@ -847,7 +847,7 @@ export default defineConfig(
 
 ```json
 {
-	"name": "@scope/project-name",
+	"name": "@anti049/test",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
@@ -855,7 +855,7 @@ export default defineConfig(
 	"keywords": ["tailwindcss", "tailwind-plugin", "design-system", "css"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/core"
 	},
 	"files": ["dist", "README.md"],
@@ -949,7 +949,7 @@ is not a function or its return value is not iterable`.** The framework parser
 
 > **You add a dev alias so the docs site resolves the plugin from source** → you
 > expect only the bare specifier to be rewritten → Vite's `resolve.alias` matches
-> by **prefix**, so `@scope/project-name/theme` becomes `…/index.ts/theme` and
+> by **prefix**, so `@anti049/test/theme` becomes `…/index.ts/theme` and
 > every subpath export silently breaks.
 >
 > **How to tell:** `Cannot find module …/index.ts/theme`.
@@ -976,16 +976,69 @@ is not a function or its return value is not iterable`.** The framework parser
 Verify, then commit:
 
 ```powershell
-bun run lint
+bunx eslint .
 git add -A
 git commit -m "chore(repo): scaffold monorepo"
 ```
 
-`bun run check` and `bun run build` do nothing useful yet — no package has
-those scripts. That is expected.
+`bun run lint` cannot pass yet — its Prettier half stops on the one expected
+error from step 11 — so lint with ESLint alone for this commit. `bun run check`
+and `bun run build` do nothing useful yet either: no package has those scripts.
 
 Commit directly to `main` for now. [Guide 9](09-github.md) turns on branch
 protection, and from that point everything goes through a pull request.
+
+---
+
+## Checkpoint
+
+Prove the commit you just made is self-sufficient: a fresh clone installs,
+links and lints with nothing from your working directory helping it along.
+
+**Skeleton:** a clone of this repository in `$env:TEMP\test-checkpoint\01`.
+Cloning a local path needs no remote, and nothing here touches your own tree.
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\01"
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+git clone --quiet . $cp
+Push-Location $cp
+
+# The lockfile was committed and matches the manifests.
+bun install --frozen-lockfile                     # exits 0
+git status --porcelain                            # prints nothing
+
+# Every workspace package is a link, not a registry download.
+Get-ChildItem node_modules/@anti049 | Select-Object Name, LinkType   # every row SymbolicLink
+
+# ESLint is a real gate: clean on the tree, and it fails on a planted mistake.
+bunx eslint .                                     # exits 0
+'const unused = 1;' | Set-Content probe.ts
+bunx eslint probe.ts; $LASTEXITCODE               # non-zero, naming no-unused-vars
+Remove-Item probe.ts
+
+# .gitignore covers the build output guide 2 is about to produce.
+New-Item -ItemType Directory -Force packages/core/dist, packages/core/generated, packages/core/.tmp | Out-Null
+'x' | Set-Content packages/core/dist/x.js, packages/core/generated/x.ts, packages/core/.tmp/x.css
+git status --porcelain                            # prints nothing
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+Run `bunx prettier --check .` in the clone too. One failure is expected at
+this stage and only one: `Unable to load plugin` naming
+`packages/core/index.ts`, because `prettier-tailwind.css` loads a plugin that
+does not exist until guide 2. `Can't resolve 'tailwindcss'` is **not**
+expected — see the first trap.
+
+**Passes when** every line prints what its comment says.
+
+**If it does not:** a dirty `git status` after `bun install` means the lockfile
+you committed is stale — run `bun install` in the real repository and commit
+`bun.lock`. A file showing up after the `.gitignore` probe is a missing ignore
+rule, and fixing it now is what keeps generated files out of every later diff.
+
 ---
 
 Next: [The Tailwind plugin](02-plugin.md)

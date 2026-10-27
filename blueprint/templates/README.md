@@ -1,7 +1,7 @@
 # Templates
 
-Copy-paste files. Everything here is ready to use once you replace `@scope`,
-`project-name` and `acme/project-name` with real values.
+Copy-paste files. Everything here is ready to use once you replace `@anti049`,
+`test` and `Anti049/test` with real values.
 
 ---
 
@@ -51,8 +51,8 @@ git config commit.template .gitmessage
 Then find and replace across the copied files:
 
 ```sh
-grep -rl '@scope\|project-name\|acme/' .github .vscode .cursor .claude AGENTS.md CLAUDE.md \
-  | xargs sed -i 's|@scope|@acme|g; s|project-name|moonlight|g; s|acme/moonlight|acme/moonlight|g'
+grep -rl '@anti049\|test\|Anti049/' .github .vscode .cursor .claude AGENTS.md CLAUDE.md \
+  | xargs sed -i 's|@anti049|@Anti049|g; s|test|moonlight|g; s|Anti049/moonlight|Anti049/moonlight|g'
 ```
 
 Read the diff before committing — the substitution is blunt and will catch prose

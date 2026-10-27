@@ -24,7 +24,7 @@ if you find yourself explaining the build in two places, fix that instead.
 Run the package's own check, not just a build:
 
 ```sh
-bun run --filter '@scope/project-name' check
+bun run --filter '@anti049/test' check
 ```
 
 `test/e2e.test.ts` compiles every component twice — once from the raw CSS, once

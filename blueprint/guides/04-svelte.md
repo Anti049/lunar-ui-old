@@ -36,14 +36,14 @@ Set-Location ..; bun install
 
 ## 2. Trim the scaffold
 
-`sv` gives you a demo route and a placeholder component. Remove them:
+`sv` gives you a demo route and a placeholder barrel. Remove them:
 
 ```powershell
 Set-Location packages/svelte
 
 # -ErrorAction SilentlyContinue replaces `2>/dev/null`: the scaffold may not
 # contain every one of these, and a missing file is not an error here.
-Remove-Item -Recurse -Force src/routes/*, src/lib/index.ts, src/lib/Counter.svelte `
+Remove-Item -Recurse -Force src/routes/*, src/lib/index.ts `
 	-ErrorAction SilentlyContinue
 
 mkdir src/lib/components, src/lib/actions, src/lib/utils
@@ -59,26 +59,35 @@ Keep `src/routes/` itself — it becomes the local playground in step 8.
 wrote one; this supersedes it, keeping only the `name` you set in guide 1.
 
 **Replacing it means re-listing what the scaffold installed.** `sv create` put
-`@sveltejs/kit` and `@sveltejs/adapter-auto` in `devDependencies`, and
-`svelte.config.js` imports the adapter. Drop them and every file in the package
-lights up with unresolved-import errors — see the trap at the end.
+`@sveltejs/kit`, `@sveltejs/vite-plugin-svelte` and `vite` in
+`devDependencies`, and `vite.config.ts` imports them — SvelteKit 3 has no
+`svelte.config.js`; all of its configuration lives in the `sveltekit()` plugin.
+Drop them and every file in the package lights up with unresolved-import
+errors — see the trap at the end.
 
 ```jsonc
 {
-	"name": "@scope/project-name-svelte",
+	"name": "@anti049/test-svelte",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/svelte"
 	},
 	"scripts": {
 		"dev": "svelte-package --watch",
 		"build": "svelte-package && publint",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"prepare": "svelte-kit sync",
 		"prepack": "svelte-package && publint"
+	},
+	// SvelteKit 3 no longer generates `$lib`. `#lib` is a standard subpath
+	// import, declared here — see below.
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	},
 	"files": ["dist", "!dist/**/*.test.*", "!dist/**/*.spec.*"],
 	"exports": {
@@ -92,25 +101,37 @@ lights up with unresolved-import errors — see the trap at the end.
 	},
 	"sideEffects": ["**/*.css"],
 	"peerDependencies": {
-		"@scope/project-name": "workspace:^",
-		"svelte": "^5.57.0"
+		"@anti049/test": "^0.0.0",
+		"svelte": "^5.0.0"
 	},
 	"dependencies": {
 		"clsx": "^2.1.1",
 		"tailwind-merge": "^3.7.0"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.3.0",
-		"@sveltejs/kit": "^2.70.3",
-		"@sveltejs/package": "^2.5.8",
-		"svelte": "^5.57.0",
-		"svelte-check": "^4.7.6",
+		"@anti049/test": "workspace:*",
+		"@sveltejs/kit": "^3.1.0",
+		"@sveltejs/package": "^3.0.1",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
+		"svelte": "^5.57.3",
+		"svelte-check": "^4.7.7",
+		"vite": "^8.3.5",
 		"publint": "^0.3.24"
 	},
 	"publishConfig": { "access": "public", "provenance": true },
 	"keywords": ["svelte", "tailwindcss", "ui", "components", "design-system"]
 }
 ```
+
+**`imports` replaces `$lib`.** SvelteKit 3 stopped generating the alias;
+`#lib` is a Node subpath import, so TypeScript, Vite and `svelte-package` all
+resolve it the same way, and `svelte-package` rewrites any `#lib` import to a
+relative path in `dist/`. Subpath imports take **explicit extensions** —
+`#lib/utils/cn.js`, never `#lib/utils/cn`.
+
+No adapter. The playground in `src/routes/` is only ever served by `vite dev`;
+nothing builds it as an app, so `adapter-auto` from SvelteKit 2 scaffolds has
+nothing to do here.
 
 The `"svelte"` export condition is what lets a bundler pick the **uncompiled**
 `.svelte` file, so the consumer's Svelte compiler handles it with their own
@@ -289,7 +310,7 @@ component in isolation.
 
 ```svelte
 <script lang="ts">
-	import { Button, Badge } from '$lib/index.js';
+	import { Button, Badge } from '#lib';
 </script>
 
 <div class="flex flex-wrap items-center gap-2 p-8">
@@ -307,12 +328,12 @@ layout. Never published — `files` lists only `dist`.
 
 ```css
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 @source './lib/**/*.svelte';
 ```
 
 ```powershell
-bun run --filter '@scope/project-name-svelte' dev
+bun run --filter '@anti049/test-svelte' dev
 ```
 
 ---
@@ -329,10 +350,16 @@ ls dist            # index.js, index.d.ts, styles.css, components/…
 Confirm the package resolves the way a consumer would:
 
 ```powershell
-# Resolve and load it the way a consumer's bundler would, then list what the
-# barrel actually exports. A typo in `exports` shows up here, not at build time.
-node --input-type=module -e "import('@scope/project-name-svelte').then(m => console.log(Object.keys(m)))"
+# Resolve both entry points through the exports map. A typo in `exports` shows
+# up here, not at build time.
+node --input-type=module -e "console.log(import.meta.resolve('@anti049/test-svelte'))"
+node --input-type=module -e "console.log(import.meta.resolve('@anti049/test-svelte/styles.css'))"
 ```
+
+Resolve, do not `import()`. Plain Node cannot **load** this package: the barrel
+re-exports `.svelte` files, which only a bundler with the Svelte plugin can
+compile. That is expected — the checkpoint at the end loads it the way a
+consumer does, through a real SvelteKit build.
 
 ---
 
@@ -343,7 +370,6 @@ Ten files. Everything the Svelte package contains at this point, in full.
 | File                                               | Status   | Written in | Next touched by                     |
 | -------------------------------------------------- | -------- | ---------- | ----------------------------------- |
 | `packages/svelte/package.json`                     | replaced | step 3     | [8](08-conventions.md) — versioning |
-| `packages/svelte/svelte.config.js`                 | modified | step 3     | never                               |
 | `packages/svelte/vite.config.ts`                   | modified | step 3     | never                               |
 | `packages/svelte/tsconfig.json`                    | kept     | scaffold   | never                               |
 | `packages/svelte/src/app.html`                     | kept     | scaffold   | never                               |
@@ -358,8 +384,8 @@ Ten files. Everything the Svelte package contains at this point, in full.
 | `packages/svelte/src/routes/+layout.svelte`        | added    | step 8     | never                               |
 | `packages/svelte/src/app.css`                      | added    | step 8     | never                               |
 
-Deleted by step 2: `src/lib/Counter.svelte`, the scaffold's `src/lib/index.ts`,
-and everything that was in `src/routes/`.
+Deleted by step 2: the scaffold's `src/lib/index.ts` and everything that was in
+`src/routes/`.
 
 Build output, gitignored: `packages/svelte/dist/` and `.svelte-kit/`.
 
@@ -369,15 +395,15 @@ Build output, gitignored: `packages/svelte/dist/` and `.svelte-kit/`.
 
 ```json
 {
-	"name": "@scope/project-name-svelte",
+	"name": "@anti049/test-svelte",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
-	"description": "Svelte 5 components for the project-name design system.",
+	"description": "Svelte 5 components for the test design system.",
 	"keywords": ["svelte", "tailwindcss", "ui", "components", "design-system"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/svelte"
 	},
 	"scripts": {
@@ -385,6 +411,10 @@ Build output, gitignored: `packages/svelte/dist/` and `.svelte-kit/`.
 		"build": "svelte-package && publint",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"prepare": "svelte-kit sync"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	},
 	"files": ["dist"],
 	"exports": {
@@ -398,25 +428,25 @@ Build output, gitignored: `packages/svelte/dist/` and `.svelte-kit/`.
 	},
 	"sideEffects": ["**/*.css"],
 	"peerDependencies": {
-		"@scope/project-name": "workspace:^",
-		"svelte": "^5.57.0"
+		"@anti049/test": "^0.0.0",
+		"svelte": "^5.0.0"
 	},
 	"dependencies": {
 		"clsx": "^2.1.1",
 		"tailwind-merge": "^3.7.0"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.3.0",
-		"@sveltejs/kit": "^2.70.3",
-		"@sveltejs/package": "^2.5.8",
-		"@sveltejs/vite-plugin-svelte": "^7.3.0",
+		"@anti049/test": "workspace:*",
+		"@sveltejs/kit": "^3.1.0",
+		"@sveltejs/package": "^3.0.1",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/vite": "^4.3.3",
 		"publint": "^0.3.24",
-		"svelte": "^5.57.0",
-		"svelte-check": "^4.7.6",
+		"svelte": "^5.57.3",
+		"svelte-check": "^4.7.7",
 		"tailwindcss": "^4.3.3",
 		"typescript": "~6.0.3",
-		"vite": "^8.3.0"
+		"vite": "^8.3.5"
 	},
 	"publishConfig": { "access": "public", "provenance": true }
 }
@@ -435,46 +465,13 @@ Four fields carry weight here:
   prod.
 - **`peerDependencies`** — both the plugin and Svelte come from the consumer.
   As a regular dependency you would ship a second Svelte runtime.
-- **`workspace:^`** — resolved to the local package while developing, rewritten
-  to a real version range by `changeset publish`.
-
----
-
-### `packages/svelte/svelte.config.js`
-
-The scaffold writes this; the only change is `package.source`.
-
-```js
-import adapter from '@sveltejs/adapter-auto';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-
-/** @type {import('@sveltejs/kit').Config} */
-export default {
-	/*
-		Strips `lang="ts"` from component <script> blocks during `svelte-package`,
-		so the published .svelte files are consumable by a project that does not
-		use TypeScript.
-	*/
-	preprocess: vitePreprocess(),
-
-	kit: {
-		/*
-			For the PLAYGROUND only — `src/routes/` is a SvelteKit app that is never
-			published. `files` in package.json lists `dist` alone.
-
-			It is here because `sv create --template library` scaffolds a SvelteKit
-			app around the library, which is the idiomatic Svelte setup: the app is
-			how you look at your components while building them.
-		*/
-		adapter: adapter()
-	}
-};
-```
-
-There is deliberately no `package: { source: … }` here. `svelte-package` v2
-defaults to `src/lib` → `dist` and takes `-i`/`-o` flags rather than config; the
-`package` key was v1 and is silently ignored now, which makes it worse than
-useless.
+- **The peer range is real semver; the workspace link lives in
+  `devDependencies`.** `workspace:^` in `peerDependencies` survives `npm pack`
+  unrewritten and produces a tarball npm cannot install — see
+  [guide 3](03-bindings.md).
+- **`imports`** — `#lib`, which SvelteKit 3 no longer generates. The targets
+  point into `src/`, which is not published; that is fine, because
+  `svelte-package` rewrites every `#lib` import in `dist/` to a relative path.
 
 ---
 
@@ -487,16 +484,15 @@ the one tsconfig in the repository that does **not** extend
 ```jsonc
 {
 	/*
-		SvelteKit GENERATES a tsconfig at .svelte-kit/tsconfig.json containing the
-		`$lib` alias, the `.svelte` file mappings and the right module settings.
-		Extending the repo base instead would lose all of that, and `$lib/index.js`
-		would stop resolving.
+		SvelteKit GENERATES the config this extends, at node_modules/$app/tsconfig.json,
+		with the `.svelte` file mappings, the generated route types and the right
+		module settings. Extending the repo base instead would lose all of that.
 
-		The base config's settings still reach here — .svelte-kit/tsconfig.json is
-		generated from svelte.config.js, and the options below restate the few that
-		matter for a published package.
+		`$app/tsconfig` sets no `include` or `exclude`, so both are stated here.
+		The options below restate the few that matter for a published package.
 	*/
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "$app/tsconfig",
+	"include": ["src", "vite.config.ts"],
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
@@ -512,16 +508,16 @@ the one tsconfig in the repository that does **not** extend
 }
 ```
 
-**`.svelte-kit/tsconfig.json` does not exist until `svelte-kit sync` has run.**
-That is what the `prepare` script is for: it runs on `bun install`, so a fresh
-clone gets it automatically. Run it by hand the first time:
+**`node_modules/$app/tsconfig.json` does not exist until `svelte-kit sync` has
+run.** That is what the `prepare` script is for: it runs on `bun install`, so a
+fresh clone gets it automatically. Run it by hand the first time:
 
 ```powershell
-bun run --filter '@scope/project-name-svelte' prepare
+bun run --filter '@anti049/test-svelte' prepare
 ```
 
-Skip it and `bun run check` fails with `File './.svelte-kit/tsconfig.json' not
-found`, which reads like a missing dependency rather than a missing build step.
+Skip it and `bun run check` fails because `$app/tsconfig` cannot be found, which
+reads like a missing dependency rather than a missing build step.
 
 ---
 
@@ -579,24 +575,48 @@ the file.
 
 ### `packages/svelte/vite.config.ts`
 
-Written by the scaffold; it needs one addition so the playground can resolve the
-plugin's utilities.
+Written by the scaffold. In SvelteKit 3 this is the package's only Svelte
+configuration — what used to live in `svelte.config.js` is passed to
+`sveltekit()`. Replace the whole file:
 
 ```ts
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	// tailwindcss() must come BEFORE sveltekit(), or the CSS transform runs
-	// after SvelteKit has already handled the file and your utilities are
-	// missing from the playground with no error.
-	plugins: [tailwindcss(), sveltekit()]
+	plugins: [
+		// tailwindcss() must come BEFORE sveltekit(), or the CSS transform runs
+		// after SvelteKit has already handled the file and your utilities are
+		// missing from the playground with no error.
+		tailwindcss(),
+		sveltekit({
+			// Written by the scaffold: runes mode for this package's own components.
+			compilerOptions: {
+				runes: ({ filename }) =>
+					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+			},
+
+			/*
+				Strips `lang="ts"` from component <script> blocks during
+				`svelte-package` — which reads this file — so the published .svelte
+				files are consumable by a project that does not use TypeScript.
+			*/
+			preprocess: vitePreprocess()
+
+			/*
+				No adapter. `src/routes/` is a playground served by `vite dev` and
+				never built as an app; `files` in package.json lists `dist` alone.
+			*/
+		})
+	]
 });
 ```
 
-This file serves `vite dev` only. The published build is `svelte-package`, which
-does not read it.
+`svelte-package` 3 reads this file, so the `preprocess` setting applies to the
+published components as well as to the playground. It still defaults to
+`src/lib` → `dist` and takes `-i`/`-o` flags for anything else.
 
 ---
 
@@ -828,7 +848,8 @@ keep their real extension — it is part of the specifier.
 
 ```svelte
 <script lang="ts">
-	import { Button, Badge } from '$lib/index.js';
+	// `#lib` is the subpath import declared in package.json.
+	import { Button, Badge } from '#lib';
 </script>
 
 <div class="flex flex-wrap items-center gap-2 p-8">
@@ -852,7 +873,7 @@ keep their real extension — it is part of the specifier.
 	plugin.
 */
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 
 /*
 	Scan this package's own components. Without it the playground renders
@@ -867,18 +888,26 @@ keep their real extension — it is part of the specifier.
 ## Traps
 
 > **You replace `package.json` and lose the scaffold's dependencies.** `sv create`
-> installs `@sveltejs/kit` and `@sveltejs/adapter-auto`; a wholesale replacement
-> that does not re-list them leaves `svelte.config.js` importing a package that
-> is no longer there.
+> installs `@sveltejs/kit`, `@sveltejs/vite-plugin-svelte` and `vite`; a
+> wholesale replacement that does not re-list them leaves `vite.config.ts`
+> importing packages that are no longer there.
 >
 > **How to tell:** every file in the package shows an error at once — not one
-> import, all of them — because `svelte.config.js` failing to load takes the
-> language server down with it. `Cannot find module '@sveltejs/adapter-auto'` is
+> import, all of them — because `vite.config.ts` failing to load takes the
+> language server down with it. `Cannot find module '@sveltejs/kit/vite'` is
 > the real message, and it is usually the least prominent one on screen.
 >
-> **Fix:** `bun add -D '@sveltejs/kit' '@sveltejs/adapter-auto'`. More generally:
-> diff the scaffold's `package.json` against yours before deleting it, rather
-> than after.
+> **Fix:** re-add them with `bun add -D`. More generally: diff the scaffold's
+> `package.json` against yours before deleting it, rather than after.
+
+> **A `svelte.config.js` left over from a SvelteKit 2 project.** SvelteKit 3
+> refuses to start while one exists. Move its options into `sveltekit({...})`
+> in `vite.config.ts` and delete the file — `npx sv migrate sveltekit-3` does
+> both for an existing project.
+
+> **`$lib` imports.** SvelteKit 3 no longer generates the alias, so every
+> `$lib/…` import fails to resolve. Declare `#lib` in `imports` (step 3) and
+> write the extension: `#lib/utils/cn.js`, not `#lib/utils/cn`.
 
 > **`svelte-package` emits nothing for files outside `src/lib`.** Components in
 > `src/components` are silently not packaged. The library root is `src/lib`, and
@@ -909,10 +938,114 @@ keep their real extension — it is part of the specifier.
 Verify, then commit:
 
 ```powershell
-bun run --filter '@scope/project-name-svelte' check
+bun run --filter '@anti049/test-svelte' check
 git add -A
 git commit -m "feat(svelte): add Svelte bindings"
 ```
+
+---
+
+## Checkpoint
+
+Step 9 resolved the package from inside the workspace. This builds a real
+SvelteKit app that installs both tarballs and ships a production bundle — the
+only place the `styles.css` registration, the `"svelte"` export condition and
+the published types are all exercised together.
+
+**Skeleton:** an `sv create` minimal app in `$env:TEMP\test-checkpoint\04-svelte`.
+Run from the repository root:
+
+```powershell
+$cp   = "$env:TEMP\test-checkpoint"
+$pkgs = "$cp\pkgs"
+$app  = "$cp\04-svelte"
+Remove-Item -Recurse -Force $pkgs, $app -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $pkgs | Out-Null
+
+bun run --filter '@anti049/test' --filter '@anti049/test-svelte' build
+'core', 'svelte' | ForEach-Object {
+	Push-Location "packages/$_"
+	npm pack --pack-destination $pkgs | Out-Null
+	Pop-Location
+}
+$tgz = (Get-ChildItem $pkgs -Filter *.tgz).FullName
+
+# The manifest a consumer resolves: no workspace: protocol anywhere.
+tar -xzOf ($tgz | Where-Object { $_ -match '-svelte-' }) package/package.json |
+	Select-String 'workspace:'                                    # prints nothing
+# styles.css is still an @source registration, not compiled CSS.
+tar -xzOf ($tgz | Where-Object { $_ -match '-svelte-' }) package/dist/styles.css   # @source '../**/*.svelte';
+
+Push-Location $cp
+bunx sv@latest create 04-svelte --template minimal --types ts --no-add-ons --no-install
+Set-Location 04-svelte
+npm install --no-audit --no-fund
+npm install --no-audit --no-fund -D tailwindcss '@tailwindcss/vite'
+npm install --no-audit --no-fund $tgz
+```
+
+Then the four files a consumer writes.
+
+**`$env:TEMP\test-checkpoint\04-svelte\vite.config.ts`** — replace it:
+
+```ts
+import adapter from '@sveltejs/adapter-auto';
+import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+	plugins: [tailwindcss(), sveltekit({ adapter: adapter() })]
+});
+```
+
+**`src/app.css`** — new file. Exactly the stylesheet
+[guide 3](03-bindings.md) tells consumers to write:
+
+```css
+@import 'tailwindcss';
+@plugin '@anti049/test';
+@import '@anti049/test-svelte/styles.css';
+```
+
+**`src/routes/+layout.svelte`** — add `import '../app.css';` to its script
+block.
+
+**`src/routes/+page.svelte`** — replace it:
+
+```svelte
+<script lang="ts">
+	import { Button, Badge } from '@anti049/test-svelte';
+</script>
+
+<Button variant="filled">Filled</Button>
+<Badge>3</Badge>
+```
+
+```powershell
+npm run check          # svelte-check: 0 errors — the published types resolve
+npm run build
+
+$css = (Get-ChildItem .svelte-kit/output/client -Recurse -Filter *.css).FullName
+(Select-String -Path $css -Pattern '\.badge\b').Count           # > 0
+(Select-String -Path $css -Pattern '\.badge-primary\b').Count   # > 0
+(Select-String -Path $css -Pattern '\.button-filled\b').Count   # > 0
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** every line prints what its comment says. Do the same grep for
+every class the components you have so far emit — `badge-primary` and
+`button-filled` are the ones built from a prop, which is exactly the shape the
+consumer's scanner cannot see.
+
+**If it does not:** a class missing from the production CSS while the
+components render in the playground is the `@source` registration not reaching
+it — or, if your components are `@utility` blocks, a class assembled from a
+template literal that no scanner can find
+([guide 0, decision 3](00-prerequisites.md#what-classes-written-by-js-at-runtime-means)).
+To watch it render, `npm run dev` in the skeleton before deleting it.
 
 ---
 

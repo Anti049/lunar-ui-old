@@ -90,7 +90,6 @@ after the server one.
 	"url": "http://localhost:5173",
 	"webRoot": "${workspaceFolder}/packages/docs",
 	"sourceMapPathOverrides": {
-		"webpack://_N_E/*": "${webRoot}/*",
 		"/@fs/*": "/*"
 	},
 	"skipFiles": ["**/node_modules/**", "**/.svelte-kit/**"]
@@ -179,7 +178,7 @@ load the page. The first request hits it.
 want one — **in the component itself**, temporarily:
 
 ```ts
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 if (browser) debugger; // client only
 ```
 
@@ -287,7 +286,7 @@ different fixes.
 		{
 			"label": "build plugin",
 			"type": "shell",
-			"command": "bun run --filter '@scope/project-name' build",
+			"command": "bun run --filter '@anti049/test' build",
 			"problemMatcher": ["$tsc"]
 		},
 		{
@@ -366,7 +365,6 @@ assembled from four separate blocks, so here it is in one piece.
 			// breakpoint in a .svelte file will ever bind.
 			"webRoot": "${workspaceFolder}/packages/docs",
 			"sourceMapPathOverrides": {
-				"webpack://_N_E/*": "${webRoot}/*",
 				// Not optional in a monorepo: Vite serves any file outside the
 				// project root through this prefix, which here is most of your code.
 				"/@fs/*": "/*"
@@ -439,7 +437,7 @@ assembled from four separate blocks, so here it is in one piece.
 		{
 			"label": "build plugin",
 			"type": "shell",
-			"command": "bun run --filter '@scope/project-name' build",
+			"command": "bun run --filter '@anti049/test' build",
 			"problemMatcher": ["$tsc"]
 		},
 		{
@@ -495,6 +493,72 @@ personal configuration, but `launch.json`, `tasks.json` and
 gets working breakpoints without being told how.
 
 Label the PR `skip-changeset`.
+
+---
+
+## Checkpoint
+
+Every configuration must bind a breakpoint, and you should be able to debug the
+plugin the way it runs for a **consumer** — which is where bug reports come
+from.
+
+**1. Each configuration binds.**
+
+| Configuration              | Breakpoint                                                 | Must                             |
+| -------------------------- | ---------------------------------------------------------- | -------------------------------- |
+| _Debug: docs (server)_     | inside `configureServer` in `packages/docs/vite.config.ts` | hit before Vite prints `Local:`  |
+| _Debug: docs (full stack)_ | an `onclick` handler in a docs page                        | hit on click, after hydration    |
+| _Debug: plugin build_      | first line of `partition()` in `functions/partition.ts`    | hit during the build             |
+| _Debug: unit tests_        | inside a test in `test/unit/partition.test.ts`             | hit                              |
+| _Debug: current test file_ | the same test, with that file focused                      | hit, and no other test file runs |
+
+Then stop the compound and confirm nothing holds the port:
+
+```powershell
+Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue   # prints nothing
+```
+
+And the task: introduce a type error in any `packages/core` file, run the
+**check** task (_Tasks: Run Test Task_), and confirm it lands in the Problems
+panel with a clickable location. Revert it.
+
+**2. Debug the plugin as a consumer runs it.** Rebuild the plugin skeleton from
+[guide 2's checkpoint](02-plugin.md#the-plugin-skeleton), then add a consumer
+stylesheet:
+
+```powershell
+@'
+@import 'tailwindcss' source(none);
+@plugin '@anti049/test';
+@source inline('badge');
+'@ | Set-Content src/consumer.css
+code node_modules/@anti049/test/dist/index.js
+```
+
+Set a breakpoint on the first line of the function returned to Tailwind — the
+`(api) => { … }` handler. Open a **JavaScript Debug Terminal** in VS Code
+(_Terminal: Create JavaScript Debug Terminal_), and in it run:
+
+```powershell
+# A new terminal, so $cli has to be found again.
+Set-Location "$env:TEMP\test-checkpoint\plugin"
+$cli = node -e "const p=require('path');console.log(p.join(p.dirname(require.resolve('@tailwindcss/cli/package.json')),'dist/index.mjs'))"
+node $cli -i src/consumer.css -o out/consumer.css
+```
+
+The breakpoint must hit, inside the installed package, with `api` holding the
+real Tailwind plugin API. Then `Pop-Location; Remove-Item -Recurse -Force
+"$env:TEMP\test-checkpoint"`.
+
+**Passes when** every row of the table hits, the port is free after stopping,
+and the consumer-side breakpoint binds in `node_modules`.
+
+**If it does not:** a breakpoint that never binds is almost always on the wrong
+side — step 1's first question. A client breakpoint that binds in the wrong
+file is `webRoot` or the `/@fs/*` override. A consumer-side breakpoint that
+never binds in `dist/index.js` usually means the CLI resolved a different copy
+of the plugin — check `npm ls '@anti049/test'` in the skeleton.
+
 ---
 
 Next: [Testing](12-testing.md)

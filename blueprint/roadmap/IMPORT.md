@@ -17,7 +17,7 @@ gh auth status
 The repository must already exist and you need write access:
 
 ```sh
-gh repo create acme/project-name --public --source=. --remote=origin --push
+gh repo create Anti049/test --public --source=. --remote=origin --push
 ```
 
 ---
@@ -26,10 +26,10 @@ gh repo create acme/project-name --public --source=. --remote=origin --push
 
 ```sh
 # See exactly what would happen. Nothing is written.
-bun blueprint/roadmap/import.ts --repo acme/project-name --dry-run
+bun blueprint/roadmap/import.ts --repo Anti049/test --dry-run
 
 # Do it.
-bun blueprint/roadmap/import.ts --repo acme/project-name
+bun blueprint/roadmap/import.ts --repo Anti049/test
 ```
 
 Order matters and the script handles it: **labels first, then milestones, then
@@ -51,7 +51,7 @@ far messier to recover from.
 If you would rather not run the script, the same three steps:
 
 ```sh
-REPO=acme/project-name
+REPO=Anti049/test
 
 # 1. Labels
 gh label create 'area:core'  --repo "$REPO" --color 1d76db --description 'The Tailwind plugin'
@@ -83,7 +83,7 @@ until the issue renders.
 **Create a project board.**
 
 ```sh
-gh project create --owner acme --title 'project-name roadmap'
+gh project create --owner Anti049 --title 'test roadmap'
 ```
 
 Then link it to the repository and add a workflow so new issues land in it
@@ -110,7 +110,7 @@ Two habits keep them useful:
   the offline copy is current:
 
   ```sh
-  gh issue list --repo acme/project-name --state all --limit 500 \
+  gh issue list --repo Anti049/test --state all --limit 500 \
     --json title,body,labels,milestone > roadmap/exported.json
   ```
 

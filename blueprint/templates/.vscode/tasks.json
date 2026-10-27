@@ -12,7 +12,7 @@
 		{
 			"label": "build plugin",
 			"type": "shell",
-			"command": "bun run --filter '@scope/project-name' build",
+			"command": "bun run --filter '@anti049/test' build",
 			"problemMatcher": ["$tsc"],
 			"group": "build"
 		},

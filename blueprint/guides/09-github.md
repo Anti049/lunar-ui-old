@@ -31,8 +31,12 @@ workflow fails on its first run for a missing value:
 | `NPM_TOKEN`    | `release.yml`             | Granular Access Token, read/write        |
 | `GITHUB_TOKEN` | `release.yml`, `docs.yml` | provided automatically, do not create it |
 
-`NPM_TOKEN` must be a **Granular Access Token** with read/write on the packages.
-Classic automation tokens still work but cannot do provenance.
+`NPM_TOKEN` must be a **Granular Access Token** with read/write on the packages —
+npm no longer issues classic tokens. Write-enabled granular tokens expire, so
+put the renewal date somewhere you will see it; an expired token fails the
+release with a 401 that reads like a typo. npm's **trusted publishing** (OIDC
+from this workflow, no stored token) removes that chore, at the cost of
+configuring each package on npmjs.com.
 
 ---
 
@@ -139,7 +143,7 @@ fails with a 401 that reads like a bad token.
 
 The site deploys to **GitHub Pages**: free, no external account, and nothing
 about a documentation site needs a server. The cost is that it is served from a
-subpath (`/project-name/`), which [guide 7](07-docs.md) handles with
+subpath (`/test/`), which [guide 7](07-docs.md) handles with
 `paths.base` and `adapter-static`.
 
 **`.github/workflows/docs.yml`** — new file.
@@ -177,17 +181,17 @@ jobs:
       - run: bun install --frozen-lockfile
 
       # The plugin must be built before the site, which imports its registry.
-      - run: bun run --filter '@scope/project-name' build
+      - run: bun run --filter '@anti049/test' build
 
-      - run: bun run --filter '@scope/project-name-docs' build
+      - run: bun run --filter '@anti049/test-docs' build
         env:
           # Pages serves from /<repo>/, and SvelteKit needs to know at BUILD
-          # time. Read in svelte.config.js - see guide 7.
+          # time. Read in vite.config.ts - see guide 7.
           BASE_PATH: /${{ github.event.repository.name }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
-        # adapter-static writes here; `pages` in svelte.config.js must agree.
+        # adapter-static writes here; `pages` in vite.config.ts must agree.
         with: { path: packages/docs/build }
       - id: deployment
         uses: actions/deploy-pages@v4
@@ -295,11 +299,11 @@ from silently aging out.
 **`.github/CODEOWNERS`** — new file. It routes review by package:
 
 ```text
-/packages/core/    @acme/design-system
-/packages/svelte/  @acme/svelte
-/packages/react/   @acme/react
-/packages/vue/     @acme/vue
-/.github/          @acme/maintainers
+/packages/core/    @Anti049/design-system
+/packages/svelte/  @Anti049/svelte
+/packages/react/   @Anti049/react
+/packages/vue/     @Anti049/vue
+/.github/          @Anti049/maintainers
 ```
 
 Dependabot PRs still need a changeset or the `skip-changeset` label. Add the
@@ -313,8 +317,10 @@ Set these once, in the web UI:
 
 - **Branch protection on `main`**: require `verify` and `check` to pass, require
   a PR, no force-push, no deletion.
-- **Tag protection** on `v*` — a force-pushed tag over a published version is
-  unrecoverable.
+- **A tag ruleset** (Settings → Rules → Rulesets) blocking updates and deletion
+  of release tags — a force-pushed tag over a published version is
+  unrecoverable. Target the tags Changesets actually creates,
+  `@anti049/*@*`, not `v*`.
 - **Auto-delete head branches** after merge.
 - **Actions permissions**: read-only by default; the release workflow asks for
   what it needs explicitly.
@@ -393,10 +399,10 @@ body:
       # so because nobody can tell whether the problem is in the plugin or in a
       # binding.
       options:
-        - '@scope/project-name (the plugin)'
-        - '@scope/project-name-svelte'
-        - '@scope/project-name-react'
-        - '@scope/project-name-vue'
+        - '@anti049/test (the plugin)'
+        - '@anti049/test-svelte'
+        - '@anti049/test-react'
+        - '@anti049/test-vue'
         - 'Not sure'
     validations: { required: true }
 
@@ -474,7 +480,7 @@ body:
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/acme/project-name/discussions
+    url: https://github.com/Anti049/test/discussions
     about: Anything that is not a bug report or a concrete proposal.
 ```
 
@@ -538,16 +544,16 @@ workflow that labels PRs opened by `dependabot[bot]`.
 ```text
 # Review routing. The last matching pattern wins, so order from general to
 # specific.
-*                   @acme/maintainers
+*                   @Anti049/maintainers
 
-/packages/core/     @acme/design-system
-/packages/svelte/   @acme/svelte
-/packages/react/    @acme/react
-/packages/vue/      @acme/vue
-/packages/docs/     @acme/docs
+/packages/core/     @Anti049/design-system
+/packages/svelte/   @Anti049/svelte
+/packages/react/    @Anti049/react
+/packages/vue/      @Anti049/vue
+/packages/docs/     @Anti049/docs
 
-/.github/           @acme/maintainers
-/blueprint/         @acme/maintainers
+/.github/           @Anti049/maintainers
+/blueprint/         @Anti049/maintainers
 ```
 
 CODEOWNERS only enforces anything once branch protection requires review from
@@ -566,7 +572,7 @@ things that live in the web UI get written down.
 ## Setup
 
     bun install
-    bun run --filter '@scope/project-name' build   # generated/ must exist first
+    bun run --filter '@anti049/test' build   # generated/ must exist first
     bun run check
 
     git config commit.template .gitmessage
@@ -626,7 +632,7 @@ contact address — GitHub surfaces it automatically once present.
 >
 > **How to tell:** the deployed site's home page works and every link from it
 > 404s. `bun run preview` reproduces it only if `BASE_PATH` was set for the
-> build — which is why [guide 7](07-docs.md) step 11 tells you to set it.
+> build — which is why [guide 7](07-docs.md)'s checkpoint sets it.
 
 > **A required status check that never reports.** Branch protection matches job
 > names literally, so a renamed job leaves every PR stuck on "Expected — waiting
@@ -650,6 +656,98 @@ through exactly what to look for.
 Turn on branch protection only **after** that PR is green. Enabling it first
 means the required checks have never reported, so nothing can merge and you
 have to unpick it from the settings UI.
+
+---
+
+## Checkpoint
+
+Step 10 exercised CI on a throwaway PR. What it cannot exercise without real
+consequences is the release path and the Pages deploy. A **sandbox repository**
+can: same workflows, a different name, and an npm token that cannot publish.
+
+**1. Lint the workflows locally.** `actionlint` catches expression typos and
+wrong action inputs that GitHub reports only after a push:
+
+```powershell
+winget install rhysd.actionlint
+actionlint                                        # prints nothing
+```
+
+**2. The sandbox.** A clone in `$env:TEMP\test-checkpoint\09`, pushed to a new
+repository named `test-sandbox`:
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\09"
+$sandbox = 'Anti049/test-sandbox'
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+git clone --quiet . $cp
+Push-Location $cp
+
+gh repo create $sandbox --public
+git remote add sandbox "https://github.com/$sandbox.git"
+git push sandbox HEAD:main
+
+# An NPM_TOKEN that cannot publish. A repository secret overrides an
+# organisation secret of the same name, so a real token can never reach this.
+gh secret set NPM_TOKEN -R $sandbox -b 'not-a-real-token'
+
+# Pages source = GitHub Actions — the setting step 4 says the workflow cannot set.
+gh api -X POST "repos/$sandbox/pages" -f build_type=workflow
+gh workflow run docs.yml -R $sandbox
+gh run watch -R $sandbox (gh run list -R $sandbox -w docs.yml -L 1 --json databaseId -q '.[0].databaseId')
+```
+
+The sandbox's name differs from the real repository's on purpose. `BASE_PATH`
+comes from the repository name, so every page now lives under
+`/test-sandbox/` — and anything hard-coded to `/test/` breaks:
+
+```powershell
+$url = gh api "repos/$sandbox/pages" -q .html_url
+npx --yes linkinator@6 $url --recurse --skip "^(?!$([regex]::Escape($url)))"   # 0 broken links
+```
+
+**3. The release path.** Push a real changeset to the sandbox's `main`:
+
+```powershell
+@'
+---
+'@anti049/test': patch
+---
+
+Sandbox release.
+'@ | Set-Content .changeset/sandbox.md
+git add .changeset; git commit -m "fix(core): sandbox release"
+git push sandbox HEAD:main
+```
+
+`release.yml` runs `check`, then opens a **chore: version packages** PR. Read
+its diff (`gh pr diff -R $sandbox <number>`): versions bumped, `CHANGELOG.md`
+written, docs site untouched. Merge it. The second run must **fail at the
+publish step** with an npm authentication error — proof that nothing publishes
+without the real token, and that the job does try.
+
+```powershell
+npm view '@anti049/test' 2>&1 | Select-String E404   # still unpublished
+```
+
+**4. Clean up.** Deleting a repository needs an extra token scope:
+
+```powershell
+gh auth refresh -s delete_repo
+gh repo delete $sandbox --yes
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** `actionlint` is silent, the sandbox site has no broken links,
+the Version PR opens with the bumps you expect, and the publish fails on
+authentication — not earlier, on `check` or `build`.
+
+**If it does not:** a deploy that fails without naming Pages is the source
+setting. Broken links under `/test-sandbox/` that pointed at `/test/` are a base
+path written by hand. A release run that never opens a PR usually means
+`GITHUB_TOKEN` lacks `pull-requests: write`.
+
 ---
 
 Next: [AI agents](10-ai-agents.md)

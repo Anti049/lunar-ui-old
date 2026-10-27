@@ -11,7 +11,7 @@
 ## Reporting
 
 Please report privately through
-[GitHub Security Advisories](https://github.com/acme/project-name/security/advisories/new)
+[GitHub Security Advisories](https://github.com/Anti049/test/security/advisories/new)
 rather than opening a public issue.
 
 You can expect an acknowledgement within three working days and an assessment

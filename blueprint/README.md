@@ -8,7 +8,7 @@ before it has been done. Where a step has a trap in it — and several do, badly
 the trap is called out inline with what it looks like when you hit it, because
 most of them fail silently.
 
-Throughout, `@scope`, `project-name` and `acme` are placeholders — your npm
+Throughout, `@anti049`, `test` and `Anti049` are placeholders — your npm
 scope, your package name and your GitHub owner. Pick them before you start
 (see [Name it once](guides/00-prerequisites.md#name-it-once-and-substitute));
 renaming later touches every package manifest, every import in the docs site,
@@ -18,7 +18,7 @@ and the published registry.
 every command becomes copy-pasteable:
 
 ```powershell
-bun blueprint/personalise.ts --scope '@acme' --name moonlight --owner acme --dry-run
+bun blueprint/personalise.ts --scope '@Anti049' --name moonlight --owner Anti049 --dry-run
 ```
 
 ---
@@ -26,12 +26,12 @@ bun blueprint/personalise.ts --scope '@acme' --name moonlight --owner acme --dry
 ## What you end up with
 
 ```text
-project-name/
+test/
 ├─ packages/
-│  ├─ core/        @scope/project-name          the Tailwind plugin
-│  ├─ svelte/      @scope/project-name-svelte   Svelte 5 components
-│  ├─ react/       @scope/project-name-react    React 19 components
-│  ├─ vue/         @scope/project-name-vue      Vue 3.5 components
+│  ├─ core/        @anti049/test          the Tailwind plugin
+│  ├─ svelte/      @anti049/test-svelte   Svelte 5 components
+│  ├─ react/       @anti049/test-react    React 19 components
+│  ├─ vue/         @anti049/test-vue      Vue 3.5 components
 │  └─ docs/        private                      the documentation site
 ├─ .github/        workflows, issue templates, agent instructions
 ├─ .vscode/        debugging, enforced conventions, recommended extensions
@@ -55,7 +55,7 @@ way a real consumer would.
 | 4   | [Svelte bindings](guides/04-svelte.md)                    | `sv create --template library`, `svelte-package`              |
 | 5   | [React bindings](guides/05-react.md)                      | `create-vite`, `tsup`, dual ESM/CJS output                    |
 | 6   | [Vue bindings](guides/06-vue.md)                          | `create-vite`, Vite library mode, `vue-tsc`                   |
-| 7   | [The docs site](guides/07-docs.md)                        | Markdown site via mdsvex, live-reload against plugin source   |
+| 7   | [The docs site](guides/07-docs.md)                        | SvelteKit site on Pages, live-reload against plugin source    |
 | 8   | [Conventions](guides/08-conventions.md)                   | Conventional Commits, SemVer, Changesets, changelogs          |
 | 9   | [GitHub](guides/09-github.md)                             | CI, publishing, GitHub Pages deploy, issue templates          |
 | 10  | [AI agents](guides/10-ai-agents.md)                       | Claude Code, Copilot and Cursor instructions that agree       |
@@ -66,15 +66,27 @@ way a real consumer would.
 Guides 14–16 extend the plugin. They are numbered after 13 so the earlier
 guides' cross-references stay stable, but they are **done straight after
 [guide 2](guides/02-plugin.md)** — guide 2 gives you a plugin that ships
-components, and these three give it tokens, themes and an option surface. Read
-15 before 14 if you are building rather than browsing; 14 sits on top of the
-token layer.
+components, and these three give it tokens, themes and an option surface.
+
+Among themselves they go in order: themes are built on the token layer, and the
+option surface is built on both.
 
 | #   | Guide                                             | What you get                                                         |
 | --- | ------------------------------------------------- | -------------------------------------------------------------------- |
-| 14  | [Themes](guides/14-themes.md)                     | Palettes generated from a seed, the catalogue, the generator         |
-| 15  | [The token layer](guides/15-tokens.md)            | Standalone tokens, the `theme.extend` bridge, shape tokens           |
+| 14  | [The token layer](guides/14-tokens.md)            | Standalone tokens, the `theme.extend` bridge, shape tokens           |
+| 15  | [Themes](guides/15-themes.md)                     | Palettes generated from a seed, the catalogue, the generator         |
 | 16  | [The plugin option surface](guides/16-options.md) | `prefix`, `include`/`exclude`, `themes`, variants, `@utility name-*` |
+
+And one last guide, which belongs at the end because it needs everything else to
+exist first:
+
+| #   | Guide                               | What you get                                                          |
+| --- | ----------------------------------- | --------------------------------------------------------------------- |
+| 17  | [Rehearsal](guides/17-rehearsal.md) | Packed tarballs installed into a scratch app, every feature exercised |
+
+Run it before the first publish without exception. It is the only check that
+sees what a consumer sees — everything else tests from inside the workspace,
+where your packages resolve by symlink.
 
 Then the planning material:
 
@@ -129,6 +141,13 @@ changed, what touches it next, and the complete contents of each. Files
 assembled across several steps — `build.ts` is put together in five — appear
 there in one piece.
 
+Then a **Checkpoint**: the gate before the next guide. Each one builds a
+throwaway skeleton project under `$env:TEMP\test-checkpoint` — a bare Tailwind
+consumer, a real SvelteKit, React or Vue app, a fresh clone, a sandbox GitHub
+repository, a local npm registry — and checks the guide's work from the
+outside, where nothing resolves through the workspace. Every check says what
+it must print, and every skeleton is deleted at the end.
+
 ---
 
 ## Committing as you go
@@ -179,7 +198,7 @@ that something works because it compiled.
 - Commands assume `bun`. Every one has an `npm`/`pnpm` equivalent; where the
   behaviour differs in a way that matters, it is called out.
 - File paths are relative to the repository root unless shown otherwise.
-- `@scope` is your npm scope or organisation. Unscoped names work too, but you
+- `@anti049` is your npm scope or organisation. Unscoped names work too, but you
   will fight for them on the registry.
 - Version numbers in the roadmap are _projected_, not promised. They exist so the
   milestone list has a shape, not so you are held to them.

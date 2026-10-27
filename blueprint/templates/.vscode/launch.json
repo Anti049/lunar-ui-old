@@ -32,8 +32,7 @@
 				// Vite serves files outside the project root through /@fs/, which a
 				// monorepo does constantly. Without this, breakpoints in workspace
 				// packages never bind.
-				"/@fs/*": "/*",
-				"webpack://_N_E/*": "${webRoot}/*"
+				"/@fs/*": "/*"
 			},
 			"skipFiles": ["**/node_modules/**", "**/.svelte-kit/**"]
 		},

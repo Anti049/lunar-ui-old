@@ -42,13 +42,13 @@ Move-Item src/main.ts src/demo/main.ts -ErrorAction SilentlyContinue
 
 ```jsonc
 {
-	"name": "@scope/project-name-vue",
+	"name": "@anti049/test-vue",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/vue"
 	},
 	"scripts": {
@@ -67,14 +67,15 @@ Move-Item src/main.ts src/demo/main.ts -ErrorAction SilentlyContinue
 	},
 	"sideEffects": ["**/*.css"],
 	"peerDependencies": {
-		"@scope/project-name": "workspace:^",
-		"vue": "^3.5.43"
+		"@anti049/test": "^0.0.0",
+		"vue": "^3.5.0"
 	},
 	"dependencies": {
 		"clsx": "^2.1.1",
 		"tailwind-merge": "^3.7.0"
 	},
 	"devDependencies": {
+		"@anti049/test": "workspace:*",
 		"@vitejs/plugin-vue": "^6.0.9",
 		"vue": "^3.5.43",
 		"vue-tsc": "^3.3.11",
@@ -122,7 +123,7 @@ export default defineConfig(({ command }) => ({
 		rollupOptions: {
 			// Never bundle the consumer's Vue, or you ship a second runtime and
 			// component instances stop sharing reactivity.
-			external: ['vue', '@scope/project-name'],
+			external: ['vue', '@anti049/test'],
 			output: {
 				// Keep styles.css at a predictable name for the exports map.
 				assetFileNames: 'styles.css'
@@ -401,7 +402,7 @@ playground's entry because step 4 sets `root: 'src/demo'` when serving.
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<title>project-name — Vue</title>
+		<title>test — Vue</title>
 	</head>
 	<body>
 		<div id="app"></div>
@@ -442,12 +443,12 @@ import { Button, Badge } from '../lib';
 
 ```css
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 @source '../lib/**/*.vue';
 ```
 
 ```powershell
-bun run --filter '@scope/project-name-vue' dev
+bun run --filter '@anti049/test-vue' dev
 ```
 
 ---
@@ -462,7 +463,7 @@ ls dist            # index.js, index.d.ts, styles.css
 ```
 
 ```powershell
-node --input-type=module -e "import('@scope/project-name-vue').then(m => console.log(Object.keys(m)))"
+node --input-type=module -e "import('@anti049/test-vue').then(m => console.log(Object.keys(m)))"
 ```
 
 Then confirm the export-parity test from [guide 3](03-bindings.md) passes now
@@ -504,15 +505,15 @@ Build output, gitignored: `packages/vue/dist/`.
 
 ```json
 {
-	"name": "@scope/project-name-vue",
+	"name": "@anti049/test-vue",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
-	"description": "Vue 3 components for the project-name design system.",
+	"description": "Vue 3 components for the test design system.",
 	"keywords": ["vue", "tailwindcss", "ui", "components", "design-system"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/vue"
 	},
 	"scripts": {
@@ -531,7 +532,7 @@ Build output, gitignored: `packages/vue/dist/`.
 	},
 	"sideEffects": ["**/*.css"],
 	"peerDependencies": {
-		"@scope/project-name": "workspace:^",
+		"@anti049/test": "^0.0.0",
 		"vue": "^3.5.0"
 	},
 	"dependencies": {
@@ -539,6 +540,7 @@ Build output, gitignored: `packages/vue/dist/`.
 		"tailwind-merge": "^3.7.0"
 	},
 	"devDependencies": {
+		"@anti049/test": "workspace:*",
 		"@tailwindcss/vite": "^4.3.3",
 		"@vitejs/plugin-vue": "^6.0.9",
 		"publint": "^0.3.24",
@@ -594,11 +596,11 @@ export default defineConfig(({ command }) => ({
 				component instances stop sharing reactivity — a component from your
 				package cannot then inject anything the app provided.
 			*/
-			external: ['vue', '@scope/project-name'],
+			external: ['vue', '@anti049/test'],
 			output: {
 				/*
 					Vite names library assets after the entry, so without this you get
-					`project-name-vue.css` and the `./styles.css` export points at
+					`test-vue.css` and the `./styles.css` export points at
 					nothing. Check `ls dist` after the first build.
 				*/
 				assetFileNames: 'styles.css'
@@ -896,7 +898,7 @@ Vite uses this as the playground's entry, because `vite.config.ts` sets
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>project-name — Vue</title>
+		<title>test — Vue</title>
 	</head>
 	<body>
 		<div id="app"></div>
@@ -950,7 +952,7 @@ import { Button, Badge } from '../lib';
 	something a consumer could not write, that is a bug in the plugin.
 */
 @import 'tailwindcss';
-@plugin '@scope/project-name';
+@plugin '@anti049/test';
 
 /*
 	Scan this package's own components. Without it the playground renders
@@ -985,7 +987,7 @@ import { Button, Badge } from '../lib';
 
 > **The emitted CSS filename changes.** Vite names library assets from the entry
 > unless told otherwise, so without `assetFileNames` you get something like
-> `project-name-vue.css` and the `./styles.css` export points at nothing. Check
+> `test-vue.css` and the `./styles.css` export points at nothing. Check
 > `ls dist` after the first build.
 
 ---
@@ -995,7 +997,7 @@ import { Button, Badge } from '../lib';
 Verify, then commit:
 
 ```powershell
-bun run --filter '@scope/project-name-vue' check
+bun run --filter '@anti049/test-vue' check
 git add -A
 git commit -m "feat(vue): add Vue bindings"
 ```
@@ -1005,6 +1007,105 @@ All three bindings now exist, so the export-parity test from
 `bun run build:packages` — then `bun test packages/core/test/unit`. If it
 fails, one binding is missing a component the other two have; fix that
 before committing rather than after.
+
+---
+
+## Checkpoint
+
+Two checks. The parity test from [guide 3](03-bindings.md) goes green inside the
+repository, and a Vite + Vue app installs the tarball and ships styled
+production output.
+
+**1. Parity, now that all three bindings exist.**
+
+```powershell
+bun run build:packages
+bun test packages/core/test/unit/export-parity.test.ts    # passes
+```
+
+**2. A real consumer.** A `create-vite` Vue app in
+`$env:TEMP\test-checkpoint\06-vue`. Run from the repository root:
+
+```powershell
+$cp   = "$env:TEMP\test-checkpoint"
+$pkgs = "$cp\pkgs"
+$app  = "$cp\06-vue"
+Remove-Item -Recurse -Force $pkgs, $app -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $pkgs | Out-Null
+
+'core', 'vue' | ForEach-Object {
+	Push-Location "packages/$_"
+	npm pack --pack-destination $pkgs | Out-Null
+	Pop-Location
+}
+$tgz = (Get-ChildItem $pkgs -Filter *.tgz).FullName
+$vue = $tgz | Where-Object { $_ -match '-vue-' }
+
+tar -xzOf $vue package/package.json | Select-String 'workspace:'   # prints nothing
+# Vite's library build must not have compiled this into plain CSS: it has to
+# reach the consumer as an @source registration, or it registers nothing.
+tar -xzOf $vue package/dist/styles.css                             # @source …
+
+Push-Location $cp
+bunx create-vite@latest 06-vue --template vue-ts --no-interactive
+Set-Location 06-vue
+npm install --no-audit --no-fund
+npm install --no-audit --no-fund -D tailwindcss '@tailwindcss/vite'
+npm install --no-audit --no-fund $tgz
+```
+
+**`vite.config.ts`** — replace it:
+
+```ts
+import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [vue(), tailwindcss()] });
+```
+
+**`src/style.css`** — replace it. `main.ts` already imports it.
+
+```css
+@import 'tailwindcss';
+@plugin '@anti049/test';
+@import '@anti049/test-vue/styles.css';
+```
+
+**`src/App.vue`** — replace it:
+
+```vue
+<script setup lang="ts">
+import { Badge, Button } from '@anti049/test-vue';
+</script>
+
+<template>
+	<Button variant="filled">Filled</Button>
+	<Badge>3</Badge>
+</template>
+```
+
+```powershell
+npm run build          # vue-tsc -b && vite build — type-checks against the published .d.ts
+
+$css = (Get-ChildItem dist/assets -Filter *.css).FullName
+(Select-String -Path $css -Pattern '\.badge\b').Count           # > 0
+(Select-String -Path $css -Pattern '\.badge-primary\b').Count   # > 0
+(Select-String -Path $css -Pattern '\.button-filled\b').Count   # > 0
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** the parity test passes and every line prints what its comment
+says.
+
+**If it does not:** a parity failure names the component one binding is
+missing — add it there rather than removing it from the other two. A
+`dist/styles.css` full of compiled rules instead of an `@source` line means
+the library build processed it through Tailwind; copy it into `dist/` after
+`vite build` instead, the way the React package does.
+
 ---
 
 Next: [The docs site](07-docs.md)

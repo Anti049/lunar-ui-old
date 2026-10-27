@@ -23,8 +23,9 @@ CLAUDE.md                       → "Read AGENTS.md" + Claude-specific bits
 New-Item -ItemType Directory -Force .claude/skills, .cursor/rules, .github/instructions
 ```
 
-`AGENTS.md` is emerging as a cross-tool convention and Claude Code, Cursor and
-several others already look for it. Keep the per-tool files under ~20 lines. If
+`AGENTS.md` is a cross-tool convention: Copilot, Cursor and Codex, among
+others, read it directly. Claude Code reads `CLAUDE.md` instead, which is why
+that file exists here only as a pointer. Keep the per-tool files under ~20 lines. If
 you find yourself explaining the build in two places, you have already lost.
 
 ---
@@ -70,7 +71,7 @@ restates the obvious dilutes the five above.
 ## Verifying work
 
 Run the package's own check, not just a build:
-bun run --filter '@scope/project-name' check
+bun run --filter '@anti049/test' check
 `test/e2e.test.ts` compiles every component twice — once from raw CSS, once
 through the compiled plugin — and compares selector by selector. A green run
 means the plugin still faithfully represents the CSS.
@@ -112,7 +113,7 @@ breakage and then actively misleads.
 **`CLAUDE.md`** — new file, at the repository root beside `AGENTS.md`.
 
 ```md
-# project-name
+# test
 
 Read `AGENTS.md` first — it has the build rules, the verification commands and
 the traps. This file adds only what is specific to Claude Code.
@@ -165,7 +166,7 @@ description: Add a component across the plugin and all three framework bindings,
 1. `packages/core/src/components/<name>.css` — foundation in
    `@layer <name>.l1.l2.l3`, variants in `.l1.l2`, state in `.l1`.
 2. Add it to `src/components/_index.css`.
-3. `bun run --filter '@scope/project-name' build` and confirm it appears in the
+3. `bun run --filter '@anti049/test' build` and confirm it appears in the
    bundle list.
 4. Bindings in `packages/{svelte,react,vue}` — identical props and exports.
 5. Docs page + class table generated from the registry.
@@ -205,8 +206,10 @@ Quick facts:
 
 ## 7. Add path-scoped Copilot instructions
 
-**`.github/instructions/plugin-css.md`** — new file. Any name works; the
-`applyTo` glob in the frontmatter is what scopes it:
+**`.github/instructions/plugin-css.instructions.md`** — new file. The name is
+yours, but the `.instructions.md` suffix is not optional — Copilot ignores any
+other file in this directory. The `applyTo` glob in the frontmatter is what
+scopes it:
 
 ```md
 ---
@@ -242,7 +245,7 @@ alwaysApply: false
   `.l1` (state). Deeper is weaker, regardless of order.
 - `src/base/` declares tokens and no classes; `src/utilities/` holds
   non-namespaced utilities. A utility in `base/` becomes invisible context.
-- After any change: `bun run --filter '@scope/project-name' check`.
+- After any change: `bun run --filter '@anti049/test' check`.
 ```
 
 Use `alwaysApply: true` sparingly — **one** always-on rule pointing at
@@ -272,15 +275,15 @@ check catches deletion; only the habit catches contradiction.
 
 ## Files after this phase
 
-| File                                    | Status   | Written in | Next touched by                 |
-| --------------------------------------- | -------- | ---------- | ------------------------------- |
-| `AGENTS.md`                             | added    | step 3     | any PR that changes the build   |
-| `CLAUDE.md`                             | added    | step 4     | rarely                          |
-| `.claude/skills/add-component/SKILL.md` | added    | step 5     | as the add-component flow grows |
-| `.github/copilot-instructions.md`       | added    | step 6     | rarely                          |
-| `.github/instructions/plugin-css.md`    | added    | step 7     | rarely                          |
-| `.cursor/rules/plugin-css.mdc`          | added    | step 8     | rarely                          |
-| `.github/workflows/ci.yml`              | modified | step 9     | never                           |
+| File                                              | Status   | Written in | Next touched by                 |
+| ------------------------------------------------- | -------- | ---------- | ------------------------------- |
+| `AGENTS.md`                                       | added    | step 3     | any PR that changes the build   |
+| `CLAUDE.md`                                       | added    | step 4     | rarely                          |
+| `.claude/skills/add-component/SKILL.md`           | added    | step 5     | as the add-component flow grows |
+| `.github/copilot-instructions.md`                 | added    | step 6     | rarely                          |
+| `.github/instructions/plugin-css.instructions.md` | added    | step 7     | rarely                          |
+| `.cursor/rules/plugin-css.mdc`                    | added    | step 8     | rarely                          |
+| `.github/workflows/ci.yml`                        | modified | step 9     | never                           |
 
 Full copies are in [`../templates/ai/`](../templates/ai/). The four instruction
 files are given in full in steps 3–8 and are not repeated here.
@@ -336,6 +339,65 @@ git commit -m "docs(repo): add agent instructions"
 
 Label the PR `skip-changeset`, or the workflow from
 [guide 9](09-github.md) fails it — this ships nothing to a consumer.
+
+---
+
+## Checkpoint
+
+Instructions are only worth what an agent does with them. Ask each tool the
+questions the files exist to answer, in a clean clone, and compare the answers
+with the files.
+
+**Skeleton:** a clone in `$env:TEMP\test-checkpoint\10`, so the agents see what
+is committed and nothing from your working tree.
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\10"
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+git clone --quiet . $cp
+Push-Location $cp
+
+# The drift check from step 9, run locally.
+'CLAUDE.md', '.github/copilot-instructions.md' | ForEach-Object {
+	if (-not (Select-String -Path $_ -Pattern 'AGENTS.md' -Quiet)) { "$_ no longer points at AGENTS.md" }
+}                                                 # prints nothing
+```
+
+Then the probes. Claude Code takes them non-interactively; for Copilot Chat and
+Cursor, paste the same questions into a chat opened on the clone:
+
+```powershell
+claude -p "Which single command verifies a change to the plugin? Reply with the command only."
+# → bun run --filter '@anti049/test' check
+
+claude -p "To change the badge's border radius, which file do you edit? Reply with the path only."
+# → packages/core/src/components/badge.css — never generated/ or dist/
+
+claude -p "How do you verify a change that affects what consumers install? One sentence."
+# → a packed tarball installed into a scratch app, not bun link
+
+claude -p "Which skills does this repository provide? Names only."
+# → add-component, verify-plugin, …
+```
+
+Ask Copilot one question that only a path-scoped instruction answers — open
+`packages/core/src/components/badge.css` and ask how layers are nested. The
+answer should come from `.github/instructions/`, which proves the `applyTo`
+glob matched.
+
+```powershell
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** the drift check is silent and every tool gives the expected
+answer.
+
+**If it does not:** a wrong answer is a missing or ambiguous line in
+`AGENTS.md`, not a reason to repeat the fact in each tool's own file — that is
+the drift this guide is built to avoid. A skill that is not listed usually has
+a `SKILL.md` without the `name`/`description` frontmatter.
+
 ---
 
 Next: [Debugging](11-debugging.md)

@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "9ed212d1a208ec6d",
+        "id": "b540a0bdcf1b4f1e",
         "type": "tabs",
         "children": [
           {
-            "id": "36dcafe1df0faf1a",
+            "id": "716074da213d0658",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00-prerequisites.md",
+                "file": "02-plugin.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "00-prerequisites"
+              "title": "02-plugin"
             }
           }
         ]
@@ -55,7 +55,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "addPrefix",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -185,15 +185,37 @@
       "bases:Create new base": false
     }
   },
-  "active": "36dcafe1df0faf1a",
+  "active": "716074da213d0658",
   "lastOpenFiles": [
-    "01-monorepo.md",
-    "00-prerequisites.md",
-    "04-svelte.md",
     "03-bindings.md",
     "02-plugin.md",
+    "01-monorepo.md",
+    "00-prerequisites.md",
+    "07-docs.md",
+    "02-plugin.md.tmp.27432.c85a22fe2980",
+    "05-react.md.tmp.27432.4ddead2b8050",
+    "04-svelte.md",
+    "08-conventions.md.tmp.27432.7aaa4cb21a52",
+    "17-rehearsal.md.tmp.27432.2b659540f41f",
+    "04-svelte.md.tmp.27432.c70db1a3a9ce",
+    "04-svelte.md.tmp.27432.ece64ca895de",
+    "sedwq3zHm",
+    "07-docs.md.tmp.27432.84cfe8bb065c",
+    "17-rehearsal.md",
+    "16-options.md",
+    "14-tokens.md",
+    "15-themes.md",
+    "12-testing.md",
+    "14-themes.md",
+    "15-tokens.md",
+    "13-release.md",
+    "11-debugging.md",
+    "10-ai-agents.md",
+    "09-github.md",
+    "08-conventions.md",
+    "06-vue.md",
+    "05-react.md",
     "02-plugin.md.tmp.47232.9abe72563641",
-    "01-monorepo.md.tmp.47232.e633c2b70ae8",
-    "sed12FGvG"
+    "01-monorepo.md.tmp.47232.e633c2b70ae8"
   ]
 }

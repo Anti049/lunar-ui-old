@@ -6,6 +6,13 @@ others structurally cannot.
 Ten steps. Steps 1–4 build the differential harness — the test that justifies the
 whole architecture — and the rest layer on top of it.
 
+**If you are working in numeric order, build Parts 1–8 now and stop there.**
+Parts 9–11 assert things the plugin cannot do yet: standalone token resolution
+([guide 14](14-tokens.md)), theme generation ([guide 15](15-themes.md)), and the
+option surface ([guide 16](16-options.md)). Including them early does not fail a
+test — it fails `tsc`, on imports of modules that do not exist. Come back and
+add them once guide 16 is done.
+
 ---
 
 ## 1. Build the differential harness
@@ -172,20 +179,26 @@ The only way to catch packaging bugs. Pack, install into a scratch app, compile:
 # workspace gets picked up by the next `bun install` as a file: dependency.
 Set-Location packages/core
 bun run build
-npm pack --pack-destination $env:TEMP
+# npm pack prints the filename it wrote. Capture it rather than guessing:
+# the name is <scope-without-@>-<package>-<version>.tgz, and hard-coding that
+# pattern breaks the first time the scope or version changes.
+$tarball = npm pack --pack-destination $env:TEMP | Select-Object -Last 1
 
 # A scratch consumer, outside the monorepo, so nothing resolves by workspace link.
 Set-Location $env:TEMP
-bunx sv create app --template minimal --types ts --no-add-ons
+bunx sv create app --template minimal --types ts --no-add-ons --no-install
 Set-Location app
-bun add -d tailwindcss '@tailwindcss/vite'
-
-# Resolve the tarball by glob — its name carries the version you just built.
-bun add (Get-Item "$env:TEMP/scope-project-name-*.tgz").FullName
+# npm, not bun: Bun resolves peer dependencies against the registry even when a
+# tarball satisfies them (guide 17, traps).
+npm install --no-audit --no-fund
+npm install --no-audit --no-fund -D tailwindcss '@tailwindcss/vite'
+npm install --no-audit --no-fund "$env:TEMP/$tarball"
 ```
 
-Then add `@plugin '@scope/project-name';` to the app's CSS, build it, and grep
-the output for a class you know the plugin owns.
+Then add `tailwindcss()` to the app's `vite.config.ts`, write an `app.css` with
+`@plugin '@anti049/test';`, import it from `+layout.svelte`, build, and grep
+the output for a class you know the plugin owns. Guide 4's checkpoint has the
+same setup written out in full.
 
 **Use a tarball, not `bun link`.** A link resolves to the working tree, so it
 hides an empty `files` array, a wrong `exports` map, and anything else that only
@@ -195,6 +208,11 @@ manifests after packing. A real project shipped a plugin with _zero_ files in
 **Bump the version before repacking.** Package managers cache by name and
 version; repacking the same version silently reinstalls stale content and you
 debug a fix that was never installed.
+
+This is the short version. [Guide 17](17-rehearsal.md) turns it into a scripted
+rehearsal that exercises every feature — standalone tokens, the option surface,
+themes, functional utilities and all three bindings — against packed tarballs.
+Run that one before publishing.
 
 ---
 
@@ -263,11 +281,18 @@ is a maintenance burden that teaches you nothing.
 | `packages/core/test/unit/export-parity.test.ts` | from [3](03-bindings.md) | —          | never                   |
 | `packages/core/package.json`                    | modified                 | step 8     | never                   |
 
-The harness below is the **finished** one, covering themes, the option surface
-and functional utilities. Those arrive in guides [14](14-themes.md),
-[15](15-tokens.md) and [16](16-options.md); each section says which guide it
-depends on, so if you are working strictly in order you can add them as you go
-and the rest still runs.
+The harness below is the **finished** one, covering tokens, themes, the option
+surface and functional utilities.
+
+Parts 1–8 and 12 stand alone and can be written now. **Parts 9, 10 and 11
+cannot** — they import `generated/shape.js` from [guide 14](14-tokens.md),
+`generated/variants.js` and `functions/extract-variants.js` from
+[guide 16](16-options.md), and they compile theme plugins that do not exist
+until [guide 15](15-themes.md). Leave those parts and their imports out until
+those guides are done.
+
+Including them early does not fail a test — it fails `tsc`, with
+`TS2307: Cannot find module` naming a path that is simply not there yet.
 
 It is a plain script, not a `bun:test` file. It prints a report and sets
 `process.exitCode`, because the useful output here is a categorised table rather
@@ -305,8 +330,19 @@ import postcss from 'postcss';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { extractClasses } from '../functions/extract-classes.js';
-import { extractCustomVariants } from '../functions/extract-variants.js';
+
+/*
+	These three come from later guides. If you are following in numeric order,
+	LEAVE THEM OUT for now, along with Parts 9–11, and add all of it once
+	guide 16 is done — otherwise `bun run typecheck` fails on modules that do
+	not exist yet.
+
+	  ../generated/shape.js            guide 14
+	  ../functions/extract-variants.js guide 16
+	  ../generated/variants.js         guide 16  (imported in Part 9)
+*/
 import shapeTokenNames from '../generated/shape.js';
+import { extractCustomVariants } from '../functions/extract-variants.js';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -556,7 +592,7 @@ const prefixed = compile(
 	'prefixed'
 );
 
-/* No CSS import at all — the plugin must carry its own tokens. Guide 15. */
+/* No CSS import at all — the plugin must carry its own tokens. Guide 14. */
 const standalone = compile(
 	["@import 'tailwindcss' source(none);", "@plugin '" + pluginPath + "';", ...sourceLines].join(
 		'\n'
@@ -697,7 +733,7 @@ function foldsToSame(baseDecls: string[], candDecls: string[]): boolean {
 
 /*
 	The plugin inlines each theme default as a var() fallback so standalone
-	builds resolve (guide 15, step 8). `var(--x)` and `var(--x, <default>)`
+	builds resolve (guide 14, step 8). `var(--x)` and `var(--x, <default>)`
 	compute the same thing whenever --x is defined, and the fallback only matters
 	when it is not.
 
@@ -819,7 +855,10 @@ const prefixChecks: [string, boolean][] = [
 
 #### Part 9 — check 5: standalone resolution
 
-Depends on [guide 15](15-tokens.md). This is the check that catches the most
+> **Requires [guide 14](14-tokens.md), and `generated/variants.js` from [guide 16](16-options.md).** Omit this part, and its
+> imports, until that guide is done.
+
+Depends on [guide 14](14-tokens.md). This is the check that catches the most
 embarrassing bug class: a plugin that works perfectly in your repo because the
 docs site happens to define a token the plugin forgot to ship.
 
@@ -853,7 +892,12 @@ const danglingHard = [...referencedVars]
 	specificity, so it always underlies whatever a [data-theme] does not set.
 */
 const base_ = (await import('../generated/base.js')).default;
-const themeRules = (await import('../generated/themes.js')).default;
+/*
+	Typed explicitly rather than inferred. If generated/themes.ts fails to
+	compile for any reason, an inferred `unknown` here produces four further
+	errors in this file that all point away from the real cause.
+*/
+const themeRules: ThemeRules = (await import('../generated/themes.js')).default;
 const customVariants = (await import('../generated/variants.js')).default;
 const sourceVariantNames = Object.keys(extractCustomVariants(coreSrc));
 const themeExtendForTest = (await import('../generated/theme.js')).default;
@@ -962,7 +1006,10 @@ const standaloneChecks: [string, boolean][] = [
 
 #### Part 10 — check 6: theme selection and custom themes
 
-Depends on [guide 14](14-themes.md).
+> **Requires [guide 15](15-themes.md).** Omit this part, and its
+> imports, until that guide is done.
+
+Depends on [guide 15](15-themes.md).
 
 ```ts
 const themePluginPath = rel(path.join(pkgRoot, 'dist/theme.js'));
@@ -975,9 +1022,7 @@ function compileExpectingError(input: string, label: string): string | null {
 		compile(input, label);
 		return null;
 	} catch (error) {
-		return (
-			/project-name: [^\n│]*/.exec(String((error as Error).message))?.[0]?.trim() ?? 'unknown error'
-		);
+		return /test: [^\n│]*/.exec(String((error as Error).message))?.[0]?.trim() ?? 'unknown error';
 	}
 }
 
@@ -1226,6 +1271,9 @@ const themeErrors: [string, string | null][] = [
 
 #### Part 11 — functional utilities
 
+> **Requires [guide 16](16-options.md), step 9.** Omit this part, and its
+> imports, until that guide is done.
+
 Depends on [guide 16](16-options.md), step 9.
 
 ```ts
@@ -1455,7 +1503,7 @@ if (failures.length) {
 Verify, then commit:
 
 ```powershell
-bun run --filter '@scope/project-name' check
+bun run --filter '@anti049/test' check
 git add -A
 git commit -m "test(core): add the differential harness and unit tests"
 ```
@@ -1466,6 +1514,54 @@ selector, then rebuild to restore it. A harness committed without that check
 may be vacuous, and it will not become less vacuous later.
 
 Label the PR `skip-changeset`.
+
+---
+
+## Checkpoint
+
+Step 3 proved the harness can fail once. A suite is only as good as the
+**weakest** layer, so plant one fault per layer and confirm the layer meant to
+catch it does — and says what is wrong.
+
+**Skeleton:** a clone in `$env:TEMP\test-checkpoint\12`. Every fault is planted
+there, so there is nothing to restore in your own tree.
+
+```powershell
+$cp = "$env:TEMP\test-checkpoint\12"
+Remove-Item -Recurse -Force $cp -ErrorAction SilentlyContinue
+git clone --quiet . $cp
+Set-Location $cp
+bun install --frozen-lockfile
+bun run build:packages                            # the parity test imports all three bindings
+Set-Location packages/core
+bun run check                                     # green before anything is planted
+```
+
+Plant each fault, run the check named beside it, then undo it with
+`git checkout -- .` and `bun run build` before the next one:
+
+| Layer      | Fault to plant                                                                            | Run                     | Must report                                          |
+| ---------- | ----------------------------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------- |
+| Parity     | change one value in `generated/components/badge/object.ts` (no rebuild)                   | `bun test/e2e.test.ts`  | the selector **and** the property                    |
+| Standalone | delete a token declaration that a component references and nothing else declares, rebuild | `bun test/e2e.test.ts`  | that token as an unresolved reference                |
+| Unit       | make `addPrefix` return its input unchanged                                               | `bun test test/unit`    | a failure in `addPrefix.test.ts`                     |
+| Artifact   | point `exports["."].types` at `./dist/nope.d.ts` in `package.json`, rebuild               | `bunx publint`          | the missing types file                               |
+| Packaging  | set `"files": ["README.md"]` in `package.json`                                            | the smoke test (step 7) | `Can't resolve '@anti049/test'` from the scratch app |
+
+```powershell
+Set-Location $env:TEMP
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** every fault makes its check fail with the message in the last
+column, and `bun run check` is green again once it is undone.
+
+**If it does not:** a fault that passes is a hole, and the place to fix it is
+the layer in that row — not a broader test somewhere else. A failure that names
+the wrong thing ("parity mismatch" with no selector) passes this checkpoint
+only in the narrowest sense: fix the reporting now, while you know what the
+fault was.
+
 ---
 
 Next: [Release and operations](13-release.md)

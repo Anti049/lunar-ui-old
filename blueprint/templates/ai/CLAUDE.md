@@ -1,4 +1,4 @@
-# project-name
+# test
 
 Read **`AGENTS.md`** first — it has the source layout, the authoring convention,
 the verification commands and the traps. This file adds only what is specific to
@@ -8,7 +8,7 @@ Claude Code.
 
 ```sh
 bun run check                                  # every workspace
-bun run --filter '@scope/project-name' check   # plugin only: build, typecheck, test, publint
+bun run --filter '@anti049/test' check   # plugin only: build, typecheck, test, publint
 bun run dev                                    # docs site + plugin CSS watcher
 bun changeset                                  # describe a release
 ```

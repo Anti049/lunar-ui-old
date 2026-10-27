@@ -497,7 +497,7 @@ export default plugin.withOptions(
 		const unknown = Object.keys(options).filter((k) => !KNOWN.has(k));
 		if (unknown.length) {
 			throw new Error(
-				`project-name: unknown option${unknown.length > 1 ? 's' : ''} ${unknown.join(', ')}. ` +
+				`test: unknown option${unknown.length > 1 ? 's' : ''} ${unknown.join(', ')}. ` +
 					`Valid: ${[...KNOWN].join(', ')}.`
 			);
 		}
@@ -587,13 +587,20 @@ nothing that ships imports `bun:test`.
 		"rootDir": "."
 	},
 	/*
-		List the ENTRY POINTS, not a glob. tsc follows imports from here, so
-		`generated/` comes along because index.ts imports it — while `functions/`
-		and `test/` stay out of dist because nothing shipped imports them.
+		Entry points, plus the generated data they import.
 
-		A glob like "functions/**" would ship your entire compiler to consumers.
+		tsc follows imports from here, so `functions/addPrefix.ts` and the theme
+		modules come along because the entries reach them — while the rest of
+		`functions/` stays out of dist, because nothing shipped imports it.
+
+		A glob like "functions/**" would ship the entire compiler, and its node:
+		imports, to every consumer.
+
+		Guides 14–16 ADD to this list. Forget to, and `bun run build` still
+		succeeds while `dist/theme.js` simply does not exist — the failure
+		surfaces as an unresolved `exports` entry in a consumer's app.
 	*/
-	"include": ["index.ts", "types.ts"]
+	"include": ["index.ts", "types.ts", "generated/**/*.ts"]
 }
 ```
 
@@ -744,19 +751,19 @@ nothing is left for you to infer.
 
 | File                                                   | Status        | Assembled in | Next touched by                          |
 | ------------------------------------------------------ | ------------- | ------------ | ---------------------------------------- |
-| `packages/core/package.json`                           | modified      | step 12      | [14](14-themes.md) — `exports`           |
+| `packages/core/package.json`                           | modified      | step 12      | [14](15-themes.md) — `exports`           |
 | `packages/core/tsconfig.json`                          | added         | step 12      | never                                    |
-| `packages/core/tsconfig.build.json`                    | added         | step 12      | [14](14-themes.md) — new entry points    |
-| `packages/core/types.ts`                               | added         | step 10      | [14](14-themes.md), [16](16-options.md)  |
+| `packages/core/tsconfig.build.json`                    | added         | step 12      | [14](15-themes.md) — new entry points    |
+| `packages/core/types.ts`                               | added         | step 10      | [14](15-themes.md), [16](16-options.md)  |
 | `packages/core/index.ts`                               | added         | step 11      | [16](16-options.md) — the option surface |
-| `packages/core/functions/context.css`                  | added         | step 2       | [15](15-tokens.md) — more `src/` imports |
-| `packages/core/functions/build.ts`                     | added         | steps 5–10   | [14](14-themes.md), [15](15-tokens.md)   |
+| `packages/core/functions/context.css`                  | added         | step 2       | [15](14-tokens.md) — more `src/` imports |
+| `packages/core/functions/build.ts`                     | added         | steps 5–10   | [14](15-themes.md), [15](14-tokens.md)   |
 | `packages/core/functions/extract-classes.ts`           | added         | step 6       | never                                    |
 | `packages/core/functions/partition.ts`                 | added         | step 9       | never                                    |
 | `packages/core/functions/nestCssLayers.ts`             | added         | step 10      | never                                    |
 | `packages/core/src/components/badge.css`               | added         | step 3       | you, per component                       |
 | `packages/core/src/components/_index.css`              | added         | step 3       | one line per component                   |
-| `packages/core/src/{base,utilities,themes}/_index.css` | added (empty) | step 1       | [15](15-tokens.md)                       |
+| `packages/core/src/{base,utilities,themes}/_index.css` | added (empty) | step 1       | [15](14-tokens.md)                       |
 
 Generated, never committed: `packages/core/generated/**` and
 `packages/core/.tmp/**`. Both are covered by the root `.gitignore` from
@@ -775,7 +782,7 @@ Replaces the stub from [guide 1](01-monorepo.md) step 9. The additions are
 
 ```json
 {
-	"name": "@scope/project-name",
+	"name": "@anti049/test",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT",
@@ -783,7 +790,7 @@ Replaces the stub from [guide 1](01-monorepo.md) step 9. The additions are
 	"keywords": ["tailwindcss", "tailwind-plugin", "design-system", "css"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/acme/project-name.git",
+		"url": "git+https://github.com/Anti049/test.git",
 		"directory": "packages/core"
 	},
 	"files": ["dist", "README.md"],
@@ -876,7 +883,21 @@ For what actually ships.
 		A glob like "functions/**" would ship your entire compiler — and its
 		node: imports — to every consumer.
 	*/
-	"include": ["index.ts", "types.ts"]
+	/*
+		Entry points, plus the generated data they import.
+
+		tsc follows imports from here, so `functions/addPrefix.ts` and the theme
+		modules come along because the entries reach them — while the rest of
+		`functions/` stays out of dist, because nothing shipped imports it.
+
+		A glob like "functions/**" would ship the entire compiler, and its node:
+		imports, to every consumer.
+
+		Guides 14–16 ADD to this list. Forget to, and `bun run build` still
+		succeeds while `dist/theme.js` simply does not exist — the failure
+		surfaces as an unresolved `exports` entry in a consumer's app.
+	*/
+	"include": ["index.ts", "types.ts", "generated/**/*.ts"]
 }
 ```
 
@@ -1012,10 +1033,10 @@ component has to be registered.
 ### `packages/core/src/base/_index.css`, `src/utilities/_index.css`, `src/themes/_index.css`
 
 Empty files at this point. They exist so `context.css` can import them without
-erroring; [guide 15](15-tokens.md) fills them.
+erroring; [guide 14](14-tokens.md) fills them.
 
 ```css
-/* Empty for now — guide 15 adds the token files. */
+/* Empty for now — guide 14 adds the token files. */
 ```
 
 ---
@@ -1373,7 +1394,7 @@ export const nestCssLayers = (styles: StyleObject): Record<string, StyleObject> 
 ### `packages/core/functions/build.ts`
 
 The whole generator, assembled from steps 5, 6, 7, 8, 9 and 10. Guides
-[14](14-themes.md) and [15](15-tokens.md) append to it; this is its state at the
+[14](15-themes.md) and [15](14-tokens.md) append to it; this is its state at the
 end of guide 2.
 
 ```ts
@@ -1663,7 +1684,7 @@ import type { PluginOptions, StyleObject } from './types.js';
 	The design system as a standalone Tailwind plugin.
 
 	    @import 'tailwindcss';
-	    @plugin '@scope/project-name' {
+	    @plugin '@anti049/test' {
 	      prefix: px-;
 	      exclude: badge;
 	    }
@@ -1710,7 +1731,7 @@ const projectName: PluginWithOptions<PluginOptions> = plugin.withOptions(
 		const unknown = Object.keys(options).filter((key) => !KNOWN.has(key));
 		if (unknown.length) {
 			throw new Error(
-				`project-name: unknown option${unknown.length > 1 ? 's' : ''} ${unknown.join(', ')}. ` +
+				`test: unknown option${unknown.length > 1 ? 's' : ''} ${unknown.join(', ')}. ` +
 					`Valid: ${[...KNOWN].join(', ')}.`
 			);
 		}
@@ -1755,7 +1776,7 @@ export default projectName;
 Verify, then commit:
 
 ```powershell
-bun run --filter '@scope/project-name' check
+bun run --filter '@anti049/test' check
 git add -A
 git commit -m "feat(core): compile CSS components into a Tailwind plugin"
 ```
@@ -1770,12 +1791,92 @@ enforcement workflow does not exist until [guide 9](09-github.md).
 
 ---
 
+## Checkpoint
+
+Step 12 compiled against `./dist/index.js` from inside the package. This
+compiles against a **packed tarball** from outside the repository, which is
+the only way to see the package a consumer actually downloads.
+
+### The plugin skeleton
+
+A bare manifest plus the Tailwind CLI in `$env:TEMP\test-checkpoint\plugin`,
+with the plugin installed from a tarball by `npm` — not `bun`, for the reason
+in [guide 17](17-rehearsal.md)'s traps. The checkpoints in guides 14, 15 and
+16 rebuild this same skeleton, so it is worth keeping the block to hand. Run it
+from the repository root:
+
+```powershell
+$cp   = "$env:TEMP\test-checkpoint"
+$pkgs = "$cp\pkgs"
+$app  = "$cp\plugin"
+Remove-Item -Recurse -Force $pkgs, $app -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $pkgs, "$app\src", "$app\out" | Out-Null
+
+bun run --filter '@anti049/test' build
+Push-Location packages/core
+# npm pack prints the filename it wrote as its last line.
+$core = npm pack --pack-destination $pkgs | Select-Object -Last 1
+Pop-Location
+
+Push-Location $app
+'{ "name": "checkpoint", "private": true, "type": "module" }' | Set-Content package.json
+npm install --no-audit --no-fund tailwindcss '@tailwindcss/cli' "$pkgs\$core"
+$cli = node -e "const p=require('path');console.log(p.join(p.dirname(require.resolve('@tailwindcss/cli/package.json')),'dist/index.mjs'))"
+```
+
+It is rebuilt from scratch every time, deliberately. Reinstalling a repacked
+tarball of the same version into an existing directory is how you end up
+testing a fix that was never installed ([guide 12](12-testing.md), step 7).
+
+### The checks
+
+```powershell
+# What a consumer downloads: dist/ and README.md, and none of the build.
+tar -tzf "$pkgs\$core" | Select-String '^package/(src|test|functions|generated)/'   # prints nothing
+tar -tzf "$pkgs\$core" | Select-String '^package/dist/index\.js$'                    # one match
+
+# The entry loads under plain Node, not just under Bun.
+node --input-type=module -e "import('@anti049/test').then(m => console.log(typeof m.default))"   # function
+
+@'
+@import 'tailwindcss' source(none);
+@plugin '@anti049/test';
+@source inline('badge');
+@source inline('badge-primary');
+'@ | Set-Content src/consumer.css
+node $cli -i src/consumer.css -o out/consumer.css
+(Select-String -Path out/consumer.css -Pattern '\.badge\b').Count           # > 0
+(Select-String -Path out/consumer.css -Pattern '\.badge-primary\b').Count   # > 0
+
+# A misspelt option must fail the consumer's build, naming the option.
+@'
+@import 'tailwindcss' source(none);
+@plugin '@anti049/test' { prefx: x-; }
+'@ | Set-Content src/typo.css
+node $cli -i src/typo.css -o out/typo.css; $LASTEXITCODE   # non-zero; the message names `prefx`
+
+Pop-Location
+Remove-Item -Recurse -Force $cp
+```
+
+**Passes when** every line prints what its comment says.
+
+**If it does not:** `src/` or `functions/` in the tarball means `files` in
+`package.json` is wrong. A plugin that loads under Bun and not under Node is
+almost always an extensionless relative import in `index.ts` or `generated/`.
+A zero `.badge` count with a successful compile is the "registered nothing
+usable" case from step 12 — read `out/consumer.css` before anything else. A
+typo that compiles cleanly means `KNOWN` validation in `index.ts` is not
+running.
+
+---
+
 What you have now ships components and nothing else. Three guides complete the
 plugin, and it is worth doing them before the bindings — they change what the
 package exports, which is what the bindings are written against:
 
-- [15. The token layer](15-tokens.md) — make the plugin work with no CSS import
-- [14. Themes](14-themes.md) — generated palettes, the catalogue, the generator
+- [14. The token layer](14-tokens.md) — make the plugin work with no CSS import
+- [15. Themes](15-themes.md) — generated palettes, the catalogue, the generator
 - [16. The plugin option surface](16-options.md) — `prefix`, `include`,
   `themes`, `addVariant`, `matchUtilities`
 
